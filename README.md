@@ -5,7 +5,8 @@ Also has tool to add up rates.
 
 REM Data format:
 A machine is divided into tiers by rates.
-```{
+```
+{
 	"egg" : <egg img to use>,
 	"title" : <title of tier>,
 	"rate" : <rate, as a float>,
@@ -15,4 +16,5 @@ A machine is divided into tiers by rates.
 	"override_array" : {
 		<id> : <url to replace default icon>
 	}
-}```
+}
+```
