@@ -29,7 +29,7 @@ function load_rem($url){
 		echo get_rarity_group($rarity['egg'], $rarity['title'], $rarity['rate'], $rarity['id_array'], $rarity['override_array']);
 	}
 }
-load_rem("./rem_dbdc.json");
+load_rem("./rem_fma.json");
 
 /*echo get_rarity_group("Diamond","★7", 2.00, array(4796,4798,4800,4186,3930));
 echo get_rarity_group("Diamond","★6", 4.50, array(4802,4804,4806,4188,3932,3934,3940,3946,3949));

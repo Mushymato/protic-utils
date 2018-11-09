@@ -1,0 +1,22 @@
+{
+	"items" : [
+		{
+			"egg" : "Diamond",
+			"title" : "★6",
+			"rate" : 2.50,
+			"id_array" : [
+				4019,4021,4023,4025
+			],
+			"override_array" : {}
+		},
+		{
+			"egg" : "Gold1",
+			"title" : "★5",
+			"rate" : 15.00,
+			"id_array" : [
+				4027,4028,4029,4030,4031,4032
+			],
+			"override_array" : {}
+		}
+	]
+}

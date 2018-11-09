@@ -7,7 +7,7 @@
 			"id_array" : [
 				4796,4798,4800,4186,3930
 			],
-			"override_array" : []
+			"override_array" : {}
 		},
 		{
 			"egg" : "Diamond",
@@ -16,7 +16,7 @@
 			"id_array" : [
 				4802,4804,4806,4188,3932,3934,3940,3946,3949
 			],
-			"override_array" : []
+			"override_array" : {}
 		},
 		{
 			"egg" : "Gold1",
@@ -25,7 +25,7 @@
 			"id_array" : [
 				4809,4190,3936,3938,3942,3944,3950
 			],
-			"override_array" : []
+			"override_array" : {}
 		}
 	]
 }

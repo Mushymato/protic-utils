@@ -3,6 +3,7 @@ window.onload=function(){
 	var totalRate = 0;
 	function loadREMRates(data){
 		var items = data['items'];
+		console.log(data);
 		for(var rarity of items){
 			for(var id of rarity['id_array']){
 				REMRate.push({'id' : id, 'rate' : rarity['rate'], 'egg' : rarity['egg']});
@@ -34,6 +35,6 @@ window.onload=function(){
 			}
 		}
 	}
-	$.getJSON('./rem_dbdc.json', loadREMRates);
+	$.getJSON('./rem_fma.json', loadREMRates);
 	document.getElementById('roll-button').addEventListener('click', rollREM);
 }
