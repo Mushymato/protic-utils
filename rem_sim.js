@@ -24,8 +24,12 @@ window.onload=function(){
 			console.log(REMRate[i] + " : " + weightSum);
 			 
 			if (randNum <= weightSum) {
-				var result = document.getElementById('roll-result');
-				result.setAttribute('src', 'https://storage.googleapis.com/mirubot/padimages/jp/full/' + REMRate[i]['id'] + '.png');
+				document.getElementById('roll-result').setAttribute('src', 'https://storage.googleapis.com/mirubot/padimages/jp/full/' + REMRate[i]['id'] + '.png');
+				
+				var icon = document.createElement("img");
+				icon.setAttribute('src', 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/' + REMRate[i]['id'] + '.png');
+				document.getElementById('roll-result-list').appendChild(icon);
+				
 				break;
 			}
 		}
