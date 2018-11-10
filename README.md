@@ -6,10 +6,12 @@ Also has tool to add up rates.
 REM Data format:
 A machine is divided into tiers by rates:
 ```
-{	"items" :{
-	{<tier>},
-	{<tier>},
-	...
+{	
+	"<rem name>" :{
+		{<tier>},
+		{<tier>},
+		...
+	}
 }
 ```
 Each tier looks like this:
@@ -26,3 +28,13 @@ Each tier looks like this:
 	}
 }
 ```
+Lastly there's a mapping that defines short names => full names
+```
+{
+	"FullNames" :{
+		"<short name>" : "<full name>",
+		...
+	}
+}
+```
+

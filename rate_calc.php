@@ -7,8 +7,6 @@
 	<script src="rate_calc.js"></script>
 </head>
 <body>
-<form>
-<h1>Total Rates = <span id="total-rate">0.00</span>%  <button type="reset" id="clear-selected" value="Reset">Reset</button></h1>
 <?php
 function get_rarity_group($egg, $title, $rate, $id_array, $override_array = array()){
 	$total = $rate * sizeof($id_array);
@@ -23,19 +21,26 @@ function get_rarity_group($egg, $title, $rate, $id_array, $override_array = arra
 }
 
 function load_rem($url){
-	$data = file_get_contents($url);
-	$rem = json_decode($data, true)['items'];
-	foreach($rem as $rarity){
-		echo get_rarity_group($rarity['egg'], $rarity['title'], $rarity['rate'], $rarity['id_array'], $rarity['override_array']);
+	$data = json_decode(file_get_contents($url), true);
+	$full_names = $data['FullNames'];
+	$select_rem = '<select id="rem-select" name="rem"><option value=""></option>';
+	foreach($full_names as $name => $full){
+		
+		$select_rem = $name == $_GET['rem'] ? $select_rem . "<option value=\"$name\" selected>$full</option>" : $select_rem . "<option value=\"$name\">$full</option>";
 	}
+	$select_rem = $select_rem . '</select><button type="submit" value="Submit">Submit</button>';
+	$rem_groups = '';
+	if($_GET['rem'] != ''){
+		$rem = $data[$_GET['rem']];
+		foreach($rem as $rarity){
+			$rem_groups = $rem_groups . get_rarity_group($rarity['egg'], $rarity['title'], $rarity['rate'], $rarity['id_array']);
+		}
+	}
+	$tbar = '<h1>Total Rates = <span id="total-rate">0.00</span>%  <button type="reset" id="clear-selected" value="Reset">Reset</button></h1>';
+	return '<form method="get">' . $select_rem . $tbar . '</form>' . $rem_groups;
 }
-load_rem("./rem_fma.json");
-
-/*echo get_rarity_group("Diamond","★7", 2.00, array(4796,4798,4800,4186,3930));
-echo get_rarity_group("Diamond","★6", 4.50, array(4802,4804,4806,4188,3932,3934,3940,3946,3949));
-echo get_rarity_group("Gold1","★5", 7.07, array(4809,4190,3936,3938,3942,3944,3950));*/
+echo load_rem("./rem_rates.json");
 
 ?>
-</form>
 </body>
 </html>
