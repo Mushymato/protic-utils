@@ -3,24 +3,25 @@
 	<head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>REM Simulator</title>
-	<!--<link rel="stylesheet" type="text/css" href="rem_sim.css">-->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="rem_sim.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src="./rem_sim.js"></script>
 </head>
 <body>
 <form>
-<select id="rem-select" name="rem"></select>
-<button type="submit" value="Submit">Submit</button>
-
-<br/>
-<button type="button" id="roll-button">Roll</button>
-
-<div>
-	<img id="roll-result" src=""/>
-</div>
-<div id="roll-result-list">
-</div>
+	<select id="rem-select" name="rem"></select>
+	<button type="submit" value="Submit">Submit</button>
 </form>
+<div>
+	<div id="rem-box" class="left">
+		<a id="roll-rem"></a>
+		<div id="rem-egg-flash"></div>
+		<img id="rem-egg-icon" src="" width="42px"/>
+		<img id="roll-result" src=""/>
+	</div>
+	<div id="roll-result-list" class="left">
+	</div>
+</div>
 
 </body>
 </html>
