@@ -37,4 +37,6 @@ Lastly there's a mapping that defines short names => full names
 	}
 }
 ```
+# Much Thanks to:
 
+SaladBadger for providing game assets

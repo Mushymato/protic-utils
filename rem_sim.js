@@ -1,6 +1,45 @@
+var REMRate = [];
+var totalRate = 0;
+function generateRoll(){
+	var randNum = Math.random() * totalRate;
+	var weightSum = 0;
+	 
+	for (var i = 0; i < REMRate.length; i++) {
+		weightSum += REMRate[i]['rate'];
+		weightSum = +weightSum.toFixed(2);
+		 
+		if (randNum <= weightSum) {
+			return i;
+		}
+	}
+	return false;
+}
+function rollREM(){
+	document.getElementById('roll-rem').style.display = 'none';
+	document.getElementById('rem-box').style.backgroundImage = 'url("./assets/BG_1.PNG")';
+	document.getElementById('roll-result').setAttribute('src', '');
+	var idx = generateRoll();
+	var card_id = REMRate[idx]['id'];
+	var card_egg = REMRate[idx]['egg'];
+	document.getElementById('rem-egg-icon').setAttribute('src', 'https://pad.protic.site/wp-content/uploads/pad-eggs/' + card_egg + '.png');
+	document.getElementById('rem-egg-flash').classList.add('flash');
+	setTimeout(function(){
+		document.getElementById('roll-result').setAttribute('src', 'https://storage.googleapis.com/mirubot/padimages/jp/full/' + card_id + '.png');		
+		var icon = document.createElement('img');
+		icon.setAttribute('src', 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/' + card_id + '.png');
+		var resList = document.getElementById('roll-result-list');
+		resList.appendChild(icon);
+		resList.scrollTop = resList.scrollHeight;
+		
+		document.getElementById('rem-egg-icon').setAttribute('src', '');
+	}, 1800);
+	setTimeout(function(){
+		document.getElementById('rem-egg-flash').classList.remove('flash');
+	}, 2000);
+	
+	document.getElementById('roll-rem').style.display = 'block';
+}
 window.onload=function(){
-	var REMRate = [];
-	var totalRate = 0;
 	function loadREMRates(data){
 		var url = new URL(window.location.href);
 		var currentREM = url.searchParams.get('rem');
@@ -28,28 +67,6 @@ window.onload=function(){
 			}
 		}
 	}
-	function rand(min, max) {
-		return Math.random() * (max - min) + min;
-	};
-	function rollREM(){
-		var randNum = rand(0, totalRate);
-		var weightSum = 0;
-		 
-		for (var i = 0; i < REMRate.length; i++) {
-			weightSum += REMRate[i]['rate'];
-			weightSum = +weightSum.toFixed(2);
-			 
-			if (randNum <= weightSum) {
-				document.getElementById('roll-result').setAttribute('src', 'https://storage.googleapis.com/mirubot/padimages/jp/full/' + REMRate[i]['id'] + '.png');
-				
-				var icon = document.createElement('img');
-				icon.setAttribute('src', 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/' + REMRate[i]['id'] + '.png');
-				document.getElementById('roll-result-list').appendChild(icon);
-				
-				break;
-			}
-		}
-	}
 	$.getJSON('./rem_rates.json', loadREMRates);
-	document.getElementById('roll-button').addEventListener('click', rollREM);
+	document.getElementById('roll-rem').addEventListener('click', rollREM);
 }
