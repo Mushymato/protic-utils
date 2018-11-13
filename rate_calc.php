@@ -21,23 +21,23 @@ function get_rarity_group($egg, $title, $rate, $id_array, $override_array = arra
 }
 
 function load_rem($url){
+	$selected = isset($_GET['rem']) ? $_GET['rem'] : '';
 	$data = json_decode(file_get_contents($url), true);
 	$full_names = $data['FullNames'];
 	$select_rem = '<select id="rem-select" name="rem"><option value=""></option>';
 	foreach($full_names as $name => $full){
-		
-		$select_rem = $name == $_GET['rem'] ? $select_rem . "<option value=\"$name\" selected>$full</option>" : $select_rem . "<option value=\"$name\">$full</option>";
+		$select_rem = $name == $selected ? $select_rem . "<option value=\"$name\" selected>$full</option>" : $select_rem . "<option value=\"$name\">$full</option>";
 	}
 	$select_rem = $select_rem . '</select><button type="submit" value="Submit">Submit</button>';
 	$rem_groups = '';
-	if($_GET['rem'] != ''){
-		$rem = $data[$_GET['rem']];
+	if($selected != ''){
+		$rem = $data[$selected];
 		foreach($rem as $rarity){
 			$rem_groups = $rem_groups . get_rarity_group($rarity['egg'], $rarity['title'], $rarity['rate'], $rarity['id_array']);
 		}
 	}
 	$tbar = '<h1>Total Rates = <span id="total-rate">0.00</span>%  <button type="reset" id="clear-selected" value="Reset">Reset</button></h1>';
-	return '<form method="get">' . $select_rem . $tbar . '</form>' . $rem_groups;
+	return '<form method="get">' . $select_rem . $tbar . $rem_groups . '</form>';
 }
 echo load_rem("./rem_rates.json");
 
