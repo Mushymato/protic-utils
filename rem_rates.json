@@ -1,7 +1,8 @@
 {
 	"FullNames" : {
 		"FMA" : "Fullmetal Alchemist",
-		"DBDC" : "Dragonbound &amp; Dragon Callers"
+		"DBDC" : "Dragonbound &amp; Dragon Callers",
+		"Bastet" : "Bastet Only"
 	},
 	"FMA" : [
 		{
@@ -44,6 +45,32 @@
 			"rate" : 7.07,
 			"id_array" : [
 				4809,4190,3936,3938,3942,3944,3950
+			]
+		}
+	],
+	"Bastet" : [
+		{
+			"egg" : "Silver1",
+			"title" : "★5",
+			"rate" : 1,
+			"id_array" : [
+				946
+			]
+		},
+		{
+			"egg" : "Gold1",
+			"title" : "★5",
+			"rate" : 1,
+			"id_array" : [
+				494,947,2912
+			]
+		},
+		{
+			"egg" : "Diamond",
+			"title" : "★6",
+			"rate" : 1,
+			"id_array" : [
+				495,888,1613,2929,2011,3384,2952
 			]
 		}
 	]
