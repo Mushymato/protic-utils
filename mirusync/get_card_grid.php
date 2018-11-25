@@ -7,9 +7,14 @@ function select_card($conn, $id){
 	$sql = 'SELECT monsterList.ATK_MAX, monsterList.HP_MAX, monsterList.RCV_MAX, monsterList.LEVEL, monsterList.LIMIT_MULT, monsterList.TA_SEQ ATT_1, monsterList.TA_SEQ_SUB ATT_2, monsterList.TE_SEQ, monsterList.TM_NAME_JP, monsterList.TM_NAME_US, monsterList.TT_SEQ TYPE_1, monsterList.TT_SEQ_SUB TYPE_2, monsterAddInfoList.SUB_TYPE TYPE_3, leadSkill.TS_DESC_US LS_DESC_US, leadSkillData.LEADER_DATA, active.TS_DESC_US AS_DESC_US, active.TURN_MAX AS_TURN_MAX, active.TURN_MIN AS_TURN_MIN FROM monsterList LEFT JOIN skillList leadSkill ON monsterList.TS_SEQ_LEADER=leadSkill.TS_SEQ LEFT JOIN skillLeaderDataList leadSkillData ON monsterList.TS_SEQ_LEADER=leadSkillData.TS_SEQ LEFT JOIN skillList active ON monsterList.TS_SEQ_SKILL=active.TS_SEQ LEFT JOIN monsterAddInfoList ON monsterList.MONSTER_NO=monsterAddInfoList.MONSTER_NO WHERE monsterList.MONSTER_NO=?;';
 	$stmt = $conn->prepare($sql);
 	$stmt->bind_param('i', $id);
-	$res = execute_select_stmt($stmt)[0];
+	$res = execute_select_stmt($stmt);
 	$stmt->free_result();
 	$stmt->close();
+	if(sizeof($res) == 0){
+		return false;
+	}else{
+		$res = $res[0];
+	}
 	$sql = 'SELECT awokenSkillList.IS_SUPER, awokenSkillList.TS_SEQ FROM awokenSkillList WHERE awokenSkillList.monster_no=?;';
 	$stmt = $conn->prepare($sql);
 	$stmt->bind_param('i', $id);
@@ -35,6 +40,9 @@ function lead_mult($lead){
 	$array = explode('///|',$lead);
 	foreach($array as $value){
 		$seg = explode('/',$value);
+		if(sizeof($seg) != 2){
+			continue;
+		}
 		$ls[$seg[0]] = ctype_digit($seg[1]) ? intval($seg[1]) : floatval($seg[1]);
 	}
 	return '[' . $ls['1'] * $ls['1'] . '/' . $ls['2'] * $ls['2'] . '/' . $ls['3'] * $ls['3'] . ($ls['4'] == 0 ? '' : ', ' . round(100 * (1 - (1-$ls['4']) * (1-$ls['4'])), 2) . '%') . ']';
@@ -61,6 +69,9 @@ function get_card_grid($id){
 	
 	$conn = connect_sql($host, $user, $pass, $schema);
 	$data = select_card($conn, $id);
+	if(!$data){
+		return '<div>NO CARD FOUND</div>';
+	}
 	//$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
 	$img_url = '/portrait/';
 		
@@ -72,7 +83,10 @@ $id = array_key_exists('id', $_GET) && $_GET['id'] != '' ? $_GET['id'] : '23';?>
 ID: <input type="text" name="id" value="<?php echo $id;?>">
 <input type="submit">
 <?php
-echo get_card_grid($id);
+$time_start = microtime(true);
+$out = get_card_grid($id);
+echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>';
+echo $out;
 ?>
 
 </form>

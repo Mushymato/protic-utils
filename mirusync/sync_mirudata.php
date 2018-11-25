@@ -19,7 +19,6 @@ foreach($lists as $tablename => $pk){
 	recreate_table($conn, $data, $tablename, $fieldnames, $pk);
 	populate_table($conn, $data, $tablename, $fieldnames);
 }
-//https://storage.googleapis.com/mirubot/paddata/miru_data/computed_names.json
 $tablename = 'computedNames';
 $pk = 'COMPUTED_NAME';
 $pairs = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/paddata/miru_data/computed_names.json'), true);
