@@ -1,6 +1,8 @@
 <?php
 include 'miru_common.php';
 include 'sql_param.php';
+$time_start = microtime(true);
+
 $conn = connect_sql($host, $user, $pass, $schema);
 /*lists*/
 $lists = array(
@@ -53,4 +55,6 @@ recreate_table($conn, $data, $tablename, $fieldnames, $pk);
 populate_table($conn, $data, $tablename, $fieldnames);*/
 
 $conn->close();
+
+echo 'Total execution time in seconds: ' . (microtime(true) - $time_start);
 ?>
