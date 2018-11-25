@@ -45,7 +45,8 @@ NAME: <input type="text" name="name" value="<?php echo $name;?>">
 	$mons = query_name_for_monster_no($conn, $name);
 	foreach($mons as $mon){
 		//print_r($mon);
-		echo '<h3>' . $mon['MONSTER_NO'] . '</h3><p><img src="https://storage.googleapis.com/mirubot/padimages/jp/portrait/' . $mon['MONSTER_NO'] . '.png"></p>';
+		//echo '<h3>' . $mon['MONSTER_NO'] . '</h3><p><img src="https://storage.googleapis.com/mirubot/padimages/jp/portrait/' . $mon['MONSTER_NO'] . '.png"></p>';
+		echo '<h3>' . $mon['MONSTER_NO'] . '</h3><p><img src="/portrait/' . $mon['MONSTER_NO'] . '.png"></p>';
 	}
 //}
 ?>
