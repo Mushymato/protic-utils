@@ -37,7 +37,8 @@ function typings($t1, $t2, $t3){
 }
 function lead_mult($lead){
 	$ls = array('1' => 1, '2' => 1, '3' => 1, '4' => 0);
-	$array = explode('///|',$lead);
+	$lead = str_replace('///', '', $lead);
+	$array = explode('|',$lead);
 	foreach($array as $value){
 		$seg = explode('/',$value);
 		if(sizeof($seg) != 2){
@@ -78,7 +79,7 @@ function get_card_grid($id){
 	return '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $img_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo"><p>[' . $id . ']<strong>' . att_orbs($data['ATT_1'], $data['ATT_2']) . $data['TM_NAME_US'] . '<br/>' . $data['TM_NAME_JP'] . '</strong><br/><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . awake_list($data['AWAKENINGS']) . '<p><u>Active Skill</u>: ' . $data['AS_DESC_US'] . ' <strong>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</strong></p><p><u>Leader Skill</u>: ' . $data['LS_DESC_US'] . ' <strong>' . lead_mult($data['LEADER_DATA']) . '</strong></p></div></div>';
 }
 
-$id = array_key_exists('id', $_GET) && $_GET['id'] != '' ? $_GET['id'] : '23';?>
+$id = array_key_exists('id', $_GET) && $_GET['id'] != '' ? $_GET['id'] : '4428';?>
 <form method="get">
 ID: <input type="text" name="id" value="<?php echo $id;?>">
 <input type="submit">

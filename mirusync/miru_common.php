@@ -1,5 +1,5 @@
 <?php
-$insert_size = 144;
+$insert_size = 250;
 
 function connect_sql($host, $user, $pass, $schema){
 	// Create connection
