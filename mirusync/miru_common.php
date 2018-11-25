@@ -138,7 +138,6 @@ function execute_select_stmt($stmt){
 	$stmt->store_result();
 	if($stmt->num_rows == 0){
 		$stmt->free_result();
-		$stmt->close();
 		return array();
 	}
 	$fields = array();
@@ -156,5 +155,12 @@ function execute_select_stmt($stmt){
 		$res[] = $c; 
 	}
 	return $res;
+}
+function check_table_exists($conn, $tablename){
+	$sql = 'DESCRIBE ' . $tablename;
+	if(!$conn->query($sql)){
+		trigger_error('Describe' . $tablename . 'failed: ' . $conn->error);
+		return false;
+	}
 }
 ?>
