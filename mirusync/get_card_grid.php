@@ -86,7 +86,7 @@ ID: <input type="text" name="id" value="<?php echo $id;?>">
 <?php
 $time_start = microtime(true);
 $out = get_card_grid($id);
-echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>';
+echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>' . PHP_EOL;
 echo $out;
 ?>
 
