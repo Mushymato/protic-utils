@@ -29,7 +29,7 @@ Search: <input type="text" name="s" value="<?php echo $id;?>">
 <input type="submit">
 <?php
 $time_start = microtime(true);
-$out = get_card_grid($conn, $id);
+$out = get_card_summary($conn, $id);
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>' . PHP_EOL;
 echo $out;
 ?>

@@ -188,10 +188,10 @@ function query_name_for_monster_no($conn, $q_str){
 	);
 	$query = array();
 	if(!mb_check_encoding($q_str, 'ASCII')){
-		$query['SELECT MONSTER_NO, TM_NAME_JP FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
+		$query['SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
 	}else{
 		$query['SELECT MONSTER_NO, COMPUTED_NAME FROM computedNames WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';		
-		$query['SELECT MONSTER_NO_US MONSTER_NO, TM_NAME_US FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';		
+		$query['SELECT MONSTER_NO_US MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';		
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
@@ -249,33 +249,41 @@ function lead_mult($lead){
 	return '[' . $ls['1'] * $ls['1'] . '/' . $ls['2'] * $ls['2'] . '/' . $ls['3'] * $ls['3'] . ($ls['4'] == 0 ? '' : ', ' . round(100 * (1 - (1-$ls['4']) * (1-$ls['4'])), 2) . '%') . ']';
 }
 $aw = array(2765 => 3, 2766 => 4, 2767 => 5, 2768 => 6, 2769 => 7, 2770 => 8, 2771 => 9, 2772 => 10, 2773 => 11, 2774 => 12, 2775 => 13, 2776 => 14, 2777 => 15, 2778 => 16, 2779 => 17, 2780 => 18, 2781 => 19, 2782 => 20, 2783 => 21, 2784 => 22, 2785 => 23, 2786 => 24, 2787 => 25, 2788 => 26, 2789 => 27, 2790 => 28, 2791 => 29, 3897 => 30, 7593 => 31, 7878 => 33, 7879 => 35, 7880 => 36, 7881 => 34, 7882 => 32, 9024 => 37, 9025 => 38, 9026 => 39, 9113 => 40, 9224 => 41, 9397 => 43, 9481 => 42, 10261 => 44, 11353 => 45, 11619 => 46, 12490 => 47, 12735 => 48, 12736 => 49, 13057 => 50, 13567 => 51, 13764 => 52, 13765 => 53, 13898 => 54, 13899 => 55, 13900 => 56, 13901 => 57, 13902 => 58, 14073 => 59, 14074 => 60, 14075 => 61, 14076 => 62, 14950 => 63, 15821 => 64, 15822 => 65 );
-function awake_list($awakenings){
+function awake_list($awakenings, $w = '31', $h = '32'){
 	global $aw;
-	$awakes = '<p>';
-	$supers = '<p>';
+	$awakes = '<div>';
+	$supers = '<div>';
 	foreach($awakenings as $awk){
 		$id =  $aw[$awk['TS_SEQ']];
 		if($awk['IS_SUPER'] == 1){
-			$supers = $supers . '<a href="http://www.puzzledragonx.com/en/awokenskill.asp?s=' . $id . '"><img src="http://www.puzzledragonx.com/en/img/awoken/' . $id . '.png"/></a>';
+			$supers = $supers . '<a href="http://www.puzzledragonx.com/en/awokenskill.asp?s=' . $id . '"><img src="http://www.puzzledragonx.com/en/img/awoken/' . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
 		}else{
-			$awakes = $awakes . '<a href="http://www.puzzledragonx.com/en/awokenskill.asp?s=' . $id . '"><img src="http://www.puzzledragonx.com/en/img/awoken/' . $id . '.png"/></a>';
+			$awakes = $awakes . '<a href="http://www.puzzledragonx.com/en/awokenskill.asp?s=' . $id . '"><img src="http://www.puzzledragonx.com/en/img/awoken/' . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
 		}
 	}
-	$awakes = $awakes . '</p>';
-	$supers = $supers . '</p>';
+	$awakes = $awakes . '</div>';
+	$supers = $supers . '</div>';
 	return $awakes . $supers;
 }
-function get_card_grid($id){	
-	include 'sql_param.php';
-	
-	$conn = connect_sql($host, $user, $pass, $schema);
+function get_card_grid($conn, $id){	
 	$data = select_card($conn, $id);
 	if(!$data){
 		return '<div>NO CARD FOUND</div>';
 	}
-	//$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
-	$img_url = '/portrait/';
+	$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
+	//$img_url = '/portrait/';
 		
 	return '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $img_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo"><p>[' . $id . ']<strong>' . att_orbs($data['ATT_1'], $data['ATT_2']) . $data['TM_NAME_US'] . '<br/>' . $data['TM_NAME_JP'] . '</strong><br/><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . awake_list($data['AWAKENINGS']) . '<p><u>Active Skill</u>: ' . $data['AS_DESC_US'] . ' <strong>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</strong></p><p><u>Leader Skill</u>: ' . $data['LS_DESC_US'] . ' <strong>' . lead_mult($data['LEADER_DATA']) . '</strong></p></div></div>';
 }
+function get_card_summary($conn, $id){	
+	$data = select_card($conn, $id);
+	if(!$data){
+		return '<div>NO CARD FOUND</div>';
+	}
+	$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
+	//$img_url = '/portrait/';
+		
+	return '<div><strong><img src="'. $img_url . $id . '.png" width="60" height="60"/> ' . $data['TM_NAME_US'] . '</strong></div>' . awake_list($data['AWAKENINGS']);
+}
+
 ?>

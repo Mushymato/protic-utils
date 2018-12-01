@@ -1,3 +1,4 @@
 *.txt
 *.csv
 sql_param.php
+get_tmp.php
