@@ -11,7 +11,7 @@ $utf_string = file_get_contents('mons.txt');
 $out = '';
 $time_start = microtime(true);
 foreach(explode(PHP_EOL, $utf_string) as $line){
-	$mon = query_name_for_monster_no($conn, $line);
+	$mon = query_monster($conn, $line);
 	if($mon){
 		if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
 			$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;

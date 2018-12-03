@@ -22,7 +22,7 @@ foreach(explode(PHP_EOL, $utf_string) as $line){
 	if(!array_key_exists($rate, $byrates)){
 		$byrates[$rate] = array();
 	}
-	$mon = query_name_for_monster_no($conn, $name);
+	$mon = query_monster($conn, $name);
 	if($mon){
 		if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
 			$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;

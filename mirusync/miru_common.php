@@ -170,17 +170,17 @@ function single_param_stmt($conn, $query, $q_str){
 	$stmt->close();
 	return $res;
 }
-function query_name_for_monster_no($conn, $q_str){
+function query_monster($conn, $q_str){
 	if($q_str == ''){
 		return false;
 	}
-	/*if(ctype_digit($q_str)){
-		$query = 'SELECT MONSTER_NO FROM monsterList WHERE MONSTER_NO=?;';
-		$res = single_param_stmt($conn, $query, $q_str);
+	if(ctype_digit($q_str)){
+		$sql = 'SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE MONSTER_NO=? ORDER BY MONSTER_NO DESC';
+		$res = single_param_stmt($conn, $sql, $q_str);
 		if(sizeof($res) > 0){
 			return $res[0];
 		}
-	}*/
+	}
 	$matching = array(
 		array('=?',$q_str),
 		array(' LIKE ?', $q_str . '%'),
@@ -190,8 +190,8 @@ function query_name_for_monster_no($conn, $q_str){
 	if(!mb_check_encoding($q_str, 'ASCII')){
 		$query['SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
 	}else{
-		$query['SELECT MONSTER_NO, COMPUTED_NAME FROM computedNames WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';		
-		$query['SELECT MONSTER_NO_US MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';		
+		$query['SELECT monsterList.MONSTER_NO, TM_NAME_JP, TM_NAME_US, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
+		$query['SELECT MONSTER_NO_US MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
@@ -224,6 +224,9 @@ function select_card($conn, $id){
 
 	return $res;
 }
+function card_icon_img($img_url, $id, $name, $w = '63', $h = '63'){
+	return '<img src="' . $img_url . $id . '.png" title="' . $id . '-' . $name . '" width="' . $w . '" height="' . $h . '"/>';
+}
 function lb_stat($base, $mult){
 	return round($base * (100 + $mult)/100);
 }
@@ -251,14 +254,17 @@ function lead_mult($lead){
 $aw = array(2765 => 3, 2766 => 4, 2767 => 5, 2768 => 6, 2769 => 7, 2770 => 8, 2771 => 9, 2772 => 10, 2773 => 11, 2774 => 12, 2775 => 13, 2776 => 14, 2777 => 15, 2778 => 16, 2779 => 17, 2780 => 18, 2781 => 19, 2782 => 20, 2783 => 21, 2784 => 22, 2785 => 23, 2786 => 24, 2787 => 25, 2788 => 26, 2789 => 27, 2790 => 28, 2791 => 29, 3897 => 30, 7593 => 31, 7878 => 33, 7879 => 35, 7880 => 36, 7881 => 34, 7882 => 32, 9024 => 37, 9025 => 38, 9026 => 39, 9113 => 40, 9224 => 41, 9397 => 43, 9481 => 42, 10261 => 44, 11353 => 45, 11619 => 46, 12490 => 47, 12735 => 48, 12736 => 49, 13057 => 50, 13567 => 51, 13764 => 52, 13765 => 53, 13898 => 54, 13899 => 55, 13900 => 56, 13901 => 57, 13902 => 58, 14073 => 59, 14074 => 60, 14075 => 61, 14076 => 62, 14950 => 63, 15821 => 64, 15822 => 65 );
 function awake_list($awakenings, $w = '31', $h = '32'){
 	global $aw;
+	$info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s=';
+	//$icon_url = 'wp-content/uploads/pad-awakenings/';
+	$icon_url = 'https://pad.protic.site/wp-content/uploads/pad-awakenings/';
 	$awakes = '<div>';
 	$supers = '<div>';
 	foreach($awakenings as $awk){
 		$id =  $aw[$awk['TS_SEQ']];
 		if($awk['IS_SUPER'] == 1){
-			$supers = $supers . '<a href="http://www.puzzledragonx.com/en/awokenskill.asp?s=' . $id . '"><img src="http://www.puzzledragonx.com/en/img/awoken/' . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+			$supers = $supers . '<a href="' . $info_url . $id . '"><img src="' . $icon_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
 		}else{
-			$awakes = $awakes . '<a href="http://www.puzzledragonx.com/en/awokenskill.asp?s=' . $id . '"><img src="http://www.puzzledragonx.com/en/img/awoken/' . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+			$awakes = $awakes . '<a href="' . $info_url . $id . '"><img src="' . $icon_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
 		}
 	}
 	$awakes = $awakes . '</div>';
@@ -270,6 +276,7 @@ function get_card_grid($conn, $id){
 	if(!$data){
 		return '<div>NO CARD FOUND</div>';
 	}
+	//$img_url = 'https://pad.gungho.jp/member/img/graphic/illust/';
 	$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
 	//$img_url = '/portrait/';
 		
@@ -280,10 +287,45 @@ function get_card_summary($conn, $id){
 	if(!$data){
 		return '<div>NO CARD FOUND</div>';
 	}
+
 	$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
 	//$img_url = '/portrait/';
 		
-	return '<div><strong><img src="'. $img_url . $id . '.png" width="60" height="60"/> ' . $data['TM_NAME_US'] . '</strong></div>' . awake_list($data['AWAKENINGS']);
+	return '<div><strong>' . card_icon_img($img_url, $data['MONSTER_NO'], $data['TM_NAME_US']) . ' ' . $data['TM_NAME_US'] . '</strong></div>' . awake_list($data['AWAKENINGS']);
 }
-
+function get_egg($str){
+	//$url = 'wp-content/uploads/pad-eggs/';
+	$url = 'https://pad.protic.site/wp-content/uploads/pad-eggs/';
+	if(ctype_digit($str)){
+		$rare = intval($str);
+		if($rare > 5){
+			return '<img src="' . $url . 'Diamond.png" width="30"/>';
+		}else if($rare == 5){
+			return '<img src="' . $url . 'Gold1.png" width="30"/>';
+		}else if($rare == 4){
+			return '<img src="' . $url . 'Silver1.png" width="30"/>';
+		}else{
+			return '<img src="' . $url . 'Star.png" width="30"/>';
+		}
+	}else{
+		return '';
+	}
+}
+function get_evolutions($conn, $id){
+	$sql = 'select MONSTER_NO, TO_NO from evolutionlist where MONSTER_NO=?';
+	$stmt = $conn->prepare($sql);
+	$stmt->bind_param('i', $id);
+	$res = execute_select_stmt($stmt);
+	$stmt->free_result();
+	$stmt->close();
+	if(sizeof($res) == 0){
+		return false;
+	}else{
+		$evo_ids = array();
+		foreach($res as $r){
+			$evo_ids[] = $r['TO_NO'];
+		}
+		return $evo_ids;
+	}
+}
 ?>

@@ -7,7 +7,7 @@ function search_id($conn){
 		if(ctype_digit($_GET['s'])){
 			return $_GET['s'];
 		}else{
-			$mon = query_name_for_monster_no($conn, $_GET['s']);
+			$mon = query_monster($conn, $_GET['s']);
 			if($mon){
 				if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
 					$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;

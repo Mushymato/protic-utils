@@ -18,15 +18,19 @@ $img_url = '/portrait/';
 //foreach(explode(PHP_EOL, $utf_string) as $name){
 $time_start = microtime(true);
 $out = '';
-$mon = query_name_for_monster_no($conn, $name);
+$mon = query_monster($conn, $name);
 if($mon){
 	if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
 		$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
 	}
 	$key = array_keys($mon);
-	$out = $out . '<div style="float:left;width:100px;height:200px;font-size:10pt;"><img src="' . $img_url . $mon['MONSTER_NO'] . '.png">';
+	$out = $out . '<div><img src="' . $img_url . $mon['MONSTER_NO'] . '.png"><br/>';
 	foreach($key as $k){
-		$out = $out .  '[' . $mon[$k] . ']<br/>';
+		if($k == 'MONSTER_NO'){
+			$out = $out .  '[' . $mon[$k] . ']<br/>';
+		}else{
+			$out = $out . '(' . $k . ') ' . $mon[$k] . '<br/>';
+		}
 	}
 	$out = $out .  '</div>';
 }
