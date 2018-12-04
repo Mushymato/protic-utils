@@ -2,3 +2,5 @@
 *.csv
 sql_param.php
 get_tmp.php
+/pad-img/
+/pad-portrait/

@@ -4,16 +4,12 @@
 <?php
 function search_id($conn){
 	if(array_key_exists('s', $_GET) && $_GET['s'] != ''){
-		if(ctype_digit($_GET['s'])){
-			return $_GET['s'];
-		}else{
-			$mon = query_monster($conn, $_GET['s']);
-			if($mon){
-				if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
-					$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
-				}
-				return $mon['MONSTER_NO'];
+		$mon = query_monster($conn, $_GET['s']);
+		if($mon){
+			if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
+				$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
 			}
+			return $mon['MONSTER_NO'];
 		}
 	}else{
 		return '4428';

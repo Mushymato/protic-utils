@@ -13,7 +13,7 @@ NAME: <input type="text" name="name" value="<?php echo $name;?>">
 </form>
 <?php
 //$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
-$img_url = '/portrait/';
+$img_url = '/protic/mirusync/pad-portrait/';
 //$utf_string = file_get_contents('mons.txt');
 //foreach(explode(PHP_EOL, $utf_string) as $name){
 $time_start = microtime(true);

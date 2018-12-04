@@ -38,5 +38,6 @@ foreach($byrates as $rate => $out){
 	echo PHP_EOL . '<strong>[shortcode_highlight]TITLE[/shortcode_highlight] | ' . $rate . ' each, ' . sizeof($out) * floatval(str_replace('%', '', $rate)) . '% total </strong>' . PHP_EOL . '<span>' . implode('', $out) . '</span>';
 }
 ?>
+
 </body>
 </html>

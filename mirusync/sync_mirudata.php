@@ -32,28 +32,6 @@ $fieldnames = array('COMPUTED_NAME', 'MONSTER_NO');
 recreate_table($conn, $data, $tablename, $fieldnames, $pk);
 populate_table($conn, $data, $tablename, $fieldnames);
 
-/*nickname list*/
-//$gid = array('2070615818', '0');
-/*$fieldnames = array(
-	'nickname',
-	'MONSTER_NO'
-);
-$data = get_google_sheets_data('https://docs.google.com/spreadsheets/d/1EoZJ3w5xsXZ67kmarLE4vfrZSIIIAfj04HXeZVST3eY/pub?gid=0&single=true&output=csv', $fieldnames);
-$tablename = 'nicknames';
-$pk = 'nickname';
-recreate_table($conn, $data, $tablename, $fieldnames, $pk);
-populate_table($conn, $data, $tablename, $fieldnames);
-
-$fieldnames = array(
-	'MONSTER_NO',
-	'basename'
-);
-$data = get_google_sheets_data('https://docs.google.com/spreadsheets/d/1EoZJ3w5xsXZ67kmarLE4vfrZSIIIAfj04HXeZVST3eY/pub?gid=2070615818&single=true&output=csv', $fieldnames);
-$tablename = 'basenames';
-$pk = '';
-recreate_table($conn, $data, $tablename, $fieldnames, $pk);
-populate_table($conn, $data, $tablename, $fieldnames);*/
-
 $conn->close();
 
 echo 'Total execution time in seconds: ' . (microtime(true) - $time_start);

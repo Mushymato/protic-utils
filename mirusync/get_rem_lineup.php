@@ -5,8 +5,8 @@
 include 'miru_common.php';
 include 'sql_param.php';
 $conn = connect_sql($host, $user, $pass, $schema);
-$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
-//$img_url = '/portrait/';
+//$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
+$img_url = '/portrait/';
 $utf_string = file_get_contents('mons.txt');
 $out = '';
 $time_start = microtime(true);
@@ -18,7 +18,8 @@ foreach(explode(PHP_EOL, $utf_string) as $line){
 			$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
 		}
 		$out = $out . '<div class="rem-detail"><div class="rem-card">' . card_icon_img($img_url, $mon['MONSTER_NO'], $mon['TM_NAME_US']) . '</div><div class="rem-name">[' . $mon['MONSTER_NO'] . '] <strong>' . $mon['TM_NAME_US'] . '</strong><br/>' . $mon['TM_NAME_JP'];
-		if(sizeof($evo_ids = get_evolutions($conn, $mon['MONSTER_NO'])) > 0){
+		$evo_ids = select_evolutions($conn, $mon['MONSTER_NO']);
+		if(sizeof($evo_ids) > 0){
 			$out = $out . '<br/><span>';
 			foreach($evo_ids as $id){
 				$evo = query_monster($conn, $id);
