@@ -267,7 +267,7 @@ function img_exists($url){
     }
 }
 function grab_img_if_exists($url, $id, $savedir, $override = false){
-	$saveto = $savedir . '/' . $id . '.png';
+	$saveto = $savedir . $id . '.png';
 	if (!file_exists($savedir)) {
 		mkdir($savedir, 0777, true);
 	}else if(file_exists($saveto) && !$override){
