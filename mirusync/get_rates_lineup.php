@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
 <body>
-<form method="post">
-<p>Paste In-Game Lineup Here:</p>
-<textarea name="input" style="width:80vw;height:20vh;">
-</textarea>
-<input type="submit">
-</form>
 <?php
 include 'miru_common.php';
 include 'sql_param.php';
 $conn = connect_sql($host, $user, $pass, $schema);
 $utf_string = array_key_exists('input', $_POST) ? $_POST['input'] : '';
+?>
+<form method="post">
+<p>Paste In-Game Lineup Here:</p>
+<textarea name="input" style="width:80vw;height:20vh;">
+<?php echo $utf_string;?>
+</textarea>
+<input type="submit">
+</form>
+<?php
 $time_start = microtime(true);
 $byrates = array();
 foreach(explode(PHP_EOL, $utf_string) as $line){

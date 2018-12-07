@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html>
 <body>
-<form method="post">
-<p>Paste In-Game Lineup Here:</p>
-<textarea name="input" style="width:80vw;height:20vh;">
-</textarea>
-<input type="submit">
-</form>
 <?php
 include 'miru_common.php';
 include 'sql_param.php';
 $conn = connect_sql($host, $user, $pass, $schema);
 $utf_string = array_key_exists('input', $_POST) ? $_POST['input'] : '';
-$out = '';
+?>
+<form method="post">
+<p>Paste In-Game Lineup Here:</p>
+<textarea name="input" style="width:80vw;height:20vh;">
+<?php echo $utf_string;?>
+</textarea>
+<input type="submit">
+</form>
+<?php
 $time_start = microtime(true);
+$out = '';
+$check_rarity = false;
 foreach(explode(PHP_EOL, $utf_string) as $line){
 	if($line == '★'){
+		$check_rarity = true;
 		continue;
 	}
 	$parts = explode('    ', $line);
+	if($check_rarity){
+		$check_rarity = false;
+		if(strlen($out) > 0){
+			$out . '</div>';
+		}
+		$rare = mb_convert_kana($parts[0], 'n');
+		$out = $out . '<div class="rem-wrapper-rarity">' . get_egg($rare) . ' <strong>★' . $rare . '</strong></div><div class="rem-wrapper-block">';
+	}
 	if(sizeof($parts) < 2){
 		$mon = query_monster($conn, $parts[0]);
 	}else{
@@ -41,12 +54,6 @@ foreach(explode(PHP_EOL, $utf_string) as $line){
 			$out = $out . '</span>';
 		}
 		$out = $out . '</div></div>';
-	}else{
-		if(strlen($out) > 0){
-			$out . '</div>';
-		}
-		$rare = str_replace('★', '', $line);
-		$out = $out . '<div class="rem-wrapper-rarity">' . get_egg($rare) . ' <strong>' . $line . '</strong></div><div class="rem-wrapper-block">';
 	}
 }
 if(strlen($out) > 0){
