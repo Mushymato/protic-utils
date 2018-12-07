@@ -14,15 +14,15 @@ $miru_portrait_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portra
 $miru_full_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
 $pad_illust_url = 'https://pad.gungho.jp/member/img/graphic/illust/';
 foreach($res as $r){
-	if(grab_img_if_exists($miru_portrait_url, $r['MONSTER_NO'], 'pad-portrait')){
+	if(grab_img_if_exists($miru_portrait_url, $r['MONSTER_NO'], $_SERVER['DOCUMENT_ROOT'] . $portrait_url)){
 		echo 'Portrait - ' . $r['MONSTER_NO'] . PHP_EOL;
 	}else{
 		echo 'No Portrait - ' . $r['MONSTER_NO'] . PHP_EOL;
 	}
-	if(grab_img_if_exists($miru_full_url, $r['MONSTER_NO'], 'pad-img')){
+	if(grab_img_if_exists($miru_full_url, $r['MONSTER_NO'], $_SERVER['DOCUMENT_ROOT'] . $fullimg_url)){
 		echo 'Full(Miru) - ' . $r['MONSTER_NO'] . PHP_EOL;
 	}else{
-		if(grab_img_if_exists($pad_illust_url, $r['MONSTER_NO'], 'pad-img')){
+		if(grab_img_if_exists($pad_illust_url, $r['MONSTER_NO'], $_SERVER['DOCUMENT_ROOT'] . $fullimg_url)){
 			echo 'Full(GHJP) - ' . $r['MONSTER_NO'] . PHP_EOL;
 		}else{
 			echo 'No Full Img - ' . $r['MONSTER_NO'] . PHP_EOL;

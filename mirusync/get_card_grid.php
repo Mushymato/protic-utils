@@ -23,13 +23,15 @@ $id = search_id($conn);
 <form method="get">
 Search: <input type="text" name="s" value="<?php echo $id;?>">
 <input type="submit">
+</form>
 <?php
 $time_start = microtime(true);
 $out = get_card_grid($conn, $id);
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>' . PHP_EOL;
-echo $out;
 ?>
-
-</form>
+<p>Output</p>
+<?php echo '<textarea style="width:80vw;height:20vh;" readonly>' . $out . '</textarea>'; ?>
+<p>Preview</p>
+<?php echo '<div>' . $out . '</div>'; ?>
 </body>
 </html>

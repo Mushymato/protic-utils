@@ -1,5 +1,7 @@
 <?php
 $insert_size = 250;
+$portrait_url = '/wp-content/uploads/pad-portrait/';
+$fullimg_url = '/wp-content/uploads/pad-img/';
 
 function connect_sql($host, $user, $pass, $schema){
 	// Create connection
@@ -217,7 +219,7 @@ function select_awakenings($conn, $id){
 	}
 }
 function select_evolutions($conn, $id){
-	$sql = 'select MONSTER_NO, TO_NO from evolutionlist where MONSTER_NO=?';
+	$sql = 'select MONSTER_NO, TO_NO from evolutionList where MONSTER_NO=?';
 	$stmt = $conn->prepare($sql);
 	$stmt->bind_param('i', $id);
 	$res = execute_select_stmt($stmt);
@@ -285,8 +287,8 @@ function grab_img_if_exists($url, $id, $savedir, $override = false){
 	}
 	return false;
 }
-function card_icon_img($img_url, $id, $name, $w = '63', $h = '63'){
-	return '<img src="' . $img_url . $id . '.png" title="' . $id . '-' . $name . '" width="' . $w . '" height="' . $h . '"/>';
+function card_icon_img($img_url, $id, $name, $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
+	return '<a href="' . $href . $id . '"><img src="' . $img_url . $id . '.png" title="' . $id . '-' . $name . '" width="' . $w . '" height="' . $h . '"/></a>';
 }
 function lb_stat($base, $mult){
 	return round($base * (100 + $mult)/100);
@@ -335,27 +337,25 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers = $supers . '</div>';
 	return $awakes . $supers;
 }
-function get_card_grid($conn, $id){	
+function get_card_grid($conn, $id){
+	global $fullimg_url;
 	$data = select_card($conn, $id);
 	if(!$data){
 		return '<div>NO CARD FOUND</div>';
 	}
 
 	//$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
-	$img_url = '/protic/mirusync/pad-img/';
 		
-	return '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $img_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo"><p>[' . $id . ']<strong>' . att_orbs($data['ATT_1'], $data['ATT_2']) . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</strong><br/><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . awake_list($data['AWAKENINGS']) . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <strong>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</strong></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <strong>' . lead_mult($data['LEADER_DATA']) . '</strong></p></div></div>';
+	return '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo"><p>[' . $id . ']<strong>' . att_orbs($data['ATT_1'], $data['ATT_2']) . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</strong><br/><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . awake_list($data['AWAKENINGS']) . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <strong>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</strong></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <strong>' . lead_mult($data['LEADER_DATA']) . '</strong></p></div></div>';
 }
-function get_card_summary($conn, $id){	
+function get_card_summary($conn, $id){
+	global $portrait_url;
 	$data = select_card($conn, $id);
 	if(!$data){
 		return '<div>NO CARD FOUND</div>';
 	}
-
-	//$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
-	$img_url = '/protic/mirusync/portrait/';
-		
-	return '<div><strong>' . card_icon_img($img_url, $id, $data['TM_NAME_US']) . ' ' . htmlentities($data['TM_NAME_US']) . '</strong></div>' . awake_list($data['AWAKENINGS']);
+			
+	return '<div><strong>' . card_icon_img($portrait_url, $id, $data['TM_NAME_US']) . ' ' . htmlentities($data['TM_NAME_US']) . '</strong></div>' . awake_list($data['AWAKENINGS']);
 }
 function get_egg($str){
 	//$url = 'wp-content/uploads/pad-eggs/';

@@ -12,8 +12,6 @@ NAME: <input type="text" name="name" value="<?php echo $name;?>">
 <input type="submit">
 </form>
 <?php
-//$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
-$img_url = '/protic/mirusync/pad-portrait/';
 //$utf_string = file_get_contents('mons.txt');
 //foreach(explode(PHP_EOL, $utf_string) as $name){
 $time_start = microtime(true);
@@ -24,7 +22,7 @@ if($mon){
 		$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
 	}
 	$key = array_keys($mon);
-	$out = $out . '<div><img src="' . $img_url . $mon['MONSTER_NO'] . '.png"><br/>';
+	$out = $out . '<div>' . card_icon_img($portrait_url, $mon['MONSTER_NO'], $mon['TM_NAME_US']) . '<br/>';
 	foreach($key as $k){
 		if($k == 'MONSTER_NO'){
 			$out = $out .  '[' . $mon[$k] . ']<br/>';
