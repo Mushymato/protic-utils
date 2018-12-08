@@ -253,19 +253,6 @@ function select_card($conn, $id){
 	
 	return $res;
 }
-function img_exists($url){
-    $handle = curl_init($url);
-    curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($handle, CURLOPT_NOBODY, TRUE);
-    $response = curl_exec($handle);
-    $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-    curl_close($handle);
-    if ($httpCode >= 200 && $httpCode < 300) {
-        return true;
-    } else {
-        return false;
-    }
-}
 function grab_img_if_exists($url, $id, $savedir, $override = false){
 	$saveto = $savedir . $id . '.png';
 	if (!file_exists($savedir)) {
@@ -288,13 +275,15 @@ function grab_img_if_exists($url, $id, $savedir, $override = false){
 	return false;
 }
 function card_icon_img($img_url, $id, $name, $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
-	return '<a href="' . $href . $id . '"><img src="' . $img_url . $id . '.png" title="' . $id . '-' . $name . '" width="' . $w . '" height="' . $h . '"/></a>';
+	return array(
+		'html' => '<a href="' . $href . $id . '"><img src="' . $img_url . $id . '.png" title="' . $id . '-' . $name . '" width="' . $w . '" height="' . $h . '"/></a>', 
+		'shortcode' => '[pdx id=' . $id . ' w=' . $w . ' h=' . $h . ']');
 }
 function lb_stat($base, $mult){
 	return round($base * (100 + $mult)/100);
 }
 function att_orbs($att1, $att2){
-	return '<img width="20" height="20" src="https://pad.protic.site/wp-content/uploads/pad-orbs/' . $att1 . '.png">' . ($att2 == 0 ? '' : '<img width="20" height="20" src="https://pad.protic.site/wp-content/uploads/pad-orbs/' . $att2 . '.png">');
+	return array('<img width="20" height="20" src="https://pad.protic.site/wp-content/uploads/pad-orbs/' . $att1 . '.png">' . ($att2 == 0 ? '' : '<img width="20" height="20" src="https://pad.protic.site/wp-content/uploads/pad-orbs/' . $att2 . '.png">'), '[orb id=' . $att1 . ']' . ($att2 == 0 ? '' : '[orb id=' . $att2 . ']'));
 }
 $type = array('', 'Dragon', 'Balance', 'Physical', 'Healer', 'Attacker', 'God', 'Evolve', 'Enhance', 'Protected', 'Devil', '', '', 'Awoken', 'Machine', 'Vendor');
 function typings($t1, $t2, $t3){
@@ -317,60 +306,75 @@ function lead_mult($lead){
 $aw = array(2765 => 3, 2766 => 4, 2767 => 5, 2768 => 6, 2769 => 7, 2770 => 8, 2771 => 9, 2772 => 10, 2773 => 11, 2774 => 12, 2775 => 13, 2776 => 14, 2777 => 15, 2778 => 16, 2779 => 17, 2780 => 18, 2781 => 19, 2782 => 20, 2783 => 21, 2784 => 22, 2785 => 23, 2786 => 24, 2787 => 25, 2788 => 26, 2789 => 27, 2790 => 28, 2791 => 29, 3897 => 30, 7593 => 31, 7878 => 33, 7879 => 35, 7880 => 36, 7881 => 34, 7882 => 32, 9024 => 37, 9025 => 38, 9026 => 39, 9113 => 40, 9224 => 41, 9397 => 43, 9481 => 42, 10261 => 44, 11353 => 45, 11619 => 46, 12490 => 47, 12735 => 48, 12736 => 49, 13057 => 50, 13567 => 51, 13764 => 52, 13765 => 53, 13898 => 54, 13899 => 55, 13900 => 56, 13901 => 57, 13902 => 58, 14073 => 59, 14074 => 60, 14075 => 61, 14076 => 62, 14950 => 63, 15821 => 64, 15822 => 65 );
 function awake_list($awakenings, $w = '31', $h = '32'){
 	if(!$awakenings){
-		return '';
+		return array('', '');
 	}
 	global $aw;
 	$info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s=';
-	//$icon_url = 'wp-content/uploads/pad-awakenings/';
-	$icon_url = 'https://pad.protic.site/wp-content/uploads/pad-awakenings/';
-	$awakes = '<div>';
-	$supers = '<div>';
+	$awake_url = 'https://pad.protic.site/wp-content/uploads/pad-awakenings/';
+	$awakes = array('<div>', '');
+	$supers = array('<div>', '');
 	foreach($awakenings as $awk){
 		$id =  $aw[$awk['TS_SEQ']];
 		if($awk['IS_SUPER'] == 1){
-			$supers = $supers . '<a href="' . $info_url . $id . '"><img src="' . $icon_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+			$supers[0] = $supers[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+			$supers[1] = $supers[1] . '[awak id=' . $id . ' w=' . $w . ' h=' . $h . ']';
 		}else{
-			$awakes = $awakes . '<a href="' . $info_url . $id . '"><img src="' . $icon_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+			$awakes[0] = $awakes[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+			$awakes[1] = $awakes[1] . '[awak id=' . $id . ' w=' . $w . ' h=' . $h . ']';
 		}
 	}
-	$awakes = $awakes . '</div>';
-	$supers = $supers . '</div>';
-	return $awakes . $supers;
+	$awakes[0] = $awakes[0] . '</div>';
+	$supers[0] = $supers[0] . '</div>';
+	return array($awakes[0] . $supers[0], $awakes[1] . '<br/>' . $supers[1]);
 }
 function get_card_grid($conn, $id){
 	global $fullimg_url;
 	$data = select_card($conn, $id);
 	if(!$data){
-		return '<div>NO CARD FOUND</div>';
+		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
 
-	//$img_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
-		
-	return '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo"><p>[' . $id . ']<strong>' . att_orbs($data['ATT_1'], $data['ATT_2']) . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</strong><br/><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . awake_list($data['AWAKENINGS']) . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <strong>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</strong></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <strong>' . lead_mult($data['LEADER_DATA']) . '</strong></p></div></div>';
+	$atts = att_orbs($data['ATT_1'], $data['ATT_2']);
+	$awakes = awake_list($data['AWAKENINGS']);
+	
+	return array(
+		'html' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo"><p>[' . $id . ']<strong>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</strong><br/><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <strong>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</strong></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <strong>' . lead_mult($data['LEADER_DATA']) . '</strong></p></div></div>', 
+		'shortcode' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo"><p>[' . $id . ']<strong>' . $atts[1] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</strong><br/><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[1] . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <strong>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</strong></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <strong>' . lead_mult($data['LEADER_DATA']) . '</strong></p></div></div>');
 }
 function get_card_summary($conn, $id){
 	global $portrait_url;
 	$data = select_card($conn, $id);
 	if(!$data){
-		return '<div>NO CARD FOUND</div>';
+		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
-			
-	return '<div><strong>' . card_icon_img($portrait_url, $id, $data['TM_NAME_US']) . ' ' . htmlentities($data['TM_NAME_US']) . '</strong></div>' . awake_list($data['AWAKENINGS']);
+
+	$card = card_icon_img($portrait_url, $id, $data['TM_NAME_US']);
+	$awakes = awake_list($data['AWAKENINGS']);
+	
+	return array(
+		'html' => '<div><strong>' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) . '</strong></div>' . $awakes[0], 
+		'shortcode' => '<div><strong>' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) . '</strong></div>' . $awakes[1]);
 }
 function get_egg($str){
-	//$url = 'wp-content/uploads/pad-eggs/';
 	$url = 'https://pad.protic.site/wp-content/uploads/pad-eggs/';
 	if(ctype_digit($str)){
 		$rare = intval($str);
+		$img_name = '';
+		$sc_name = '';
 		if($rare > 5){
-			return '<img src="' . $url . 'Diamond.png" width="30"/>';
+			$img_name = 'Diamond';
+			$sc_name = 'dia';
 		}else if($rare == 5){
-			return '<img src="' . $url . 'Gold1.png" width="30"/>';
+			$img_name = 'Gold1';
+			$sc_name = 'gold';
 		}else if($rare == 4){
-			return '<img src="' . $url . 'Silver1.png" width="30"/>';
+			$img_name = 'Silver1';
+			$sc_name = 'silver';
 		}else{
-			return '<img src="' . $url . 'Star.png" width="30"/>';
+			$img_name = 'Star';
+			$sc_name = 'star';
 		}
+		return array('html' => '<img src="' . $url . $img_name . '.png" width="30"/>', 'shortcode' => '[egg id=' . $sc_name . ' w=30]');
 	}else{
 		return '';
 	}
