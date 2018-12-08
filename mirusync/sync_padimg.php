@@ -9,7 +9,6 @@ $stmt = $conn->prepare($sql);
 $res = execute_select_stmt($stmt);
 $stmt->close();
 $conn->close();
-
 $miru_portrait_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
 $miru_full_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
 $pad_illust_url = 'https://pad.gungho.jp/member/img/graphic/illust/';

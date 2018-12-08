@@ -22,7 +22,7 @@ if($mon){
 		$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
 	}
 	$key = array_keys($mon);
-	$out = $out . '<div>' . card_icon_img($portrait_url, $mon['MONSTER_NO'], $mon['TM_NAME_US'])['html'] . '<br/>';
+	$out = $out . '<div>' . card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US'])['html'] . '<br/>';
 	foreach($key as $k){
 		if($k == 'MONSTER_NO'){
 			$out = $out .  '[' . $mon[$k] . ']<br/>';

@@ -1,6 +1,5 @@
 *.txt
 *.csv
 sql_param.php
-get_tmp.php
-/pad-img/
-/pad-portrait/
+sb_tierlist.php
+sync_padicons.php
