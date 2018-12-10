@@ -35,7 +35,7 @@ echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . 
 		}
 		echo '[/shortcode_box]' . PHP_EOL . PHP_EOL;
 	}
-	echo implode(($om == 'html' ? '<br/>' : PHP_EOL), $output_arr[$om]) . '</textarea>'; 
+	echo implode(PHP_EOL . PHP_EOL, $output_arr[$om]) . '</textarea>'; 
 ?>
 <p>Preview</p>
 <?php echo '<div>' . implode('<br/>', $output_arr['html']) . '</div>' . PHP_EOL; ?>
