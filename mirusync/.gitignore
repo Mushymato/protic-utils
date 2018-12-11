@@ -1,5 +1,5 @@
 *.txt
 *.csv
 sql_param.php
-sb_tierlist.php
+*_tierlist.php
 sync_padicons.php

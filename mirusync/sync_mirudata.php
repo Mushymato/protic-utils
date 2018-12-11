@@ -11,7 +11,9 @@ $lists = array(
 	'evolutionList' => 'TV_SEQ',
 	'skillList' => 'TS_SEQ',
 	'awokenSkillList' => 'TMA_SEQ',
-	'skillLeaderDataList' => 'TS_SEQ'
+	'skillLeaderDataList' => 'TS_SEQ',
+	'collectionTitleList' => 'TCT_SEQ',
+	'collectionMonsterList' => 'TCM_SEQ'
 );
 foreach($lists as $tablename => $pk){
 	$data = json_decode(file_get_contents("https://storage.googleapis.com/mirubot/paddata/padguide/$tablename.json"), true)['items'];

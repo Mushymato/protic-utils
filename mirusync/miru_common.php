@@ -177,7 +177,7 @@ function query_monster($conn, $q_str){
 		return false;
 	}
 	if(ctype_digit($q_str)){
-		$sql = 'SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE MONSTER_NO=? ORDER BY MONSTER_NO DESC';
+		$sql = 'SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE MONSTER_NO=? ORDER BY MONSTER_NO DESC';
 		$res = single_param_stmt($conn, $sql, $q_str);
 		if(sizeof($res) > 0){
 			return $res[0];
@@ -190,10 +190,10 @@ function query_monster($conn, $q_str){
 	);
 	$query = array();
 	if(!mb_check_encoding($q_str, 'ASCII')){
-		$query['SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
+		$query['SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
 	}else{
-		$query['SELECT monsterList.MONSTER_NO, TM_NAME_JP, TM_NAME_US, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
-		$query['SELECT MONSTER_NO_US MONSTER_NO, TM_NAME_JP, TM_NAME_US FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';
+		$query['SELECT monsterList.MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
+		$query['SELECT MONSTER_NO_US MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
@@ -235,6 +235,7 @@ function select_evolutions($conn, $id){
 		foreach($evo_ids as $eid){
 			$evo_ids = array_merge($evo_ids, select_evolutions($conn, $eid));
 		}
+		sort($evo_ids);
 		return $evo_ids;
 	}
 }
@@ -277,10 +278,10 @@ function grab_img_if_exists($url, $id, $savedir, $override = false){
 	}
 	return false;
 }
-function card_icon_img($id, $name, $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
+function card_icon_img($id, $name = '', $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
 	global $portrait_url;
 	return array(
-		'html' => '<a href="' . $href . $id . '"><img src="' . $portrait_url . $id . '.png" title="' . $id . '-' . $name . '" width="' . $w . '" height="' . $h . '"/></a>', 
+		'html' => '<a href="' . $href . $id . '"><img src="' . $portrait_url . $id . '.png" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
 		'shortcode' => '[pdx id=' . $id . ' w=' . $w . ' h=' . $h . ']');
 }
 function lb_stat($base, $mult){
@@ -361,7 +362,6 @@ function get_card_summary($conn, $id){
 }
 function get_egg($str){
 	$url = '/wp-content/uploads/pad-eggs/';
-	echo $str;
 	if(ctype_digit($str)){
 		$rare = intval($str);
 		$img_name = '';
