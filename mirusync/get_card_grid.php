@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+<head>
+<link rel="stylesheet" type="text/css" href="card-stats-table.css">
+</head>
 <body>
 <?php
 include 'miru_common.php';

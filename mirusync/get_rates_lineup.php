@@ -21,10 +21,12 @@ $byrates = array('html' => array(), 'shortcode' => array());
 foreach(explode(PHP_EOL, $input_str) as $line){
 	$parts = explode('    ', $line);
 	if(sizeof($parts) < 2){
-		continue;
+		$name = $parts[0];
+		$rate = '0';
+	}else{
+		$name = $parts[sizeof($parts)-2];
+		$rate = $parts[sizeof($parts)-1];
 	}
-	$name = $parts[sizeof($parts)-2];
-	$rate = $parts[sizeof($parts)-1];
 	if(!array_key_exists($rate, $byrates)){
 		$byrates[$rate] = array();
 	}
@@ -36,6 +38,8 @@ foreach(explode(PHP_EOL, $input_str) as $line){
 		$card = card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US']);
 		$byrates['html'][$rate][] = $card['html'];
 		$byrates['shortcode'][$rate][] = $card['shortcode'];
+	}else{
+		
 	}
 }
 $conn->close();
@@ -47,9 +51,11 @@ foreach($byrates as $mode => $rate_group){
 		$output_arr[$mode][] = '<strong>' . $title . ' | ' . $rate . ' each, ' . sizeof($out) * floatval(str_replace('%', '', $rate)) . '% total </strong><br/><span>' . implode(' ', $out) . '</span>';
 	}
 }
+krsort($output_arr['html']);
+krsort($output_arr['shortcode']);
 ?>
 <p>Output</p>
-<?php echo '<textarea style="width:80vw;height:20vh;" readonly>' . implode(($om == 'html' ? '<br/>' : PHP_EOL), $output_arr[$om]) . '</textarea>'; ?>
+<?php echo '<textarea style="width:80vw;height:20vh;" readonly>' . implode(($om == 'html' ? '<br/>' . PHP_EOL : PHP_EOL), $output_arr[$om]) . '</textarea>'; ?>
 <p>Preview</p>
 <?php echo '<div>' . implode('<br/>', $output_arr['html']) . '</div>'; ?>
 

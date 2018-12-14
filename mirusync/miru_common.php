@@ -26,7 +26,7 @@ function default_fieldnames($entry){
 function recreate_table($conn, $data, $tablename, $fieldnames, $pk){
 	$sql = 'DROP TABLE IF EXISTS ' . $tablename;
 	if($conn->query($sql)){
-		$sql = 'CREATE TABLE ' . $tablename . '(';
+		$sql = 'CREATE TABLE ' . $tablename . ' (';
 		foreach($fieldnames as $field){
 			$sql = $sql . $field . ' ';
 			if(ctype_digit($data[0][$field])){
@@ -74,7 +74,7 @@ function populate_table($conn, $data, $tablename, $fieldnames){
 			$paramtype = $paramtype . 's';
 		}
 	}
-	$valueGroup = '(' . substr(str_repeat('?,', sizeof($fieldnames)), 0, -1) . '),';
+	$valueGroup = ' (' . substr(str_repeat('?,', sizeof($fieldnames)), 0, -1) . '),';
 	$sql = substr($sql, 0, -1) . ') VALUES ';
 	$sql_m = $sql . substr(str_repeat($valueGroup, $insert_size), 0, -1) . ';';
 	$paramtype_m = str_repeat($paramtype, $insert_size);
@@ -287,6 +287,17 @@ function card_icon_img($id, $name = '', $w = '63', $h = '63', $href = 'http://ww
 function lb_stat($base, $mult){
 	return round($base * (100 + $mult)/100);
 }
+function stat_table($data, $plus = false){
+	if($data['LIMIT_MULT'] == 0){
+		return '<table class="card-stats-table"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . ($data['HP_MAX'] + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . ($data['ATK_MAX'] + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . ($data['RCV_MAX'] + 297) . '</td></tr></tbody></table>';
+	}else{
+		if($plus){
+			return '<table class="card-stats-table"><thead><tr><td>Stat</td><td>Lv.99 (+297)</td><td>Lv.110 (+297)</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . ' (' . ($data['HP_MAX'] + 990) . ')</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . ')</tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . ' (' . ($data['ATK_MAX'] + 495) . ')</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . ')</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . ' (' . ($data['RCV_MAX'] + 297) . ')</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . ')</td></tr></tbody></table>';
+		}else{
+			return '<table class="card-stats-table" class="base-stat"><thead><tr><td>Stat</td><td>Lv.99</td><td>Lv.110</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td></tr></tbody></table>';
+		}
+	}
+}
 function att_orbs($att1, $att2){
 	return array('<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att1 . '.png">' . ($att2 == 0 ? '' : '<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att2 . '.png">'), '[orb id=' . $att1 . ']' . ($att2 == 0 ? '' : '[orb id=' . $att2 . ']'));
 }
@@ -308,7 +319,7 @@ function lead_mult($lead){
 	}
 	return '[' . $ls['1'] * $ls['1'] . '/' . $ls['2'] * $ls['2'] . '/' . $ls['3'] * $ls['3'] . ($ls['4'] == 0 ? '' : ', ' . round(100 * (1 - (1-$ls['4']) * (1-$ls['4'])), 2) . '%') . ']';
 }
-$aw = array(2765 => 3, 2766 => 4, 2767 => 5, 2768 => 6, 2769 => 7, 2770 => 8, 2771 => 9, 2772 => 10, 2773 => 11, 2774 => 12, 2775 => 13, 2776 => 14, 2777 => 15, 2778 => 16, 2779 => 17, 2780 => 18, 2781 => 19, 2782 => 20, 2783 => 21, 2784 => 22, 2785 => 23, 2786 => 24, 2787 => 25, 2788 => 26, 2789 => 27, 2790 => 28, 2791 => 29, 3897 => 30, 7593 => 31, 7878 => 33, 7879 => 35, 7880 => 36, 7881 => 34, 7882 => 32, 9024 => 37, 9025 => 38, 9026 => 39, 9113 => 40, 9224 => 41, 9397 => 43, 9481 => 42, 10261 => 44, 11353 => 45, 11619 => 46, 12490 => 47, 12735 => 48, 12736 => 49, 13057 => 50, 13567 => 51, 13764 => 52, 13765 => 53, 13898 => 54, 13899 => 55, 13900 => 56, 13901 => 57, 13902 => 58, 14073 => 59, 14074 => 60, 14075 => 61, 14076 => 62, 14950 => 63, 15821 => 64, 15822 => 65 );
+$aw = array(2765 => 3, 2766 => 4, 2767 => 5, 2768 => 6, 2769 => 7, 2770 => 8, 2771 => 9, 2772 => 10, 2773 => 11, 2774 => 12, 2775 => 13, 2776 => 14, 2777 => 15, 2778 => 16, 2779 => 17, 2780 => 18, 2781 => 19, 2782 => 20, 2783 => 21, 2784 => 22, 2785 => 23, 2786 => 24, 2787 => 25, 2788 => 26, 2789 => 27, 2790 => 28, 2791 => 29, 3897 => 30, 7593 => 31, 7878 => 33, 7879 => 35, 7880 => 36, 7881 => 34, 7882 => 32, 9024 => 37, 9025 => 38, 9026 => 39, 9113 => 40, 9224 => 41, 9397 => 43, 9481 => 42, 10261 => 44, 11353 => 45, 11619 => 46, 12490 => 47, 12735 => 48, 12736 => 49, 13057 => 50, 13567 => 51, 13764 => 52, 13765 => 53, 13898 => 54, 13899 => 55, 13900 => 56, 13901 => 57, 13902 => 58, 14073 => 59, 14074 => 60, 14075 => 61, 14076 => 62, 14950 => 63, 15821 => 64, 15822 => 65, 15823 => 66);
 function awake_list($awakenings, $w = '31', $h = '32'){
 	if(!$awakenings){
 		return array('', '');
@@ -330,7 +341,7 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	}
 	$awakes[0] = $awakes[0] . '</div>';
 	$supers[0] = $supers[0] . '</div>';
-	return array($awakes[0] . $supers[0], $awakes[1] . '<br/>' . $supers[1]);
+	return array($awakes[0] . $supers[0], $awakes[1] . PHP_EOL . $supers[1]);
 }
 function get_card_grid($conn, $id){
 	global $fullimg_url;
@@ -343,8 +354,8 @@ function get_card_grid($conn, $id){
 	$awakes = awake_list($data['AWAKENINGS']);
 	
 	return array(
-		'html' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p></div></div>', 
-		'shortcode' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/><table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>' . ($data['LIMIT_MULT'] == 0 ? '' : 'Lv.110') . '+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . '</td></tr></tbody></table></div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . PHP_EOL . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>' . PHP_EOL . PHP_EOL . '</div></div>');
+		'html' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . stat_table($data, true) . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p></div></div>', 
+		'shortcode' => '<div class="cardgrid" id="' . $id . '"><div class="col1">[pdxp id=' . $id . ']' . stat_table($data, true) . '</div>' . PHP_EOL . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . PHP_EOL . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>' . PHP_EOL . PHP_EOL . '</div></div>');
 }
 function get_card_summary($conn, $id){
 	global $portrait_url;
