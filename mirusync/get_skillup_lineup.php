@@ -13,7 +13,7 @@ $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
 ?>
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
-<p>Enter search terms, one per line:</p>
+<p>Paste Skillup Dungeon Lineup:</p>
 <textarea name="input" style="width:80vw;height:20vh;"><?php echo $input_str;?></textarea>
 </form>
 <?php
