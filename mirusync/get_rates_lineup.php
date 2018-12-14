@@ -18,8 +18,11 @@ Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){e
 <?php
 $time_start = microtime(true);
 $byrates = array('html' => array(), 'shortcode' => array());
-foreach(explode(PHP_EOL, $input_str) as $line){
-	$parts = explode('    ', $line);
+foreach(explode("\n", $input_str) as $line){
+	if(trim($line) == '★'){
+		continue;
+	}
+	$parts = explode('    ', trim($line));
 	if(sizeof($parts) < 2){
 		$name = $parts[0];
 		$rate = '0';
@@ -27,32 +30,33 @@ foreach(explode(PHP_EOL, $input_str) as $line){
 		$name = $parts[sizeof($parts)-2];
 		$rate = $parts[sizeof($parts)-1];
 	}
-	if(!array_key_exists($rate, $byrates)){
-		$byrates[$rate] = array();
-	}
 	$mon = query_monster($conn, $name);
 	if($mon){
+		if(!array_key_exists($rate . '|' . $mon['RARITY'], $byrates)){
+			$byrates[$rate . '|' . $mon['RARITY']] = array();
+		}
 		if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
 			$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
 		}
 		$card = card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US']);
-		$byrates['html'][$rate][] = $card['html'];
-		$byrates['shortcode'][$rate][] = $card['shortcode'];
-	}else{
-		
+		$byrates['html'][$rate . '|' . $mon['RARITY']][] = $card['html'];
+		$byrates['shortcode'][$rate . '|' . $mon['RARITY']][] = $card['shortcode'];
 	}
 }
 $conn->close();
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>';
 $output_arr = array('html' => array(), 'shortcode' => array());
 foreach($byrates as $mode => $rate_group){
-	$title = $mode == 'html' ? '<span class="su-highlight" style="background:#ddff99;color:#000000">PLACEHOLDER PLEASE CHANGE</span>' : '[shortcode_highlight]PLACEHOLDER PLEASE CHANGE[/shortcode_highlight]';
-	foreach($rate_group as $rate => $out){
-		$output_arr[$mode][] = '<strong>' . $title . ' | ' . $rate . ' each, ' . sizeof($out) * floatval(str_replace('%', '', $rate)) . '% total </strong><br/><span>' . implode(' ', $out) . '</span>';
+	$title = $mode == 'html' ? '<span class="su-highlight" style="background:#ddff99;color:#000000">★</span>' : '[shortcode_highlight]★[/shortcode_highlight]';
+	foreach($rate_group as $rate_rarity => $out){
+		$parts = explode('|', $rate_rarity);
+		$rate = $parts[0];
+		$rarity = $parts[1];
+		$output_arr[$mode][] = '<strong>' . str_replace('★', $rarity . '★', $title) . ' | ' . $rate . ' each, ' . sizeof($out) * floatval(str_replace('%', '', $rate)) . '% total </strong><br/><span>' . implode(' ', $out) . '</span>';
 	}
 }
-krsort($output_arr['html']);
-krsort($output_arr['shortcode']);
+ksort($output_arr['html']);
+ksort($output_arr['shortcode']);
 ?>
 <p>Output</p>
 <?php echo '<textarea style="width:80vw;height:20vh;" readonly>' . implode(($om == 'html' ? '<br/>' . PHP_EOL : PHP_EOL), $output_arr[$om]) . '</textarea>'; ?>
