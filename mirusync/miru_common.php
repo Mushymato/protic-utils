@@ -397,8 +397,8 @@ function get_egg($str){
 }
 function search_ids($conn, $input_str){
 	$ids = array();
-	foreach(explode(PHP_EOL, $input_str) as $line){
-		$mon = query_monster($conn, $line);
+	foreach(explode("\n", $input_str) as $line){
+		$mon = query_monster($conn, trim($line));
 		if($mon){
 			if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
 				$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
