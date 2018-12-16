@@ -47,6 +47,15 @@
 	width:40px;
 	height:40px;
 }
+.orbbg{
+	margin: 0px;
+    background-size: 55%;
+	background-position: center;
+	background-repeat: no-repeat;
+    z-index: 1;
+    position: relative;
+	text-shadow: 1px 1px 0px #ffffff;
+}
 .R {
 	background-image: url('img/R.png');
 }

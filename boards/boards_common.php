@@ -5,9 +5,7 @@ function get_board($pattern, $size = 'm'){
 	global $orb_list;
 	$out = '<div class="board ' . $size . '">';
 	foreach(str_split($pattern) as $o){
-		if(in_array($o, $orb_list)){
-			$out = $out . '<div class="orb ' . $o . '"></div>';
-		}
+		$out = $out . '<div class="orb ' . $o . '" data-orb="' . $o . '"></div>';
 	}
 	$out = $out . '</div>';
 	return $out;
@@ -23,26 +21,60 @@ function count_orbs($pattern){
 	}
 	return $counts;
 }
+function get_ratio($board){
+	global $orb_list;
+	$out = '';
+	foreach($orb_list as $orb){
+		if($board[$orb] != 0){
+			$out = $out . $board[$orb] . '-';
+		}
+	}
+	return substr($out, 0, -1);
+}
 function normalize($entry){
 	global $orb_list;
+	$entry['size'] = strtolower($entry['size']);
 	$entry['pattern'] = strtoupper($entry['pattern']);
 	$counts = count_orbs($entry['pattern']);
 	arsort($counts);
 	$i = 0;
 	foreach($counts as $orb => $count){
-		$entry['pattern'] = str_replace($orb, $i, $entry['pattern']);
+		$entry['pattern'] = str_replace($orb, strval($i), $entry['pattern']);
 		if($entry['style'] != 'MAXCOMBO' && $entry['styleAtt'] == $orb){
-			$entry['styleAtt'] = $i;
+			$entry['styleAtt'] = strval($i);
 		}
 		$i++;
 	}
 	foreach($orb_list as $idx => $orb){
 		$entry['pattern'] = str_replace($idx, $orb, $entry['pattern']);
-		if($entry['style'] != 'MAXCOMBO' && $entry['styleAtt'] == $idx){
+		if($entry['style'] != 'MAXCOMBO' && $entry['styleAtt'] == strval($i)){
 			$entry['styleAtt'] = $orb;
 		}
 	}
-	$entry = array_merge($entry, $counts);
+	$entry = array_merge($entry, count_orbs($entry['pattern']));
+	return $entry;
+}
+function invert($entry){
+	global $orb_list;
+	$entry['size'] = strtolower($entry['size']);
+	$entry['pattern'] = strtoupper($entry['pattern']);
+	$counts = array_filter(count_orbs($entry['pattern']));
+	asort($counts);
+	$i = 0;
+	foreach($counts as $orb => $count){
+		$entry['pattern'] = str_replace($orb, strval($i), $entry['pattern']);
+		if($entry['style'] != 'MAXCOMBO' && $entry['styleAtt'] == $orb){
+			$entry['styleAtt'] = strval($i);
+		}
+		$i++;
+	}
+	foreach($orb_list as $idx => $orb){
+		$entry['pattern'] = str_replace($idx, $orb, $entry['pattern']);
+		if($entry['style'] != 'MAXCOMBO' && $entry['styleAtt'] == strval($i)){
+			$entry['styleAtt'] = $orb;
+		}
+	}
+	$entry = array_merge($entry, count_orbs($entry['pattern']));
 	return $entry;
 }
 function connect_sql($host, $user, $pass, $schema){
@@ -126,6 +158,7 @@ function load_boards_from_google_sheets($conn){
 				$entry[$fieldnames[$i]] = $tmp[$i] == '' ? null : $tmp[$i];
 			}
 			$data[] = normalize($entry);
+			$data[] = invert($entry);
 		}
 		fclose($fh);
 	}else{
@@ -191,11 +224,16 @@ function load_boards_from_google_sheets($conn){
 	}
 	echo 'Imported ' . $count . ' records out of ' . sizeof($data) . ' to ' . $tablename . PHP_EOL;
 }
-function select_all_boards($conn){
-	$sql = 'SELECT `boards`.`bID`,`boards`.`size`,`boards`.`pattern`,`boards`.`combo`,`boards`.`style`,`boards`.`styleAtt`,`boards`.`styleCount`,`boards`.`R`,`boards`.`B`,`boards`.`G`,`boards`.`L`,`boards`.`D`,`boards`.`H`,`boards`.`J`,`boards`.`X`,`boards`.`P`,`boards`.`M`,`boards`.`description` FROM `optimal_boards`.`boards`;';
+function select_boards_by_size($conn, $size = 'm'){
+	$sql = 'SELECT `boards`.`bID`,`boards`.`size`,`boards`.`pattern`,`boards`.`combo`,`boards`.`style`,`boards`.`styleAtt`,`boards`.`styleCount`,`boards`.`R`,`boards`.`B`,`boards`.`G`,`boards`.`L`,`boards`.`D`,`boards`.`H`,`boards`.`J`,`boards`.`X`,`boards`.`P`,`boards`.`M`,`boards`.`description` FROM `optimal_boards`.`boards` WHERE `boards`.`size`=? ORDER BY `boards`.`R` DESC;';
 	$stmt = $conn->prepare($sql);
+	$stmt->bind_param('s', $size);
 	$res = execute_select_stmt($stmt);
 	$stmt->close();
 	return $res;
+}
+function get_filters($conn){
+	$out = '<form>';
+	
 }
 ?>
