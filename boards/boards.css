@@ -1,0 +1,79 @@
+#pattern {
+    resize: none;
+	font: 18px/1.2 Courier New;
+	z-index:1;
+	overflow:hidden;
+}
+#pattern.s{
+	width:60px;
+	height:90px;
+}
+#pattern.m{
+	width:70px;
+	height:110px;
+}
+#pattern.l{
+	width:80px;
+	height:130px;
+}
+.board {
+	background-image:url('img/BG.png');
+	background-size:80px 80px;
+	border:5px solid #1f201f;
+	margin: 5px;
+	overflow:hidden;
+}
+.board.s {
+	width:200px;
+	height:160px;
+}
+.board.m {
+	width:240px;
+	height:200px;
+}
+.board.l {
+	width:280px;
+	height:240px;
+}
+.orb {
+	margin: 0px;
+    display: block;
+    float: left;
+    background-size: 100%;
+	background-position: center;
+	background-repeat: no-repeat;
+    z-index: 1;
+    position: relative;
+	width:40px;
+	height:40px;
+}
+.R {
+	background-image: url('img/R.png');
+}
+.B {
+	background-image: url('img/B.png');
+}
+.G {
+	background-image: url('img/G.png');
+}
+.L {
+	background-image: url('img/L.png');
+}
+.D {
+	background-image: url('img/D.png');
+}
+.H {
+	background-image: url('img/H.png');
+}
+.J {
+	background-image: url('img/J.png');
+}
+.P {
+	background-image: url('img/P.png');
+}
+.M {
+	background-image: url('img/M.png');
+}
+.X {
+	background-image: url('img/X.png');
+}
