@@ -49,7 +49,7 @@
 }
 .orbbg{
 	margin: 0px;
-    background-size: 55%;
+    background-size: contain;
 	background-position: center;
 	background-repeat: no-repeat;
     z-index: 1;

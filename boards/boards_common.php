@@ -1,5 +1,5 @@
 <?php
-$size_list = array('s', 'm', 'l');
+$size_list = array('s' => array(5,4), 'm' => array(6,5), 'l' => array(7,6));
 $orb_list = array('R', 'B', 'G', 'L', 'D', 'H', 'J', 'X', 'P', 'M');
 function get_board($pattern, $size = 'm'){
 	global $orb_list;
@@ -76,6 +76,23 @@ function invert($entry){
 	}
 	$entry = array_merge($entry, count_orbs($entry['pattern']));
 	return $entry;
+}
+function get_match($pattern, $p){
+	
+}
+function count_combos($pattern, $size = 'm'){
+	global $size_list;
+	global $orb_list;
+	$combos = array();
+	foreach($orb_list as $orb){
+		$counts[$orb] = 0;
+	}
+	$wh = $size_list[$size];
+	for(int $i = 0; $i < $wh[0]; $i++){
+		for(int $j = 0; $j < $wh[1]; $j++){
+			$p = $i * $wh[1] + $j;
+		}
+	}
 }
 function connect_sql($host, $user, $pass, $schema){
 	// Create connection

@@ -4,9 +4,6 @@
 <link rel="stylesheet" type="text/css" href="boards.css">
 </head>
 <body>
-<form>
-
-</form>
 <?php
 include 'boards_common.php';
 include 'sql_param.php';
