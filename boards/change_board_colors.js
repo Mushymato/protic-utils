@@ -1,3 +1,29 @@
-function changeColors(current, target){
-	$("." . current).css("background-image", "url(img/" + target + ".png)");
+function changeColor(base, target){
+	//$("div[data-orb='" + base + "']").css("background-image", "url(img/" + target + ".png)");
+	for(let orb of ["R", "B", "G", "L", "D", "H", "J", "X", "P", "M"]){
+		$("[data-orb='" + base + "']").removeClass(orb);
+	}
+	$("[data-orb='" + base + "']").addClass(target);
+}
+function refreshColor(orb){
+	changeColor(orb, window.localStorage.getItem("att-" + orb));
+}
+function addChangeColorListeners(dataAttName){
+	$("input[" + dataAttName + "]").each(function(index) {
+		$(this).on("click", function(){
+			var data = $(this).attr("data-attribute").split("-");
+			window.localStorage.setItem("att-" + data[0], data[1]);
+			refreshColor(data[0]);
+		});
+	});
+}
+function refreshAllColors(){
+	for(let orb of ["R", "B", "G", "L", "D", "H", "J", "X", "P", "M"]){
+		if(window.localStorage.getItem("att-" + orb) === null){
+			window.localStorage.setItem("att-" + orb, orb);
+		}
+		var target = window.localStorage.getItem("att-" + orb);
+		changeColor(orb, target);
+		$("input[data-attribute='" + orb + "-" + target + "']").prop("checked", true);
+	}
 }

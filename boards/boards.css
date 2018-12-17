@@ -29,8 +29,8 @@
 	grid-auto-rows: min-content;
 }
 .grid.atts{
-	width: 200px;
-	grid-template-columns: repeat(10, 20px);
+	width: 100px;
+	grid-template-columns: repeat(5, 20px);
 }
 .grid.boards{
 	

@@ -411,20 +411,18 @@ function select_boards_by_params($conn, $params){
 }
 function att_radios($att_num, $checked = ''){
 	$out = '';
-	global $orb_list;
-	foreach ($orb_list as $i => $orb){
-		$out = $out . '<div><input type="radio" name="attribute-' . $orb_list[$att_num] . '" data-attribute="' . $orb_list[$att_num] . '-' . $orb . '" value="' . $orb . '"';
-		if($i == $checked){$out = $out . ' checked';}
-		$out = $out . '><p class="orb-bg ' . $orb . '"></p></div>';
+	global $var_orb_list;
+	foreach ($var_orb_list as $i => $orb){
+		$out = $out . '<div><input type="radio" name="attribute-' . $var_orb_list[$att_num] . '" data-attribute="' . $var_orb_list[$att_num] . '-' . $orb . '" value="' . $orb . '"><p class="orb-bg ' . $orb . '"></p></div>';
 	}
 	return $out;
 }
 function get_att_change_radios($boards){
-	global $orb_list;
+	global $var_orb_list;
 	$colors = array();
 	foreach($boards as $board){
-		for($i = 0; $i < sizeof($orb_list); $i++){
-			if($board[$orb_list[$i]] > 0 && !in_array($i, $colors)){
+		for($i = 0; $i < sizeof($var_orb_list); $i++){
+			if($board[$var_orb_list[$i]] > 0 && !in_array($i, $colors)){
 				$colors[] = $i;
 			}
 		}

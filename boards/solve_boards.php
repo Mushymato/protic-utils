@@ -1,11 +1,24 @@
 <!DOCTYPE html>
+<?php include 'boards_common.php';?>
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="boards.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" type="text/javascript"></script>
+<script src="change_board_colors.js" type="text/javascript"></script>
+<script>
+window.onload = function(){
+	<?php
+		foreach($orb_list as $orb){
+			if(array_key_exists($orb, $_GET)){
+				echo 'changeColors("' . $orb . '", "' . $_GET[$orb] . '");';
+			}
+		}
+	?>
+}
+</script>
 </head>
 <body>
 <?php
-include 'boards_common.php';
 if(array_key_exists('pattern', $_GET)){
 	$pattern_array = str_split($_GET['pattern']);
 	$res = solve_board($pattern_array);
