@@ -24,6 +24,17 @@
 .float > div{
 	float:left;
 }
+.grid{
+	display: grid;
+	grid-auto-rows: min-content;
+}
+.grid.atts{
+	width: 200px;
+	grid-template-columns: repeat(10, 20px);
+}
+.grid.boards{
+	
+}
 .board {
 	background-image:url('img/BG.png');
 	background-size:80px 80px;
@@ -55,7 +66,7 @@
 	width:40px;
 	height:40px;
 }
-.orbbg{
+.orb-bg{
 	margin: 0px;
     background-size: contain;
 	background-position: center;
@@ -63,6 +74,8 @@
     z-index: 1;
     position: relative;
 	text-shadow: 1px 1px 0px #ffffff;
+	min-width:20px;
+	min-height:20px;
 }
 .R {
 	background-image: url('img/R.png');

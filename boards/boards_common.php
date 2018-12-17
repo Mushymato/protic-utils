@@ -3,7 +3,6 @@ $size_list = array('s' => array(5,4), 'm' => array(6,5), 'l' => array(7,6));
 $orb_list = array('R', 'B', 'G', 'L', 'D', 'H', 'J', 'X', 'P', 'M');
 $var_orb_list = array('R', 'B', 'G', 'L', 'D');
 function get_board($pattern, $size = 'm'){
-	global $orb_list;
 	$out = '<div class="board ' . $size . '">';
 	foreach(str_split($pattern) as $o){
 		$out = $out . '<div class="orb ' . $o . '" data-orb="' . $o . '"></div>';
@@ -407,8 +406,35 @@ function select_boards_by_size($conn, $size = 'm'){
 	$stmt->close();
 	return $res;
 }
-function get_filters($conn){
-	$out = '<form>';
+function select_boards_by_params($conn, $params){
 	
+}
+function att_radios($att_num, $checked = ''){
+	$out = '';
+	global $orb_list;
+	foreach ($orb_list as $i => $orb){
+		$out = $out . '<div><input type="radio" name="attribute-' . $orb_list[$att_num] . '" data-attribute="' . $orb_list[$att_num] . '-' . $orb . '" value="' . $orb . '"';
+		if($i == $checked){$out = $out . ' checked';}
+		$out = $out . '><p class="orb-bg ' . $orb . '"></p></div>';
+	}
+	return $out;
+}
+function get_att_change_radios($boards){
+	global $orb_list;
+	$colors = array();
+	foreach($boards as $board){
+		for($i = 0; $i < sizeof($orb_list); $i++){
+			if($board[$orb_list[$i]] > 0 && !in_array($i, $colors)){
+				$colors[] = $i;
+			}
+		}
+	}
+	$out = '';
+	foreach($colors as $i){
+		$out = $out . att_radios($i, $i);
+	}
+	$out = '<div class="grid atts">' . $out . '</div>';
+	
+	return $out;
 }
 ?>
