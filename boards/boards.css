@@ -16,6 +16,14 @@
 	width:80px;
 	height:130px;
 }
+.float{
+	height:auto;
+	width:auto;
+	overflow:hidden;
+}
+.float > div{
+	float:left;
+}
 .board {
 	background-image:url('img/BG.png');
 	background-size:80px 80px;

@@ -11,7 +11,7 @@ $conn = connect_sql($host, $user, $pass, $schema);
 $boards = select_boards_by_size($conn);
 foreach($boards as $board){
 	$ratio = get_ratio($board);
-	echo '<div style="float: left;" data-ratio="' . $ratio. '" data-style="' . $board['style'] . '" data-styleAtt="' . $board['styleCount'] . '" data-styleAtt="' . $board['styleCount'] . '"><p>' . $ratio . '</b> COMBO ' . $board['combo'] . ($board['style'] == 'MAXCOMBO' ? '' : ', <span class="orbbg ' . $orb_list[intval($board['styleAtt'])] . '" data-orb="' . $board['styleAtt'] . '">' . $board['style'] . ' ' . $board['styleCount'] . '</span>') . '</p>' . get_board($board['pattern']) . '</div>';
+	echo '<div style="float: left;" data-ratio="' . $ratio. '" data-style="' . $board['style'] . '" data-styleAtt="' . $board['styleCount'] . '" data-styleAtt="' . $board['styleCount'] . '"><p>' . $ratio . '</b> COMBO ' . $board['combo'] . ($board['style'] == 'MAXCOMBO' ? '' : ', <span class="orbbg ' . $board['styleAtt'] . '" data-orb="' . $board['styleAtt'] . '">' . $board['style'] . ' ' . $board['styleCount'] . '</span>') . '</p><a href="solve_boards.php?pattern=' . $board['pattern'] . '">' . get_board($board['pattern']) . '</a></div>';
 }
 ?>
 </body>
