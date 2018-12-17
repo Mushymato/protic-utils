@@ -17,7 +17,9 @@ function count_orbs($pattern){
 		$counts[$orb] = 0;
 	}
 	foreach(str_split($pattern) as $o){
-		$counts[$o] += 1;
+		if(in_array($o, $orb_list)){
+			$counts[$o] += 1;
+		}
 	}
 	return $counts;
 }
@@ -77,23 +79,6 @@ function invert($entry){
 	$entry = array_merge($entry, count_orbs($entry['pattern']));
 	return $entry;
 }
-function get_match($pattern, $p){
-	
-}
-function count_combos($pattern, $size = 'm'){
-	global $size_list;
-	global $orb_list;
-	$combos = array();
-	foreach($orb_list as $orb){
-		$counts[$orb] = 0;
-	}
-	$wh = $size_list[$size];
-	for(int $i = 0; $i < $wh[0]; $i++){
-		for(int $j = 0; $j < $wh[1]; $j++){
-			$p = $i * $wh[1] + $j;
-		}
-	}
-}
 function connect_sql($host, $user, $pass, $schema){
 	// Create connection
 	$conn = new mysqli($host, $user, $pass);
@@ -148,7 +133,7 @@ function insert_board($conn, $combo, $style, $pattern, $styleCount = 0, $size = 
 	if($styleCount == ''){
 		$styleCount = 0;
 	}
-	$sql = 'INSERT INTO `optimal_boards`.`boards` (`size`,`pattern`,`combo`,`style`,`styleCount`,`description`) VALUES (?,?,?,?,?,?);';
+	$sql = 'INSERT INTO `Boards` (`size`,`pattern`,`combo`,`style`,`styleCount`,`description`) VALUES (?,?,?,?,?,?);';
 	$stmt = $conn->prepare($sql);
 	$stmt->bind_param('ssisis', $size, $pattern, $combo, $style, $styleCount, $description);
 	if(!$stmt->execute()){
@@ -183,7 +168,7 @@ function load_boards_from_google_sheets($conn){
 		return false;
 	}
 	$fieldnames = array_merge($fieldnames, $orb_list);
-	$tablename = 'boards';
+	$tablename = 'Boards';
 	$sql = 'TRUNCATE TABLE ' . $tablename;
 	if(!$conn->query($sql)){
 		trigger_error('Truncate ' . $tablename . ' failed: ' . $conn->error);
@@ -242,7 +227,7 @@ function load_boards_from_google_sheets($conn){
 	echo 'Imported ' . $count . ' records out of ' . sizeof($data) . ' to ' . $tablename . PHP_EOL;
 }
 function select_boards_by_size($conn, $size = 'm'){
-	$sql = 'SELECT `boards`.`bID`,`boards`.`size`,`boards`.`pattern`,`boards`.`combo`,`boards`.`style`,`boards`.`styleAtt`,`boards`.`styleCount`,`boards`.`R`,`boards`.`B`,`boards`.`G`,`boards`.`L`,`boards`.`D`,`boards`.`H`,`boards`.`J`,`boards`.`X`,`boards`.`P`,`boards`.`M`,`boards`.`description` FROM `optimal_boards`.`boards` WHERE `boards`.`size`=? ORDER BY `boards`.`R` DESC;';
+	$sql = 'SELECT `Boards`.`bID`,`Boards`.`size`,`Boards`.`pattern`,`Boards`.`combo`,`Boards`.`style`,`Boards`.`styleAtt`,`Boards`.`styleCount`,`Boards`.`R`,`Boards`.`B`,`Boards`.`G`,`Boards`.`L`,`Boards`.`D`,`Boards`.`H`,`Boards`.`J`,`Boards`.`X`,`Boards`.`P`,`Boards`.`M`,`Boards`.`description` FROM `Boards` WHERE `Boards`.`size`=? ORDER BY `Boards`.`R` DESC;';
 	$stmt = $conn->prepare($sql);
 	$stmt->bind_param('s', $size);
 	$res = execute_select_stmt($stmt);
