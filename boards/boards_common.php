@@ -1,10 +1,19 @@
 <?php
-$size_list = array('s' => array(5,4), 'm' => array(6,5), 'l' => array(7,6));
+$size_list = array('s' => array(5,4), 'm' => array(6,5), 'l' => array(7,6), 'half' => array(3,5));
 $orb_list = array('R', 'B', 'G', 'L', 'D', 'H', 'J', 'X', 'P', 'M');
 $var_orb_list = array('R', 'B', 'G', 'L', 'D');
+$style_list = array('TPA', 'CROSS', 'L', 'VDP', 'SFUA', 'FUA', 'ROW');
 function get_board($pattern, $size = 'm'){
-	$out = '<div class="board ' . $size . '">';
+	$out = '<div class="board size-' . $size . '">';
 	foreach(str_split($pattern) as $o){
+		$out = $out . '<div class="orb ' . $o . '" data-orb="' . $o . '"></div>';
+	}
+	$out = $out . '</div>';
+	return $out;
+}
+function get_board_arr($p_arr, $size = 'm'){
+	$out = '<div class="board size-' . $size . '">';
+	foreach($p_arr as $o){
 		$out = $out . '<div class="orb ' . $o . '" data-orb="' . $o . '"></div>';
 	}
 	$out = $out . '</div>';
@@ -56,8 +65,8 @@ function normalize($entry){
 			$entry['styleAtt'] = $orb;
 		}
 	}
-	$res = solve_board(str_split($entry['pattern']));
-	$entry['combo'] = count_combos($res[1]);
+	$solve = solve_board(str_split($entry['pattern']));
+	$entry['combo'] = count_combos($solve);
 	$entry = array_merge($entry, count_orbs($entry['pattern']));
 	return $entry;
 }
@@ -142,6 +151,114 @@ class FloodFill{
 			$this->stack[] = array($x-1, $y);
 		}
 	}
+	function check_combo_styles($combo){
+		$styles = array();
+		$size = sizeof($combo['positions']);
+		$min_p = min($combo['positions']);
+		$min_xy = $this->convertXY($min_p);
+		$x = $min_xy[0];
+		$y = $min_xy[1];
+		if($size >= $this->minimumMatched){
+			if($size == 4){
+				$styles[] = 'TPA';
+			}else if($size == 5){
+				//Cross
+				if($x >= 1 && $y >= 0 && $x <= $this->wh[0]-2 && $y <= $this->wh[1]-3){
+					if(	in_array($this->convertPosition($x, $y+1), $combo['positions']) &&
+						in_array($this->convertPosition($x-1, $y+1), $combo['positions']) &&
+						in_array($this->convertPosition($x+1, $y+1), $combo['positions']) &&
+						in_array($this->convertPosition($x, $y+2), $combo['positions'])){
+						$styles[] = 'CROSS';
+					}
+				}
+				//L
+				if($x >= 0 && $y >= 0 && $x <= $this->wh[0]-3 && $y <= $this->wh[1]-3){
+					if(	in_array($this->convertPosition($x, $y+1), $combo['positions']) &&
+						in_array($this->convertPosition($x, $y+2), $combo['positions']) &&
+						in_array($this->convertPosition($x+1, $y+2), $combo['positions']) &&
+						in_array($this->convertPosition($x+2, $y+2), $combo['positions'])){
+						$styles[] = 'L';
+					}else if(
+						in_array($this->convertPosition($x+1, $y), $combo['positions']) &&
+						in_array($this->convertPosition($x+2, $y), $combo['positions']) &&
+						in_array($this->convertPosition($x+2, $y+1), $combo['positions']) &&
+						in_array($this->convertPosition($x+2, $y+2), $combo['positions'])){
+						$styles[] = 'L';
+					}else if(
+						in_array($this->convertPosition($x+1, $y), $combo['positions']) &&
+						in_array($this->convertPosition($x+2, $y), $combo['positions']) &&
+						in_array($this->convertPosition($x, $y+1), $combo['positions']) &&
+						in_array($this->convertPosition($x, $y+2), $combo['positions'])){
+						$styles[] = 'L';
+					}
+				}
+				if($x >= 2 && $y >= 0 && $x <= $this->wh[0]-1 && $y <= $this->wh[1]-3){
+					if(	in_array($this->convertPosition($x, $y+1), $combo['positions']) &&
+						in_array($this->convertPosition($x, $y+2), $combo['positions']) &&
+						in_array($this->convertPosition($x-1, $y+2), $combo['positions']) &&
+						in_array($this->convertPosition($x-2, $y+2), $combo['positions'])){
+						$styles[] = 'L';
+					}
+				}
+			}else if($size == 9){
+				//VDP
+				if($x >= 0 && $y >= 0 && $x <= $this->wh[0]-3 && $y <= $this->wh[1]-3){
+					$full_box = true;
+					for($i = 0; $i < 3; $i++){
+						for($j = 0; $j < 3; $j++){
+							if(!in_array($this->convertPosition($x+$i, $y+$j), $combo['positions'])){
+								$full_box = false;
+								break;
+							}
+						}
+					}
+					if($full_box){
+						if($combo['color'] == 'H'){
+							$styles[] = 'SFUA';
+						}else{
+							$styles[] = 'VDP';
+						}
+					}
+				}
+			}
+			if($size == $this->wh[1] && $combo['color'] == 'H'){
+				//FUA
+				for($i = 0; $i < $this->wh[0]; $i++){
+					$full_column = true;
+					for($j = 0; $j < $this->wh[1]; $j++){
+						if(!in_array($this->convertPosition($i, $j), $combo['positions'])){
+							$full_column = false;
+							break;
+						}
+					}
+					if($full_column){
+						$styles[] = 'FUA';
+					}
+				}
+			}
+			if($size >= $this->wh[0]){
+				//ROW
+				for($j = 0; $j < $this->wh[1]; $j++){
+					$full_row = true;
+					for($i = 0; $i < $this->wh[0]; $i++){
+						if(!in_array($this->convertPosition($i, $j), $combo['positions'])){
+							$full_row = false;
+							break;
+						}
+					}
+					if($full_row){
+						$styles[] = 'ROW';
+					}
+				}
+			}
+		}
+		if(sizeof($styles) > 0){
+			$combo['styles'] = $styles;
+		}else{
+			$combo['styles'] = false;
+		}
+		return $combo;
+	}
 	function floodFill($p){
 		$this->comboColor = $this->p_arr[$p];
 		if (!array_key_exists($p, $this->comboTracker)){
@@ -158,16 +275,12 @@ class FloodFill{
 			$this->fillPosition($toFill[0], $toFill[1]);
 		}
 		if(sizeof($this->track) > $this->minimumMatched){
-			$this->solutions[] = array('color' => $this->comboColor, 'positions' => $this->track);
+			$this->solutions[] = $this->check_combo_styles(array('color' => $this->comboColor, 'positions' => $this->track));
 		}
 	}
 }
-function solve_board($p_arr, $size = 'm', $minimumMatched = 2){
-	global $size_list;
-	$wh = $size_list[$size];
-
-	$board_states = array();
-	$board_states[] = implode($p_arr);
+function solve_board($p_arr, $wh, $minimumMatched = 2){	
+	$p_start = $p_arr;
 	
 	$comboPositionList = array();
 	$comboColor = '';
@@ -208,14 +321,14 @@ function solve_board($p_arr, $size = 'm', $minimumMatched = 2){
 	}
 	
 	if (sizeof($comboPositionList) == 0){
-		return false;
+		return array(array('board' => $p_start, 'solution' => false));
 	}
 	$ff = new FloodFill($p_arr, $wh, $minimumMatched, $comboPositionList);
 	foreach($comboPositionList as $p){
 		$ff->floodFill($p);
 	}
 	if(sizeof($ff->solutions) == 0){
-		return false;
+		return array(array('board' => $p_start, 'solution' => false));
 	}
 	foreach($ff->solutions as $combo){
 		foreach($combo['positions'] as $p){
@@ -236,18 +349,22 @@ function solve_board($p_arr, $size = 'm', $minimumMatched = 2){
 		}
 	}
 
-	$res = solve_board($p_arr);
-	if($res){
-		return array(array_merge($board_states, $res[0]), array_merge(array($ff->solutions), $res[1]));
-	}else{
-		$board_states[] = implode($p_arr);
-		return array($board_states, array($ff->solutions));
-	}
+	$res = solve_board($p_arr, $wh);
+	return array_merge(array(array('board' => $p_start, 'solution' => $ff->solutions)), $res);
 }
-function count_combos($solution){
+function get_match_pattern($solution){
+	$p_arr = str_split(str_repeat('-', 30));
+	foreach($solution as $combo){
+		foreach($combo['positions'] as $p){
+			$p_arr[$p] = $combo['color'];
+		}
+	}
+	return $p_arr;
+}
+function count_combos($result){
 	$count = 0;
-	foreach($solution as $pass){
-		$count += sizeof($pass);
+	foreach($result as $step){
+		$count += sizeof($step['solution']);
 	}
 	return $count;
 }

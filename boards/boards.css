@@ -42,15 +42,19 @@
 	margin: 5px;
 	overflow:hidden;
 }
-.board.s {
+.board.size-s {
 	width:200px;
 	height:160px;
 }
-.board.m {
+.board.size-m {
 	width:240px;
 	height:200px;
 }
-.board.l {
+.board.size-half {
+	width:120px;
+	height:200px;
+}
+.board.size-l {
 	width:280px;
 	height:240px;
 }
@@ -76,6 +80,15 @@
 	text-shadow: 1px 1px 0px #ffffff;
 	min-width:20px;
 	min-height:20px;
+}
+.border-box{
+	text-align:center;
+	display: inline-block;
+	width:auto;
+	height:auto;
+	overflow:hidden;
+	margin: 1px;
+	border: 1px solid #000000;
 }
 .R {
 	background-image: url('img/R.png');

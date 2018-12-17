@@ -1,6 +1,7 @@
+var orb_list = ["R", "B", "G", "L", "D"];
 function changeColor(base, target){
 	//$("div[data-orb='" + base + "']").css("background-image", "url(img/" + target + ".png)");
-	for(let orb of ["R", "B", "G", "L", "D", "H", "J", "X", "P", "M"]){
+	for(let orb of orb_list){
 		$("[data-orb='" + base + "']").removeClass(orb);
 	}
 	$("[data-orb='" + base + "']").addClass(target);
@@ -18,7 +19,7 @@ function addChangeColorListeners(dataAttName){
 	});
 }
 function refreshAllColors(){
-	for(let orb of ["R", "B", "G", "L", "D", "H", "J", "X", "P", "M"]){
+	for(let orb of orb_list){
 		if(window.localStorage.getItem("att-" + orb) === null){
 			window.localStorage.setItem("att-" + orb, orb);
 		}
