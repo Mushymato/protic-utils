@@ -132,7 +132,7 @@ function get_google_sheets_data($url, $fieldnames){
 	}
 	return $data;
 }
-function execute_select_stmt($stmt){
+function execute_select_stmt($stmt, $pk = null){
 	if(!$stmt->execute()){
 		trigger_error($conn->error . '[select]');
 		return false;
@@ -150,11 +150,19 @@ function execute_select_stmt($stmt){
 	}
 	call_user_func_array(array($stmt, 'bind_result'), $fields);
 	$res = array();
-	while ($stmt->fetch()) { 
+	while ($stmt->fetch()){ 
 		foreach($row as $key => $val){
 			$c[$key] = $val; 
 		} 
-		$res[] = $c; 
+		if($pk != null){
+			if(array_key_exists($c[$pk], $res)){
+				$res[$c[$pk]][] = $c;
+			}else{
+				$res[$c[$pk]] = $c;
+			}
+		}else{
+			$res[] = $c; 
+		}
 	}
 	return $res;
 }
@@ -343,7 +351,7 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1] . PHP_EOL . $supers[1]);
 }
-function get_card_grid($conn, $id){
+function get_card_grid($conn, $id, $right_side_table = false){
 	global $fullimg_url;
 	$data = select_card($conn, $id);
 	if(!$data){
@@ -353,9 +361,16 @@ function get_card_grid($conn, $id){
 	$atts = att_orbs($data['ATT_1'], $data['ATT_2']);
 	$awakes = awake_list($data['AWAKENINGS']);
 	
+	$stat1 = '';
+	$stat2 = '';
+	if($right_side_table){
+		$stat2 = '<div class="table-responsive">' . stat_table($data, true) . '</div>';
+	}else{
+		$stat1 = stat_table($data, true);
+	}
 	return array(
-		'html' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . stat_table($data, true) . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p></div></div>', 
-		'shortcode' => '<div class="cardgrid" id="' . $id . '"><div class="col1">[pdxp id=' . $id . ']' . stat_table($data, true) . '</div>' . PHP_EOL . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . PHP_EOL . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>' . PHP_EOL . PHP_EOL . '</div></div>');
+		'html' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . '<p>' . $stat2 . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p></div></div>', 
+		'shortcode' => '<div class="cardgrid" id="' . $id . '"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . PHP_EOL . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . $stat2 . PHP_EOL . PHP_EOL . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>' . PHP_EOL . PHP_EOL . '</div></div>');
 }
 function get_card_summary($conn, $id){
 	global $portrait_url;

@@ -20,6 +20,9 @@ Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){e
 $time_start = microtime(true);
 $byrarity = array();
 foreach(explode("\n", $input_str) as $line){
+	if(trim($line) == '★'){
+		continue;
+	}
 	$parts = explode('    ', trim($line));
 	if(sizeof($parts) < 1){
 		continue;
