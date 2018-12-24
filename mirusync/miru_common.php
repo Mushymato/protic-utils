@@ -364,12 +364,12 @@ function get_card_grid($conn, $id, $right_side_table = false){
 	$stat1 = '';
 	$stat2 = '';
 	if($right_side_table){
-		$stat2 = '<div class="table-responsive">' . stat_table($data, true) . '</div>';
+		$stat2 = stat_table($data, true);
 	}else{
 		$stat1 = stat_table($data, true);
 	}
 	return array(
-		'html' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . '<p>' . $stat2 . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p></div></div>', 
+		'html' => '<div class="cardgrid" id="' . $id . '"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p><p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p></div></div>', 
 		'shortcode' => '<div class="cardgrid" id="' . $id . '"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . PHP_EOL . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . $stat2 . PHP_EOL . PHP_EOL . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>' . PHP_EOL . PHP_EOL . '</div></div>');
 }
 function get_card_summary($conn, $id){
