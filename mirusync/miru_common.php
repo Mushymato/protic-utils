@@ -290,10 +290,13 @@ function card_icon_img($id, $name = '', $w = '63', $h = '63', $href = 'http://ww
 	global $portrait_url;
 	return array(
 		'html' => '<a href="' . $href . $id . '"><img src="' . $portrait_url . $id . '.png" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
-		'shortcode' => '[pdx id=' . $id . ' w=' . $w . ' h=' . $h . ']');
+		'shortcode' => '[pdx id=' . $id . ($w == $h && $w == '63' ? '' : ' w=' . $w . ' h=' . $h) . ']');
 }
 function lb_stat($base, $mult){
 	return round($base * (100 + $mult)/100);
+}
+function weighted($data){
+	return array(99 => round($data['HP_MAX'] / 10 + $data['ATK_MAX'] / 5 + $data['RCV_MAX'] / 3), 110 => round(lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) / 10 + lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) / 5 + lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) / 3));
 }
 function stat_table($data, $plus = false){
 	if($data['LIMIT_MULT'] == 0){
@@ -385,6 +388,37 @@ function get_card_summary($conn, $id){
 	return array(
 		'html' => '<div><b>' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) . '</b></div>' . $awakes[0], 
 		'shortcode' => '<b>' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) . '</b>' . $awakes[1]);
+}
+function get_lb_stats_row($conn, $id){
+	global $portrait_url;
+	$data = select_card($conn, $id);
+	if(!$data){
+		return array('html' => '', 'shortcode' => '');
+	}
+
+	$card = card_icon_img($id, $data['TM_NAME_US']);
+	
+	global $aw;
+	$w = '31';
+	$h = '32';
+	$awakenings = $data['AWAKENINGS'];
+	$info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s=';
+	$awake_url = '/wp-content/uploads/pad-awakenings/';
+	$supers = array('', '');
+	foreach($awakenings as $awk){
+		$id =  $aw[$awk['TS_SEQ']];
+		if($awk['IS_SUPER'] == 1){
+			$supers[0] = $supers[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+			$supers[1] = $supers[1] . '[awak id=' . $id . ' w=' . $w . ' h=' . $h . ']';
+		}
+	}
+	
+	$stats = '<td>' . weighted($data)[110] . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td>';
+	
+	return array(
+		'html' => '<tr><td>' . $card['html'] . '</td>' . $stats . '<td>' . $supers[0] . '</td></tr>', 
+		'shortcode' => '<tr><td>' . $card['shortcode'] . '</td>' . $stats . '<td>' . $supers[1] . '</td></tr>'
+	);
 }
 function get_egg($str){
 	$url = '/wp-content/uploads/pad-eggs/';
