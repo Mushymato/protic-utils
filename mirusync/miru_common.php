@@ -317,6 +317,35 @@ function typings($t1, $t2, $t3){
 	global $type;
 	return $type[$t1] . ($t2 == 0 ? '' : ' / ' . $type[$t2]) . ($t3 == 0 ? '' : ' / ' . $type[$t3]);
 }
+function typing_killer_tooltip($t1, $t2, $t3){
+	global $type;
+	$types = array_filter(array($t1, $t2, $t3));
+	$types_out = array();
+	$latents = array();
+	foreach($types as $t){
+		$add = array();
+		$types_out[] = $type[$t];
+		if(!in_array('All', $latents)){
+			switch($t){
+				case 1: case 3: $add = array('Machine', 'Healer'); break; //dragon phys
+				case 2: $latents = array('All'); break; //balance
+				case 4: $add = array('Dragon', 'Attacker'); break; //healer
+				case 5: $add = array('Devil', 'Physical'); break; //attacker
+				case 6: $add = array('Devil'); break; //god
+				case 10: $add = array('God'); break; //devil
+				case 14: $add = array('God', 'Balance'); break; //machine
+			}
+			$latents = array_unique(array_merge($latents, $add));
+		}
+	}
+	$type_txt = implode(' / ', $types_out);
+	if(sizeof($latents) == 0){
+		return array($type_txt, $type_txt);
+	}else{
+		$latent_txt = implode(' / ', $latents);
+		return array('<span class="su-tooltip" data-close="no" data-behavior="hover" data-my="bottom center" data-at="top center" data-classes="su-qtip qtip-light su-qtip-size-default" data-title="" data-hasqtip="0" oldtitle="Available Killers: ' . $latent_txt . '" title="" aria-describedby="qtip-0">' . $type_txt . '</span>', '[shortcode_tooltip style="light" content="Available Killers: ' . $latent_txt . '"]' . $type_txt . '[/shortcode_tooltip]');
+	}
+}
 function lead_mult($lead){
 	$ls = array('1' => 1, '2' => 1, '3' => 1, '4' => 0);
 	$lead = str_replace('///', '', $lead);
@@ -362,6 +391,7 @@ function get_card_grid($conn, $id, $right_side_table = false, $headings = true){
 	}
 
 	$atts = att_orbs($data['ATT_1'], $data['ATT_2']);
+	$types = typing_killer_tooltip($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']);
 	$awakes = awake_list($data['AWAKENINGS']);
 	
 	$stat1 = '';
@@ -374,8 +404,8 @@ function get_card_grid($conn, $id, $right_side_table = false, $headings = true){
 	$name_arr = explode(', ', $data['TM_NAME_US']);
 	$head = $headings ? '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' : '';
 	return array(
-		'html' => $head . '<div class="cardgrid"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . PHP_EOL . typings($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']) . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . $stat2 . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . (strlen($data['LS_DESC_US']) == 0 ? '' : PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div></div>');
+		'html' => $head . '<div class="cardgrid"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
+		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . $stat2 . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . (strlen($data['LS_DESC_US']) == 0 ? '' : PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div></div>');
 }
 function get_card_summary($conn, $id){
 	global $portrait_url;
