@@ -1,4 +1,4 @@
-<?php
+<?php 
 $insert_size = 250;
 $portrait_url = '/wp-content/uploads/pad-portrait/';
 $fullimg_url = '/wp-content/uploads/pad-img/';
@@ -397,7 +397,7 @@ function get_card_grid($conn, $id, $right_side_table = false, $headings = true){
 	$stat1 = '';
 	$stat2 = '';
 	if($right_side_table){
-		$stat2 = stat_table($data, true) . PHP_EOL . PHP_EOL;
+		$stat2 = stat_table($data, true) . '<br/>' . PHP_EOL;
 	}else{
 		$stat1 = stat_table($data, true);
 	}
@@ -405,7 +405,7 @@ function get_card_grid($conn, $id, $right_side_table = false, $headings = true){
 	$head = $headings ? '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' : '';
 	return array(
 		'html' => $head . '<div class="cardgrid"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo">[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . PHP_EOL . PHP_EOL . $awakes[1] . PHP_EOL . PHP_EOL . $stat2 . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . (strlen($data['LS_DESC_US']) == 0 ? '' : PHP_EOL . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div></div>');
+		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . '<br/>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/>' . PHP_EOL . $awakes[1] . '<br/>' . PHP_EOL . $stat2 . '<u>Active Skill</u>: ' . htmlentities($data['AS_DESC_US']) . ' <b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/>' . PHP_EOL .'<u>Leader Skill</u>: ' . htmlentities($data['LS_DESC_US']) . ' <b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div></div>');
 }
 function get_card_summary($conn, $id){
 	global $portrait_url;
