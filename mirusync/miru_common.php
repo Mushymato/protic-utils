@@ -333,7 +333,7 @@ function typing_killer_tooltip($t1, $t2, $t3){
 				case 5: $add = array('Devil', 'Physical'); break; //attacker
 				case 6: $add = array('Devil'); break; //god
 				case 10: $add = array('God'); break; //devil
-				case 14: $add = array('God', 'Balance'); break; //machine
+				case 14: $add = array('God', 'Balanced'); break; //machine
 			}
 			$latents = array_unique(array_merge($latents, $add));
 		}
