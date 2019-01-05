@@ -300,19 +300,19 @@ function weighted($data){
 }
 function stat_table($data, $plus = false){
 	if($data['LIMIT_MULT'] == 0){
-		return '<table class="card-stats-table"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . ($data['HP_MAX'] + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . ($data['ATK_MAX'] + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . ($data['RCV_MAX'] + 297) . '</td></tr></tbody></table>';
+		return '<table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . ($data['HP_MAX'] + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . ($data['ATK_MAX'] + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . ($data['RCV_MAX'] + 297) . '</td></tr></tbody></table>';
 	}else{
 		if($plus){
 			return '<table class="card-stats-table"><thead><tr><td>Stat</td><td>Lv.99 (+297)</td><td>Lv.110 (+297)</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . ' (' . ($data['HP_MAX'] + 990) . ')</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . ')</tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . ' (' . ($data['ATK_MAX'] + 495) . ')</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . ')</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . ' (' . ($data['RCV_MAX'] + 297) . ')</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . ')</td></tr></tbody></table>';
 		}else{
-			return '<table class="card-stats-table" class="base-stat"><thead><tr><td>Stat</td><td>Lv.99</td><td>Lv.110</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td></tr></tbody></table>';
+			return '<table style="width:100%" class="base-stat"><thead><tr><td>Stat</td><td>Lv.99</td><td>Lv.110</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td></tr></tbody></table>';
 		}
 	}
 }
 function att_orbs($att1, $att2){
 	return array('<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att1 . '.png">' . ($att2 == 0 ? '' : '<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att2 . '.png">'), '[orb id=' . $att1 . ']' . ($att2 == 0 ? '' : '[orb id=' . $att2 . ']'));
 }
-$type = array('', 'Dragon', 'Balance', 'Physical', 'Healer', 'Attacker', 'God', 'Evolve', 'Enhance', 'Protected', 'Devil', '', '', 'Awoken', 'Machine', 'Vendor');
+$type = array('', 'Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evolve', 'Enhance', 'Protected', 'Devil', '', '', 'Awoken', 'Machine', 'Vendor');
 function typings($t1, $t2, $t3){
 	global $type;
 	return $type[$t1] . ($t2 == 0 ? '' : ' / ' . $type[$t2]) . ($t3 == 0 ? '' : ' / ' . $type[$t3]);
@@ -369,14 +369,15 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$awake_url = '/wp-content/uploads/pad-awakenings/';
 	$awakes = array('<div>', '');
 	$supers = array('<div>', '');
+	
 	foreach($awakenings as $awk){
 		$id =  $aw[$awk['TS_SEQ']];
 		if($awk['IS_SUPER'] == 1){
 			$supers[0] = $supers[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
-			$supers[1] = $supers[1] . '[awak id=' . $id . ' w=' . $w . ' h=' . $h . ']';
+			$supers[1] = $supers[1] . '[awak id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']';
 		}else{
 			$awakes[0] = $awakes[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
-			$awakes[1] = $awakes[1] . '[awak id=' . $id . ' w=' . $w . ' h=' . $h . ']';
+			$awakes[1] = $awakes[1] . '[awak id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']';
 		}
 	}
 	$awakes[0] = $awakes[0] . '</div>';
