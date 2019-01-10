@@ -207,6 +207,9 @@ function query_monster($conn, $q_str){
 		foreach($query as $q => $o){
 			$res = single_param_stmt($conn, $q . $m[0] . $o, $m[1]);
 			if(sizeof($res) > 0){
+				if($res[0]['MONSTER_NO'] > 10000){ // crows in computedNames
+					$res[0]['MONSTER_NO'] = $res[0]['MONSTER_NO'] - 10000;
+				}
 				return $res[0];
 			}
 		}
@@ -457,10 +460,10 @@ function get_lb_stats_row($conn, $id, $sa){
 		'shortcode' => '<tr><td>' . $card['shortcode'] . '</td>' . $stats . $supers[1] . '</tr>'
 	);
 }
-function get_egg($str){
+function get_egg($rare){
 	$url = '/wp-content/uploads/pad-eggs/';
-	if(ctype_digit($str)){
-		$rare = intval($str);
+	if(is_numeric($rare)){
+		$rare = intval($rare);
 		$img_name = '';
 		$sc_name = '';
 		if($rare > 5){
@@ -486,9 +489,6 @@ function search_ids($conn, $input_str){
 	foreach(explode("\n", $input_str) as $line){
 		$mon = query_monster($conn, trim($line));
 		if($mon){
-			if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
-				$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
-			}
 			$ids[] = $mon['MONSTER_NO'];
 		}
 	}

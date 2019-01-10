@@ -8,39 +8,60 @@
 </head>
 <body>
 <?php
-function get_rarity_group($egg, $title, $rate, $id_array, $override_array = array()){
-	$total = $rate * sizeof($id_array);
-	$out = "<div class=\"rem-wrapper-rarity\"><img src=\"https://pad.protic.site/wp-content/uploads/pad-eggs/$egg.png\" width=\"30\"> <strong>$title | $rate% each, $total% total<br/></strong></div>";
-	$out = $out . "<div class=\"rate-group\" data-rate=\"$rate\">";
-	foreach($id_array as $id){
-		$url = array_key_exists($id, $override_array) ? $override_array[$id] : "http://puzzledragonx.com/en/img/book/$id.png?w=60";
-		$out = $out . "<div class=\"icon-check\"><input type=\"checkbox\" id=\"pad-cb-$id\"/><label for=\"pad-cb-$id\"><img class=\"pdx-icon\" src=\"$url\"></label></div>";
-	}
-	$out = $out . "</div>";
-	return $out;
-}
-
-function load_rem($url){
-	$selected = isset($_GET['rem']) ? $_GET['rem'] : '';
-	$data = json_decode(file_get_contents($url), true);
-	$full_names = $data['FullNames'];
-	$select_rem = '<select id="rem-select" name="rem"><option value=""></option>';
-	foreach($full_names as $name => $full){
-		$select_rem = $name == $selected ? $select_rem . "<option value=\"$name\" selected>$full</option>" : $select_rem . "<option value=\"$name\">$full</option>";
-	}
-	$select_rem = $select_rem . '</select><button type="submit" value="Submit">Submit</button>';
-	$rem_groups = '';
-	if($selected != ''){
-		$rem = $data[$selected];
-		foreach($rem as $rarity){
-			$rem_groups = $rem_groups . get_rarity_group($rarity['egg'], $rarity['title'], $rarity['rate'], $rarity['id_array']);
+include '../sql_param.php';
+include '../miru_common.php';
+function load_rems($conn, $region = 'jp'){
+	global $portrait_url;
+	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/paddata/raw/' . $region . '/egg_machines.json'), true);
+	$output_array = array();
+	$output_tabs = array();
+	foreach($data as $machine){
+		$sorted = array();
+		$is_pem = false;
+		foreach($machine['contents'] as $card => $rate){
+			$is_pem = ($rate == 0);
+			$mon = query_monster($conn, $card);
+			if(!$mon){
+				continue;
+			}
+			if(!array_key_exists($mon['RARITY'], $sorted)){
+				$sorted[$mon['RARITY']] = array();
+			}
+			$r_rate = intval($rate * 10000);
+			if(!array_key_exists($r_rate, $sorted[$mon['RARITY']])){
+				$sorted[$mon['RARITY']][$r_rate] = array();
+			}
+			$sorted[$mon['RARITY']][$r_rate][] = $mon;
 		}
-	}
-	$tbar = '<h1>Total Rates = <span id="total-rate">0.00</span>%  <button type="reset" id="clear-selected" value="Reset">Reset</button></h1>';
-	return '<form method="get">' . $select_rem . $tbar . $rem_groups . '</form>';
+		krsort($sorted);
+		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $machine['egg_machine_id'];
+		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . $machine['clean_name'] . '</li>';
+		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1><p>' . $machine['clean_comment'] . '</p>' . ($is_pem ? '' : '<h2>Total Rates = <span class="total-rate">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2>');
+		foreach($sorted as $rarity => $rates){
+			ksort($rates);
+			foreach($rates as $r_rate => $cards){
+				$rate = $r_rate/100;
+				$out .= '<div class="' . ($is_pem ? 'pem' : 'rem') . '-wrapper-rarity">' . get_egg($rarity)['html'] . '<strong>' . $rarity . '★' . ($is_pem ? '</strong>' : ' | ' . $rate . '% each, ' . ($rate * sizeof($cards)) . '% total<br/></strong>') . '<div class="rate-group" data-rate="' . $rate . '">';
+				if($is_pem){
+					foreach($cards as $mon){
+						$out .= '<div class="pem-icon"><img src="' . $portrait_url . $mon['MONSTER_NO'] . '.png" title="' . $mon['MONSTER_NO'] . '-' . $mon['TM_NAME_US'] . '"/></div>';
+					}
+				}else{
+					foreach($cards as $mon){
+						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['egg_machine_id'] . '-' . $mon['MONSTER_NO'] . '"/><label for="remcard-' . $machine['egg_machine_id'] . '-' . $mon['MONSTER_NO'] . '"><img src="' . $portrait_url . $mon['MONSTER_NO'] . '.png" title="' . $mon['MONSTER_NO'] . '-' . $mon['TM_NAME_US'] . '"/></label></div>';
+					}
+				}
+				$out .= '</div></div>';
+			}
+		}
+		$output_array[$machine['clean_name']] = $out . '</form>';
+	}	
+	return '<ul class="egg-machine-tabs">' . implode($output_tabs) . '</ul><div class="egg-machines">' . implode($output_array) . '</div>';
 }
-echo load_rem("./rem_rates.json");
-//https://storage.googleapis.com/mirubot/paddata/raw/jp/egg_machines.json
+$conn = connect_sql($host, $user, $pass, $schema);
+$region = array_key_exists('region', $_GET) && ($_GET['region'] == 'na' || $_GET['region'] == 'jp') ? $_GET['region'] : 'jp';
+echo load_rems($conn, $region);
+$conn->close();
 ?>
 </body>
 </html>
