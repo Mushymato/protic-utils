@@ -40,7 +40,7 @@ function load_rem($url){
 	return '<form method="get">' . $select_rem . $tbar . $rem_groups . '</form>';
 }
 echo load_rem("./rem_rates.json");
-
+//https://storage.googleapis.com/mirubot/paddata/raw/jp/egg_machines.json
 ?>
 </body>
 </html>
