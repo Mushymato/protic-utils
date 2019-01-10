@@ -16,7 +16,37 @@ function sumRates(){
 		rem.querySelector("#"+remID+" span.total-rate").innerHTML = Number(sumSelected).toFixed(2);
 	}
 }
+function showRegion(){
+	var region = window.localStorage.getItem("region");
+	document.getElementById("egg-machine-region").innerHTML = region;
+	var regionDivs = document.querySelectorAll("div[id^='region-']");
+	for(var rd of regionDivs){
+		if(rd.getAttribute("id") === "region-" + region){
+			rd.style.display = "block";
+			rd.style.zIndex = "1";
+		}else{
+			rd.style.display = "none";
+			rd.style.zIndex = "0";
+		}
+	}
+}
 window.onload=function(){
+	window.localStorage.clear();
+	if(window.localStorage.getItem("region") === null){
+		window.localStorage.setItem("region", 'JP');
+	}
+	showRegion();
+	document.getElementById("egg-machine-region").addEventListener("click",
+		function(){
+			if(window.localStorage.getItem("region") === 'NA'){
+				window.localStorage.setItem("region", 'JP');
+			}else{
+				window.localStorage.setItem("region", 'NA');
+			}
+			showRegion();
+		}
+	);
+
 	var padCheckbox = document.querySelectorAll('input[type="checkbox"].rem-icon-cb');
 	for(var cb of padCheckbox){
 		cb.addEventListener("change", sumRates);
@@ -34,7 +64,7 @@ window.onload=function(){
 		link.addEventListener("click", 
 			function(){
 				var target = event.srcElement.getAttribute("data-machineid");
-				var machines = document.querySelectorAll("form[id*='em-']");
+				var machines = document.querySelectorAll("#region-" + window.localStorage.getItem("region") + " form[id*='em-']");
 				for(var machine of machines){
 					if(machine.getAttribute("id") === target){
 						machine.style.opacity = "1";
@@ -47,5 +77,4 @@ window.onload=function(){
 			}
 		);
 	}
-	tabLinks[0].click();
 }

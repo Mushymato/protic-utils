@@ -7,10 +7,11 @@
 	<script src="rate_calc.js"></script>
 </head>
 <body>
+<div id="egg-machine-region"></div>
 <?php
 include '../sql_param.php';
 include '../miru_common.php';
-function load_rems($conn, $region = 'jp'){
+function load_rem_by_region($conn, $region = 'jp'){
 	global $portrait_url;
 	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/paddata/raw/' . $region . '/egg_machines.json'), true);
 	$output_array = array();
@@ -57,11 +58,13 @@ function load_rems($conn, $region = 'jp'){
 		}
 		$output_array[$machine['clean_name']] = $out . '</form>';
 	}	
-	return '<a class="egg-machine-region" href="rate_calc.php?region=' . ($region == 'jp' ? 'na' : 'jp') . '">' . strtoupper($region) . '</a><ul class="egg-machine-tabs">' . implode($output_tabs) . '</ul><div class="egg-machines">' . implode($output_array) . '</div>';
+	return '<ul class="egg-machine-tabs">' . implode($output_tabs) . '</ul><div class="egg-machines">' . implode($output_array) . '</div>';
+}
+function load_rems($conn){
+	return '<div id="region-JP">' . load_rem_by_region($conn, 'jp') . '</div><div id="region-NA">' . load_rem_by_region($conn, 'na') . '</div>';
 }
 $conn = connect_sql($host, $user, $pass, $schema);
-$region = array_key_exists('region', $_GET) && ($_GET['region'] == 'na' || $_GET['region'] == 'jp') ? $_GET['region'] : 'jp';
-echo load_rems($conn, $region);
+echo load_rems($conn);
 $conn->close();
 ?>
 </body>

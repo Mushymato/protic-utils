@@ -5,16 +5,20 @@
 	display:flex;
 	z-index:2;
 }
-.egg-machine-region{
+#egg-machine-region{
 	background: DeepSkyBlue;
 	color: white;
-	text-decoration: none;
 	width:100%;
+	height:auto;
 	font-size:28px;
 	text-align: center;
-	display:block;
+	cursor: pointer;
 }
-.egg-machine-region, .egg-machine-tabs li{
+#region-JP,#region-NA{
+	z-index:0;
+	display:none;
+}
+#egg-machine-region, .egg-machine-tabs li{
 	border: 1px solid DeepSkyBlue;
 }
 .egg-machine-tabs li {
@@ -55,6 +59,10 @@
 	visibility: hidden;
 	opacity:0;
 	transition: visibility 0s, opacity 0.2s linear;
+}
+.egg-machines > form:first-child{
+	visibility: visible;
+	opacity:1;
 }
 
 .pem-icon,.rem-icon-check{
