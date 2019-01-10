@@ -34,9 +34,10 @@ function load_rems($conn, $region = 'jp'){
 			$sorted[$mon['RARITY']][$r_rate][] = $mon;
 		}
 		krsort($sorted);
-		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $machine['egg_machine_id'];
+		$comments = explode($machine['clean_comment'], '|');
+		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $machine['egg_machine_row'];
 		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . $machine['clean_name'] . '</li>';
-		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1><p>' . $machine['clean_comment'] . '</p>' . ($is_pem ? '' : '<h2>Total Rates = <span class="total-rate">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2>');
+		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1>' . ($is_pem ? '' : '<h2>Total Rates = <span class="total-rate">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2>');
 		foreach($sorted as $rarity => $rates){
 			ksort($rates);
 			foreach($rates as $r_rate => $cards){
@@ -48,7 +49,7 @@ function load_rems($conn, $region = 'jp'){
 					}
 				}else{
 					foreach($cards as $mon){
-						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['egg_machine_id'] . '-' . $mon['MONSTER_NO'] . '"/><label for="remcard-' . $machine['egg_machine_id'] . '-' . $mon['MONSTER_NO'] . '"><img src="' . $portrait_url . $mon['MONSTER_NO'] . '.png" title="' . $mon['MONSTER_NO'] . '-' . $mon['TM_NAME_US'] . '"/></label></div>';
+						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['egg_machine_row'] . '-' . $mon['MONSTER_NO'] . '"/><label for="remcard-' . $machine['egg_machine_row'] . '-' . $mon['MONSTER_NO'] . '"><img src="' . $portrait_url . $mon['MONSTER_NO'] . '.png" title="' . $mon['MONSTER_NO'] . '-' . $mon['TM_NAME_US'] . '"/></label></div>';
 					}
 				}
 				$out .= '</div></div>';
@@ -56,7 +57,7 @@ function load_rems($conn, $region = 'jp'){
 		}
 		$output_array[$machine['clean_name']] = $out . '</form>';
 	}	
-	return '<ul class="egg-machine-tabs">' . implode($output_tabs) . '</ul><div class="egg-machines">' . implode($output_array) . '</div>';
+	return '<a class="egg-machine-region" href="rate_calc.php?region=' . ($region == 'jp' ? 'na' : 'jp') . '">' . strtoupper($region) . '</a><ul class="egg-machine-tabs">' . implode($output_tabs) . '</ul><div class="egg-machines">' . implode($output_array) . '</div>';
 }
 $conn = connect_sql($host, $user, $pass, $schema);
 $region = array_key_exists('region', $_GET) && ($_GET['region'] == 'na' || $_GET['region'] == 'jp') ? $_GET['region'] : 'jp';

@@ -3,9 +3,23 @@
 	padding:0px;
 	list-style: none;
 	display:flex;
+	z-index:2;
+}
+.egg-machine-region{
+	background: DeepSkyBlue;
+	color: white;
+	text-decoration: none;
+	width:100%;
+	font-size:28px;
+	text-align: center;
+	display:block;
+}
+.egg-machine-region, .egg-machine-tabs li{
+	border: 1px solid DeepSkyBlue;
 }
 .egg-machine-tabs li {
 	flex:1;
+	font-size:20px;
 	cursor: pointer;
 	display: inline;
 	color: black;
@@ -15,7 +29,6 @@
 	position: relative; 
 	left: 1px;
 	background: white;
-	text-decoration: none;
 }
 .egg-machine-tabs li:hover {
 	background: #ccc;
@@ -33,20 +46,15 @@
 	min-height: 250px;
 }
 .egg-machines > form {
-	position: fixed;
-	background: white;
-	padding: 20px;
+	padding: 0px 20px;
 	min-height: 250px;
 	position: absolute;
 	top: -1px;
 	left: 0;
-	width: 100%;
+	width: calc(100% - 40px);
 	visibility: hidden;
 	opacity:0;
 	transition: visibility 0s, opacity 0.2s linear;
-}
-.egg-machines > form, .egg-machine-tabs li{
-	border: 1px solid #ccc;
 }
 
 .pem-icon,.rem-icon-check{
@@ -59,7 +67,7 @@ input[type="checkbox"].rem-icon-cb {
 input[type="checkbox"].rem-icon-cb + label {
 	width:70px;
 	height:70px;
-	border: 1px solid #fff;
+	/*border: 1px solid DeepSkyBlue;*/
 	display: block;
 	position: relative;
 	cursor: pointer;
@@ -78,7 +86,7 @@ input[type="checkbox"].rem-icon-cb + label:before {
 	content: " ";
 	display: block;
 	border-radius: 50%;
-	border: 1px solid grey;
+	border: 1px solid white;
 	position: absolute;
 	top: -5px;
 	left: -5px;
@@ -91,19 +99,20 @@ input[type="checkbox"].rem-icon-cb + label:before {
 }
 
 input[type="checkbox"].rem-icon-cb:checked + label {
-	border-color: #ddd;
+	border-color: DeepSkyBlue;
 }
 
 input[type="checkbox"].rem-icon-cb:checked + label:before {
 	content: "✓";
-	background-color: grey;
+	background-color: DeepSkyBlue;
 	transform: scale(1);
 	z-index: 2;
 }
 
 input[type="checkbox"].rem-icon-cb:checked + label > img {
 	transform: scale(0.9);
-	box-shadow: 0 0 5px #333;
+	background-color: DeepSkyBlue;
+	box-shadow: 0 0 10px DeepSkyBlue;
 }
 
 .pem-icon img{
