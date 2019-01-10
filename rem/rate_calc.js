@@ -31,7 +31,6 @@ function showRegion(){
 	}
 }
 window.onload=function(){
-	window.localStorage.clear();
 	if(window.localStorage.getItem("region") === null){
 		window.localStorage.setItem("region", 'JP');
 	}
