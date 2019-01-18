@@ -18,8 +18,8 @@ $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
 <?php
 $time_start = microtime(true);
 $output = '';
-foreach(explode(PHP_EOL, $input_str) as $line){
-	$parts = explode('    ', $line);
+foreach(explode("\n", $input_str) as $line){
+	$parts = explode('    ', trim($line));
 	$reward = $parts[0];
 	if(sizeof($parts) == 2){
 		if(strlen($output) != 0){
