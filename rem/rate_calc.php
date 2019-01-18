@@ -21,7 +21,7 @@ function load_rem_by_region($conn, $region = 'jp'){
 		$is_pem = false;
 		foreach($machine['contents'] as $card => $rate){
 			$is_pem = ($rate == 0);
-			$mon = query_monster($conn, $card);
+			$mon = query_monster($conn, trim($card));
 			if(!$mon){
 				continue;
 			}
@@ -35,7 +35,7 @@ function load_rem_by_region($conn, $region = 'jp'){
 			$sorted[$mon['RARITY']][$r_rate][] = $mon;
 		}
 		krsort($sorted);
-		$comments = explode($machine['clean_comment'], '|');
+		$comments = explode('|', $machine['clean_comment']);
 		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $machine['egg_machine_row'];
 		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . $machine['clean_name'] . '</li>';
 		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1>' . ($is_pem ? '' : '<h2>Total Rates = <span class="total-rate">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2>');
