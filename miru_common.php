@@ -422,8 +422,8 @@ function get_card_summary($conn, $id){
 	$awakes = awake_list($data['AWAKENINGS']);
 	
 	return array(
-		'html' => '<div><b>' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) . '</b></div>' . $awakes[0], 
-		'shortcode' => '<b>' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) . '</b>' . $awakes[1]);
+		'html' => '<h2 id="card_' . $id . '">' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) . '</h2>' . $awakes[0], 
+		'shortcode' => '<h2 id="card_' . $id . '">' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) . '</h2>' . $awakes[1]);
 }
 function get_lb_stats_row($conn, $id, $sa){
 	global $portrait_url;
