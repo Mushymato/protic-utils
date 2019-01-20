@@ -80,7 +80,7 @@ function get_tradepost_farmable($conn, $data, $include = array()){
 	$out['shortcode'] .= PHP_EOL . '</table>';
 	return $out;
 }
-$data = json_decode(file_get_contents("https://storage.googleapis.com/mirubot/paddata/processed/{$rg}_exchange.json"), true);
+$data = json_decode(file_get_contents("https://storage.googleapis.com/mirubot-data/paddata/processed/{$rg}_exchange.json"), true);
 $conn = connect_sql($host, $user, $pass, $schema);
 $output_arr = $tf == 'rem' ? get_tradepost_rare($conn, $data, search_ids($conn, $input_str)) : get_tradepost_farmable($conn, $data, search_ids($conn, $input_str));
 $conn->close();?>
