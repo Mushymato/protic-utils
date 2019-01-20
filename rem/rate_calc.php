@@ -13,12 +13,15 @@ include '../sql_param.php';
 include '../miru_common.php';
 function load_rem_by_region($conn, $region = 'jp'){
 	global $portrait_url;
-	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/paddata/raw/' . $region . '/egg_machines.json'), true);
+	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot-data/paddata/raw/' . $region . '/egg_machines.json'), true);
 	$output_array = array();
 	$output_tabs = array();
 	foreach($data as $machine){
 		$sorted = array();
 		$is_pem = false;
+		if(sizeof($machine['contents']) == 0){
+			continue;
+		}
 		foreach($machine['contents'] as $card => $rate){
 			$is_pem = ($rate == 0);
 			$mon = query_monster($conn, trim($card));
