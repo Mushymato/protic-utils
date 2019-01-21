@@ -3,7 +3,7 @@
 Simulates Puzzles and Dragons Rare Egg Machine.
 Also has tool to add up rates.
 
-REM Data format:
+# REM Data format:
 A machine is divided into tiers by rates:
 ```
 {	
@@ -40,3 +40,4 @@ Lastly there's a mapping that defines short names => full names
 # Much Thanks to:
 
 SaladBadger for providing game assets
+tactical_retreat for egg_machine.json
