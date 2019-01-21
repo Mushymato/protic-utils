@@ -11,7 +11,7 @@ $tf = array_key_exists('tf', $_POST) ? $_POST['tf'] : 'rem';
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
 <p>Region: <input type="radio" name="r" value="jp" <?php if($rg == 'jp'){echo 'checked';}?>> JP <input type="radio" name="r" value="na" <?php if($rg == 'na'){echo 'checked';}?>> NA</p>
-<p>Enter (<input type="radio" name="tf" value="rem" <?php if($tf == 'rem'){echo 'checked';}?>> Target <input type="radio" name="tf" value="farmable" <?php if($tf == 'farmable'){echo 'checked';}?>> Fodder) to include, one per line (leave blank to show all):</p>
+<p>Enter <input type="radio" name="tf" value="rem" <?php if($tf == 'rem'){echo 'checked';}?>> Target <input type="radio" name="tf" value="farmable" <?php if($tf == 'farmable'){echo 'checked';}?>> Fodder to include, one per line (leave blank to show all):</p>
 <textarea name="input" style="width:80vw;height:20vh;"><?php echo $input_str;?></textarea>
 </form>
 <?php
@@ -27,7 +27,7 @@ function get_tradepost_rare($conn, $data, $include = array()){
 		$mon = query_monster($conn, $d['monster_id']);
 		if($mon){
 			$card = card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US']);
-			$out['html'] .= '<tr class="mon-exchange-card"><td style="width: 80px">' . $card['html'] . '</td><td>[' . $mon['MONSTER_NO'] . '] <strong>' . $mon['TM_NAME_US'] . ' ' . $mon['TM_NAME_JP'] . '</strong></td></tr><tr class="mon-exchange-list"><td colspan="2"><p class="1"><strong>▼ Trade ' . $d['required_count'] . ' cards in.</strong>';
+			$out['html'] .= '<tr class="mon-exchange-card"><td style="width: 80px">' . $card['html'] . '</td><td>[' . $mon['MONSTER_NO'] . '] <strong>' . $mon['TM_NAME_US'] . ' ' . $mon['TM_NAME_JP'] . '</strong></td></tr><tr class="mon-exchange-list"><td colspan="2"><p class="1"><strong>▼ Trade ' . $d['required_count'] . ' cards in.</strong><br/>';
 			$out['shortcode'] .= '<tr class="mon-exchange-card"><td style="width: 80px">' . $card['shortcode'] . '</td><td>[' . $mon['MONSTER_NO'] . '] <strong>' . $mon['TM_NAME_US'] . ' ' . $mon['TM_NAME_JP'] . '</strong></td></tr>' . PHP_EOL . '<tr class="mon-exchange-list"><td colspan="2"><p class="1"><strong>▼ Trade ' . $d['required_count'] . ' cards in.</strong>' . PHP_EOL ;
 			foreach($d['required_monsters'] as $req_id){
 				$mon = query_monster($conn, $req_id);

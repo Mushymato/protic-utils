@@ -1,6 +1,34 @@
 <!DOCTYPE html>
+<header>
+<script type="text/javascript">
+function showHide(self, target){
+	if(document.getElementById(self).checked){
+		console.log(self, target);
+		document.getElementById(target).style.display = 'block';
+	}else{
+		document.getElementById(target).style.display = 'none';
+	}
+}
+window.onload = function(){
+	document.getElementById('ir_mirubot').addEventListener('change', function(){showHide('ir_mirubot', 'rem_selector');showHide('ir_ingame', 'txt_input');});
+	document.getElementById('ir_ingame').addEventListener('change', function(){showHide('ir_mirubot', 'rem_selector');showHide('ir_ingame', 'txt_input');});
+	showHide('ir_mirubot', 'rem_selector');
+	showHide('ir_ingame', 'txt_input');
+}
+</script>
+</header>
 <html>
 <?php
+$region = 'jp';
+$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot-data/paddata/raw/' . $region . '/egg_machines.json'), true);
+function machine_selector($selected = ''){
+	global $data;
+	$output = '';
+	foreach($data as $machine){
+		$output .= '<option value="' . $machine['clean_name'] . '"' . ($machine['clean_name'] == $selected ? ' selected' : '' ) . '>' . $machine['clean_name'] . '</option>';
+	}
+	return '<select id="rem_selector" name="rem_name" style="width:80vw;height:2em;">' . $output . '</select>';
+}
 function populate_from_input($input_str){
 	include 'sql_param.php';
 	$conn = connect_sql($host, $user, $pass, $schema);
@@ -35,20 +63,16 @@ function populate_from_input($input_str){
 	$conn->close();
 	return sort_mons_array($mons_array);
 }
-function populate_from_mirubot($input_str, $region = 'jp'){
+function populate_from_mirubot($rem_name){
+	global $data;
 	include 'sql_param.php';
 	$conn = connect_sql($host, $user, $pass, $schema);
-	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot-data/paddata/raw/' . $region . '/egg_machines.json'), true);
-	$name = trim(explode("\n", $input_str)[0]);
-	if(strlen($name) == 0){
-		return array();
-	}
 	$contents = false;
 	foreach($data as $machine){
 		if(sizeof($machine['contents']) == 0){
 			continue;
 		}
-		if(strpos($machine['clean_name'], $name) !== false || strpos($name, $machine['clean_name']) !== false){
+		if($machine['clean_name'] == $rem_name){
 			$contents = $machine['contents'];
 			break;
 		}
@@ -157,19 +181,21 @@ $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
 $om = array_key_exists('om', $_POST) ? $_POST['om'] : 'html';
 $st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';
 $ir = array_key_exists('ir', $_POST) ? $_POST['ir'] : 'mirubot';
+$rem = array_key_exists('rem_name', $_POST) ? $_POST['rem_name'] : '';
 ?>
 <form method="post">
 Output Mode: <input type="radio" name="om" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="om" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"><br/>
 Output Style: <input type="radio" name="st" value="rates" <?php if($st == 'rates'){echo 'checked';}?>> Rate Groups <input type="radio" name="st" value="cards" <?php if($st == 'cards'){echo 'checked';}?>> Card Details<br/>
-<p>Enter <input type="radio" name="ir" value="mirubot" <?php if($ir == 'mirubot'){echo 'checked';}?>> REM Name <input type="radio" name="ir" value="ingame" <?php if($ir == 'ingame'){echo 'checked';}?>> In-game Lineup</p>
-<textarea name="input" style="width:80vw;height:20vh;">
+<p>Enter <input type="radio" name="ir" value="mirubot" id="ir_mirubot" <?php if($ir == 'mirubot'){echo 'checked';}?>> REM Name <input type="radio" name="ir" value="ingame" id="ir_ingame" <?php if($ir == 'ingame'){echo 'checked';}?>> In-game Lineup</p>
+<?php echo machine_selector($rem);?>
+<textarea id="txt_input" name="input" style="width:80vw;height:20vh;">
 <?php echo $input_str;?>
 </textarea>
 </form>
 <?php
 $time_start = microtime(true);
 
-$mons_array = $ir == 'mirubot' ? populate_from_mirubot($input_str) : populate_from_input($input_str);
+$mons_array = $ir == 'mirubot' ? populate_from_mirubot($rem) : populate_from_input($input_str);
 $output_arr = $st == 'rates' ? rate_groups_lineup($mons_array) : detailed_lineup($mons_array);
 
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>';
