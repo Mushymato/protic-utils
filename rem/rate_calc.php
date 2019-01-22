@@ -13,7 +13,7 @@ include '../sql_param.php';
 include '../miru_common.php';
 function load_rem_by_region($conn, $region = 'jp'){
 	global $portrait_url;
-	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot-data/paddata/raw/' . $region . '/egg_machines.json'), true);
+	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
 	$output_array = array();
 	$output_tabs = array();
 	foreach($data as $machine){

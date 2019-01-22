@@ -161,8 +161,14 @@ function rate_groups_lineup($mons_array){
 		$rr = explode('|', $key);
 		$rare = $rr[0];
 		$rate = floatval($rr[1]);
-		$output_arr['html'] = $output_arr['html'] . '<strong><span class="su-highlight" style="background:#ddff99;color:#000000">★' . $rare . '</span> | ' . $rate . '% each, ' . (sizeof($mons) * $rate) . '% total </strong><div>';
-		$output_arr['shortcode'] = $output_arr['shortcode'] . '<strong>[shortcode_highlight]★' . $rare . '[/shortcode_highlight] | ' . $rate . '% each, ' . (sizeof($mons) * $rate) . '% total </strong>' . PHP_EOL . PHP_EOL;
+		$output_arr['html'] = $output_arr['html'] . '<strong><span class="su-highlight" style="background:#ddff99;color:#000000">★' . $rare . '</span>';
+		$output_arr['shortcode'] = $output_arr['shortcode'] . '<strong>[shortcode_highlight]★' . $rare . '[/shortcode_highlight]';
+		if($rate != 0){
+			$output_arr['html'] = $output_arr['html'] . ' | ' . $rate . '% each, ' . (sizeof($mons) * $rate) . '% total </strong>';
+			$output_arr['shortcode'] = $output_arr['shortcode'] . ' | ' . $rate . '% each, ' . (sizeof($mons) * $rate) . '% total </strong>';
+		}
+		$output_arr['html'] .= '<div>';
+		$output_arr['shortcode'] .= PHP_EOL . PHP_EOL;
 		foreach($mons as $mon){
 			$card = card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US']);
 			$output_arr['html'] .= $card['html'];

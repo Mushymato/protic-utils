@@ -16,7 +16,7 @@ $lists = array(
 	'collectionMonsterList' => 'TCM_SEQ'
 );
 foreach($lists as $tablename => $pk){
-	$data = json_decode(file_get_contents("https://storage.googleapis.com/mirubot-data/paddata/padguide/$tablename.json"), true)['items'];
+	$data = json_decode(file_get_contents("https://storage.googleapis.com/mirubot/protic/paddata/padguide/$tablename.json"), true)['items'];
 	$fieldnames = default_fieldnames($data[0]);
 	// exclude search_data and timestamp
 	$fieldnames = array_diff($fieldnames, ['SEARCH_DATA', 'TSTAMP']);
@@ -25,7 +25,7 @@ foreach($lists as $tablename => $pk){
 }
 $tablename = 'computedNames';
 $pk = 'COMPUTED_NAME';
-$pairs = json_decode(file_get_contents('https://storage.googleapis.com/mirubot-data/paddata/miru_data/computed_names.json'), true);
+$pairs = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/miru_data/computed_names.json'), true);
 $data = array();
 foreach($pairs as $computed_name => $monster_no){
 	$data[] = array('COMPUTED_NAME' => $computed_name, 'MONSTER_NO' => $monster_no);
