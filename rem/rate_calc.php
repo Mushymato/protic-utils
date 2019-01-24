@@ -9,7 +9,6 @@
 <body>
 <div id="egg-machine-region"></div>
 <?php
-include '../sql_param.php';
 include '../miru_common.php';
 mb_internal_encoding('UTF-8');
 $jp_en_regex = array(
@@ -27,7 +26,7 @@ function rem_name_tl($jp_name){
 	}
 	return ($result != $jp_name ? trim($result) : null);
 }
-function load_rem_by_region($conn, $region = 'jp'){
+function load_rem_by_region($region = 'jp'){
 	global $portrait_url;
 	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
 	$output_array = array();
@@ -40,7 +39,7 @@ function load_rem_by_region($conn, $region = 'jp'){
 		}
 		foreach($machine['contents'] as $card => $rate){
 			$is_pem = ($rate == 0);
-			$mon = query_monster($conn, trim($card));
+			$mon = query_monster(trim($card));
 			if(!$mon){
 				continue;
 			}
@@ -82,12 +81,10 @@ function load_rem_by_region($conn, $region = 'jp'){
 	}	
 	return '<ul class="egg-machine-tabs">' . implode($output_tabs) . '</ul><div class="egg-machines">' . implode($output_array) . '</div>';
 }
-function load_rems($conn){
-	return '<div id="region-JP">' . load_rem_by_region($conn, 'jp') . '</div><div id="region-NA">' . load_rem_by_region($conn, 'na') . '</div>';
+function load_rems(){
+	return '<div id="region-JP">' . load_rem_by_region('jp') . '</div><div id="region-NA">' . load_rem_by_region('na') . '</div>';
 }
-$conn = connect_sql($host, $user, $pass, $schema);
-echo load_rems($conn);
-$conn->close();
+echo load_rems();
 ?>
 </body>
 </html>
