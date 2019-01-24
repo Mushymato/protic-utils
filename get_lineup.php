@@ -20,7 +20,7 @@ window.onload = function(){
 <html>
 <?php
 $region = 'jp';
-$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot-data/paddata/raw/' . $region . '/egg_machines.json'), true);
+$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
 function machine_selector($selected = ''){
 	global $data;
 	$output = '';
@@ -30,8 +30,6 @@ function machine_selector($selected = ''){
 	return '<select id="rem_selector" name="rem_name" style="width:80vw;height:2em;">' . $output . '</select>';
 }
 function populate_from_input($input_str){
-	include 'sql_param.php';
-	$conn = connect_sql($host, $user, $pass, $schema);
 	$mons_array = array();
 	foreach(explode("\n", $input_str) as $line){
 		if(trim($line) == '★'){
@@ -47,11 +45,11 @@ function populate_from_input($input_str){
 			$q_str = $parts[sizeof($parts)-2];
 			$rate = floatval(str_replace('%', '', $parts[sizeof($parts)-1]));
 		}
-		$mon = query_monster($conn, $q_str);
+		$mon = query_monster($q_str);
 		if($mon){
 			$mon['EVOS'] = array();
-			foreach(select_evolutions($conn, $mon['MONSTER_NO']) as $eid){
-				$mon['EVOS'][] = query_monster($conn, $eid);
+			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
+				$mon['EVOS'][] = query_monster($eid);
 			}
 			if(array_key_exists($mon['RARITY'] . '|' . $rate, $mons_array)){
 				$mons_array[$mon['RARITY'] . '|' . $rate][] = $mon;
@@ -60,13 +58,10 @@ function populate_from_input($input_str){
 			}
 		}
 	}
-	$conn->close();
 	return sort_mons_array($mons_array);
 }
 function populate_from_mirubot($rem_name){
 	global $data;
-	include 'sql_param.php';
-	$conn = connect_sql($host, $user, $pass, $schema);
 	$contents = false;
 	foreach($data as $machine){
 		if(sizeof($machine['contents']) == 0){
@@ -83,11 +78,11 @@ function populate_from_mirubot($rem_name){
 	$mons_array = array();
 	foreach($contents as $id => $rate){
 		$rate = $rate * 100;
-		$mon = query_monster($conn, $id);
+		$mon = query_monster($id);
 		if($mon){
 			$mon['EVOS'] = array();
-			foreach(select_evolutions($conn, $mon['MONSTER_NO']) as $eid){
-				$mon['EVOS'][] = query_monster($conn, $eid);
+			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
+				$mon['EVOS'][] = query_monster($eid);
 			}
 			if(array_key_exists($mon['RARITY'] . '|' . $rate, $mons_array)){
 				$mons_array[$mon['RARITY'] . '|' . $rate][] = $mon;
@@ -96,7 +91,6 @@ function populate_from_mirubot($rem_name){
 			}
 		}
 	}
-	$conn->close();
 	return sort_mons_array($mons_array);
 }
 function sort_mons_array($mons_array){

@@ -6,9 +6,7 @@
 <body>
 <?php
 include 'miru_common.php';
-include 'sql_param.php';
-$conn = connect_sql($host, $user, $pass, $schema);
-$input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '4428';
+$input_str = array_key_exists('input', $_POST) ? $_POST['input'] : 'TITLE' . PHP_EOL . '2969/4428';
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
 ?>
 <form method="post">
@@ -26,7 +24,7 @@ foreach(explode(PHP_EOL, $input_str) as $line){
 	$monsters = explode('/', $line);
 	if(sizeof($monsters) > 1){
 		foreach($monsters as $name){
-			$mon = query_monster($conn, $name);
+			$mon = query_monster($name);
 			if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
 				$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
 			}
@@ -47,7 +45,6 @@ if(sizeof($output_arr['html']) > 0){
 	$output_arr['html'][] = '</p>';
 	$output_arr['shortcode'][] = '</p>';
 }
-$conn->close();
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>' . PHP_EOL;
 ?>
 <p>Output</p>

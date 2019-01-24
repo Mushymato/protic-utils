@@ -11,6 +11,22 @@
 <?php
 include '../sql_param.php';
 include '../miru_common.php';
+mb_internal_encoding('UTF-8');
+$jp_en_regex = array(
+	'/スーパー/' => ' Super ',
+	'/ゴッドフェス/' => ' Godfest ',
+	'/魔法石(\d*?)個！/' => ' $1 Magic Stones!',
+	'/コラボ/' => ' Collab ',
+	'/ガチャ/' => ' Machine '
+);
+function rem_name_tl($jp_name){
+	global $jp_en_regex;
+	$result = $jp_name;
+	foreach($jp_en_regex as $regex => $replace){
+		$result = preg_replace($regex, $replace, $result);
+	}
+	return ($result != $jp_name ? trim($result) : null);
+}
 function load_rem_by_region($conn, $region = 'jp'){
 	global $portrait_url;
 	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
@@ -40,8 +56,11 @@ function load_rem_by_region($conn, $region = 'jp'){
 		krsort($sorted);
 		$comments = explode('|', $machine['clean_comment']);
 		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $machine['egg_machine_row'];
-		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . $machine['clean_name'] . '</li>';
-		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1>' . ($is_pem ? '' : '<h2>Total Rates = <span class="total-rate">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2>');
+		if($region == 'jp'){
+			$tl_name = rem_name_tl($machine['clean_name']);
+		}
+		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . (isset($tl_name) ? $tl_name : $machine['clean_name']) . '</li>';
+		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1>' . (isset($tl_name) ? '<h2/>' . $tl_name . '</h2>' : '') . ($is_pem ? '' : '<h2>Total Rates = <span class="total-rate">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2>');
 		foreach($sorted as $rarity => $rates){
 			ksort($rates);
 			foreach($rates as $r_rate => $cards){

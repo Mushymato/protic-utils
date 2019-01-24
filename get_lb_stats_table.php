@@ -3,10 +3,8 @@
 <body>
 <?php
 include 'miru_common.php';
-include 'sql_param.php';
-$conn = connect_sql($host, $user, $pass, $schema);
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '4428';
-$ids = search_ids($conn, $input_str);
+$ids = search_ids($input_str);
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
 $sa = array_key_exists('sa', $_POST) ? $_POST['sa'] : 'yes';
 ?>
@@ -20,11 +18,10 @@ $sa = array_key_exists('sa', $_POST) ? $_POST['sa'] : 'yes';
 $time_start = microtime(true);
 $output_arr = array('html' => array(), 'shortcode' => array());
 foreach($ids as $id){
-	$card = get_lb_stats_row($conn, $id, $sa == 'yes');
+	$card = get_lb_stats_row($id, $sa == 'yes');
 	$output_arr['html'][] = $card['html'];
 	$output_arr['shortcode'][] = $card['shortcode'];
 }
-$conn->close();
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>' . PHP_EOL;
 $thead = '<thead><tr><td>Card</td><td>Weighted<br>Lv.110</td><td>HP</td><td>ATK</td><td>RCV</td>' . ($sa == 'yes' ? '<td>Super Awakes</td>' . PHP_EOL : '') . '</tr></thead>';
 ?>

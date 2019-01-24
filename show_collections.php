@@ -1,12 +1,9 @@
 <?php
 include 'miru_common.php';
-include 'sql_param.php';
-$conn = connect_sql($host, $user, $pass, $schema);
 
 $sql = 'select title.TITLE_US, mon.MONSTER_NO from collectionTitleList title inner join collectionMonsterList mon on title.TCT_SEQ=mon.TCT_SEQ where title.DEL_YN=\'N\' and mon.DEL_YN=\'N\';';
-$stmt = $conn->prepare($sql);
+$stmt = $miru->conn->prepare($sql);
 $res_array = execute_select_stmt($stmt);
-$stmt->close();
 
 $show_array = array();
 foreach($res_array as $entry){
@@ -17,7 +14,7 @@ foreach($res_array as $entry){
 	}else{
 		$show_array[$entry['TITLE_US']] = array($entry['MONSTER_NO']);
 	}
-	foreach(select_evolutions($conn, $entry['MONSTER_NO']) as $id){
+	foreach(select_evolutions($entry['MONSTER_NO']) as $id){
 		if(!in_array($id, $show_array[$entry['TITLE_US']])){
 			$show_array[$entry['TITLE_US']][] = $id;
 		}

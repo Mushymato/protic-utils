@@ -4,9 +4,8 @@
 <?php
 include 'miru_common.php';
 include 'sql_param.php';
-$conn = connect_sql($host, $user, $pass, $schema);
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '4428';
-$ids = search_ids($conn, $input_str);
+$ids = search_ids($input_str);
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
 ?>
 <form method="post">
@@ -18,11 +17,10 @@ $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
 $time_start = microtime(true);
 $output_arr = array('html' => array(), 'shortcode' => array());
 foreach($ids as $id){
-	$card = get_card_summary($conn, $id);
+	$card = get_card_summary($id);
 	$output_arr['html'][] = $card['html'];
 	$output_arr['shortcode'][] = $card['shortcode'];
 }
-$conn->close();
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>' . PHP_EOL;
 ?>
 <p>Output</p>

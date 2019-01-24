@@ -2,7 +2,6 @@
 $insert_size = 250;
 $portrait_url = '/wp-content/uploads/pad-portrait/';
 $fullimg_url = '/wp-content/uploads/pad-img/';
-
 function connect_sql($host, $user, $pass, $schema){
 	// Create connection
 	$conn = new mysqli($host, $user, $pass);
@@ -16,6 +15,17 @@ function connect_sql($host, $user, $pass, $schema){
 	$conn->select_db($schema);
 	return $conn;
 }
+class mySQLConn{
+	public $conn;
+    function __construct() {
+		include 'sql_param.php';
+        $this->conn = connect_sql($host, $user, $pass, $schema);
+    }
+    function __destruct() {
+        $this->conn->close();
+    }
+}
+$miru = new mySQLConn();
 function default_fieldnames($entry){
 	$fieldnames = array();
 	foreach($entry as $field => $value){
@@ -23,9 +33,10 @@ function default_fieldnames($entry){
 	}
 	return $fieldnames;
 }
-function recreate_table($conn, $data, $tablename, $fieldnames, $pk){
+function recreate_table($data, $tablename, $fieldnames, $pk){
+	global $miru;
 	$sql = 'DROP TABLE IF EXISTS ' . $tablename;
-	if($conn->query($sql)){
+	if($miru->conn->query($sql)){
 		$sql = 'CREATE TABLE ' . $tablename . ' (';
 		foreach($fieldnames as $field){
 			$sql = $sql . $field . ' ';
@@ -53,16 +64,17 @@ function recreate_table($conn, $data, $tablename, $fieldnames, $pk){
 		}
 		
 		$sql = substr($sql, 0, -1) . ');';
-		if(!$conn->query($sql)){
-			trigger_error('Table creation failed: ' . $conn->error);
+		if(!$miru->conn->query($sql)){
+			trigger_error('Table creation failed: ' . $miru->conn->error);
 			return false;
 		}
 	}else{
-		trigger_error('Drop table failed: ' . $conn->error);
+		trigger_error('Drop table failed: ' . $miru->conn->error);
 		return false;
 	}
 }
-function populate_table($conn, $data, $tablename, $fieldnames){
+function populate_table($data, $tablename, $fieldnames){
+	global $miru;
 	global $insert_size;
 	$sql = 'INSERT INTO ' . $tablename . ' (';
 	$paramtype = '';
@@ -78,7 +90,7 @@ function populate_table($conn, $data, $tablename, $fieldnames){
 	$sql = substr($sql, 0, -1) . ') VALUES ';
 	$sql_m = $sql . substr(str_repeat($valueGroup, $insert_size), 0, -1) . ';';
 	$paramtype_m = str_repeat($paramtype, $insert_size);
-	$stmt = $conn->prepare($sql_m);
+	$stmt = $miru->conn->prepare($sql_m);
 	$count = 0;
 	$value_arr = array();
 	foreach($data as $entry){
@@ -92,8 +104,8 @@ function populate_table($conn, $data, $tablename, $fieldnames){
 		if(sizeof($value_arr) == strlen($paramtype_m)){
 			$stmt->bind_param($paramtype_m, ...$value_arr);
 			if(!$stmt->execute()){
-				trigger_error('Insert failed: ' . $conn->error);
-				echo 'Insert failed: ' . $conn->error;
+				trigger_error('Insert failed: ' . $miru->conn->error);
+				echo 'Insert failed: ' . $miru->conn->error;
 			}else{
 				$count += $insert_size;
 			}
@@ -104,11 +116,11 @@ function populate_table($conn, $data, $tablename, $fieldnames){
 	if(sizeof($value_arr) > 0){
 		$remaining = sizeof($value_arr) / sizeof($fieldnames);
 		$sql = $sql . substr(str_repeat($valueGroup, $remaining), 0, -1) . ';';
-		$stmt = $conn->prepare($sql);
+		$stmt = $miru->conn->prepare($sql);
 		$stmt->bind_param(str_repeat($paramtype, $remaining), ...$value_arr);
 		if(!$stmt->execute()){
-			trigger_error('Insert failed: ' . $conn->error);
-			echo 'Insert failed: ' . $conn->error;
+			trigger_error('Insert failed: ' . $miru->conn->error);
+			echo 'Insert failed: ' . $miru->conn->error;
 		}else{
 			$count += $remaining;
 		}
@@ -133,8 +145,9 @@ function get_google_sheets_data($url, $fieldnames){
 	return $data;
 }
 function execute_select_stmt($stmt, $pk = null){
+	global $miru;
 	if(!$stmt->execute()){
-		trigger_error($conn->error . '[select]');
+		trigger_error($miru->conn->error . '[select]');
 		return false;
 	}
 	$stmt->store_result();
@@ -166,27 +179,30 @@ function execute_select_stmt($stmt, $pk = null){
 	}
 	return $res;
 }
-function check_table_exists($conn, $tablename){
+function check_table_exists($tablename){
+	global $miru;
 	$sql = 'DESCRIBE ' . $tablename;
-	if(!$conn->query($sql)){
-		trigger_error('Describe' . $tablename . 'failed: ' . $conn->error);
+	if(!$miru->conn->query($sql)){
+		trigger_error('Describe' . $tablename . 'failed: ' . $miru->conn->error);
 		return false;
 	}
 }
-function single_param_stmt($conn, $query, $q_str){
-	$stmt = $conn->prepare($query);
+function single_param_stmt($query, $q_str){
+	global $miru;
+	$stmt = $miru->conn->prepare($query);
 	$stmt->bind_param('s', $q_str);
 	$res = execute_select_stmt($stmt);
 	$stmt->close();
 	return $res;
 }
-function query_monster($conn, $q_str){
+function query_monster($q_str){
+	global $miru;
 	if($q_str == ''){
 		return false;
 	}
 	if(ctype_digit($q_str)){
 		$sql = 'SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE MONSTER_NO=? ORDER BY MONSTER_NO DESC';
-		$res = single_param_stmt($conn, $sql, $q_str);
+		$res = single_param_stmt($sql, $q_str);
 		if(sizeof($res) > 0){
 			return $res[0];
 		}
@@ -205,7 +221,7 @@ function query_monster($conn, $q_str){
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
-			$res = single_param_stmt($conn, $q . $m[0] . $o, $m[1]);
+			$res = single_param_stmt($q . $m[0] . $o, $m[1]);
 			if(sizeof($res) > 0){
 				if($res[0]['MONSTER_NO'] > 10000){ // crows in computedNames
 					$res[0]['MONSTER_NO'] = $res[0]['MONSTER_NO'] - 10000;
@@ -216,9 +232,10 @@ function query_monster($conn, $q_str){
 	}
 	return false;
 }
-function select_awakenings($conn, $id){
+function select_awakenings($id){
+	global $miru;
 	$sql = 'SELECT awokenSkillList.IS_SUPER, awokenSkillList.TS_SEQ FROM awokenSkillList WHERE awokenSkillList.monster_no=?;';
-	$stmt = $conn->prepare($sql);
+	$stmt = $miru->conn->prepare($sql);
 	$stmt->bind_param('i', $id);
 	$res = execute_select_stmt($stmt);
 	$stmt->free_result();
@@ -229,9 +246,10 @@ function select_awakenings($conn, $id){
 		return $res;
 	}
 }
-function select_evolutions($conn, $id){
+function select_evolutions($id){
+	global $miru;
 	$sql = 'select MONSTER_NO, TO_NO from evolutionList where MONSTER_NO=?';
-	$stmt = $conn->prepare($sql);
+	$stmt = $miru->conn->prepare($sql);
 	$stmt->bind_param('i', $id);
 	$res = execute_select_stmt($stmt);
 	$stmt->free_result();
@@ -244,15 +262,16 @@ function select_evolutions($conn, $id){
 			$evo_ids[] = $r['TO_NO'];
 		}
 		foreach($evo_ids as $eid){
-			$evo_ids = array_merge($evo_ids, select_evolutions($conn, $eid));
+			$evo_ids = array_merge($evo_ids, select_evolutions($eid));
 		}
 		sort($evo_ids);
 		return $evo_ids;
 	}
 }
-function select_card($conn, $id){
+function select_card($id){
+	global $miru;
 	$sql = 'SELECT monsterList.ATK_MAX, monsterList.HP_MAX, monsterList.RCV_MAX, monsterList.LEVEL, monsterList.LIMIT_MULT, monsterList.TA_SEQ ATT_1, monsterList.TA_SEQ_SUB ATT_2, monsterList.TE_SEQ, monsterList.TM_NAME_JP, monsterList.TM_NAME_US, monsterList.TT_SEQ TYPE_1, monsterList.TT_SEQ_SUB TYPE_2, monsterAddInfoList.SUB_TYPE TYPE_3, leadSkill.TS_DESC_US LS_DESC_US, leadSkillData.LEADER_DATA, active.TS_DESC_US AS_DESC_US, active.TURN_MAX AS_TURN_MAX, active.TURN_MIN AS_TURN_MIN FROM monsterList LEFT JOIN skillList leadSkill ON monsterList.TS_SEQ_LEADER=leadSkill.TS_SEQ LEFT JOIN skillLeaderDataList leadSkillData ON monsterList.TS_SEQ_LEADER=leadSkillData.TS_SEQ LEFT JOIN skillList active ON monsterList.TS_SEQ_SKILL=active.TS_SEQ LEFT JOIN monsterAddInfoList ON monsterList.MONSTER_NO=monsterAddInfoList.MONSTER_NO WHERE monsterList.MONSTER_NO=?;';
-	$stmt = $conn->prepare($sql);
+	$stmt = $miru->conn->prepare($sql);
 	$stmt->bind_param('i', $id);
 	$res = execute_select_stmt($stmt);
 	$stmt->free_result();
@@ -263,8 +282,8 @@ function select_card($conn, $id){
 		$res = $res[0];
 	}
 	
-	$res['AWAKENINGS'] = select_awakenings($conn, $id);
-	//$res['EVOLUTIONS'] = select_evolutions($conn, $id);
+	$res['AWAKENINGS'] = select_awakenings($id);
+	//$res['EVOLUTIONS'] = select_evolutions($id);
 	
 	return $res;
 }
@@ -387,9 +406,9 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1] . PHP_EOL . $supers[1]);
 }
-function get_card_grid($conn, $id, $right_side_table = false, $headings = true){
+function get_card_grid($id, $right_side_table = false, $headings = true){
 	global $fullimg_url;
-	$data = select_card($conn, $id);
+	$data = select_card($id);
 	if(!$data){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
@@ -411,9 +430,9 @@ function get_card_grid($conn, $id, $right_side_table = false, $headings = true){
 		'html' => $head . '<div class="cardgrid"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/><b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/><b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
 		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US'])) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>' . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
-function get_card_summary($conn, $id){
+function get_card_summary($id){
 	global $portrait_url;
-	$data = select_card($conn, $id);
+	$data = select_card($id);
 	if(!$data){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
@@ -425,9 +444,9 @@ function get_card_summary($conn, $id){
 		'html' => '<h2 id="card_' . $id . '">' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) . '</h2>' . $awakes[0], 
 		'shortcode' => '<h2 id="card_' . $id . '">' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) . '</h2>' . $awakes[1]);
 }
-function get_lb_stats_row($conn, $id, $sa){
+function get_lb_stats_row($id, $sa){
 	global $portrait_url;
-	$data = select_card($conn, $id);
+	$data = select_card($id);
 	if(!$data){
 		return array('html' => '', 'shortcode' => '');
 	}
@@ -484,10 +503,10 @@ function get_egg($rare){
 		return array('html' => '[EGG]', 'shortcode' => '[EGG]');
 	}
 }
-function search_ids($conn, $input_str){
+function search_ids($input_str){
 	$ids = array();
 	foreach(explode("\n", $input_str) as $line){
-		$mon = query_monster($conn, trim($line));
+		$mon = query_monster(trim($line));
 		if($mon){
 			$ids[] = $mon['MONSTER_NO'];
 		}
