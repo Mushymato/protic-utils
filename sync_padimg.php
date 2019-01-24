@@ -1,14 +1,12 @@
 <?php
 include 'miru_common.php';
-include 'sql_param.php';
 $time_start = microtime(true);
-$conn = connect_sql($host, $user, $pass, $schema);
 
 $sql = 'SELECT MONSTER_NO FROM monsterList';
-$stmt = $conn->prepare($sql);
+$stmt = $miru->conn->prepare($sql);
 $res = execute_select_stmt($stmt);
 $stmt->close();
-$conn->close();
+
 $miru_portrait_url = 'https://storage.googleapis.com/mirubot/padimages/jp/portrait/';
 $miru_full_url = 'https://storage.googleapis.com/mirubot/padimages/jp/full/';
 $pad_illust_url = 'https://pad.gungho.jp/member/img/graphic/illust/';
