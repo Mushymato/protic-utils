@@ -19,6 +19,7 @@ window.onload = function(){
 </header>
 <html>
 <?php
+include 'miru_common.php';
 $region = 'jp';
 $data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
 function machine_selector($selected = ''){
@@ -176,7 +177,6 @@ function rate_groups_lineup($mons_array){
 ?>
 <body>
 <?php
-include 'miru_common.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
 $om = array_key_exists('om', $_POST) ? $_POST['om'] : 'html';
 $st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';

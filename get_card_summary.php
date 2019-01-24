@@ -3,7 +3,6 @@
 <body>
 <?php
 include 'miru_common.php';
-include 'sql_param.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '4428';
 $ids = search_ids($input_str);
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
