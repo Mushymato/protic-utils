@@ -2,24 +2,24 @@
 $insert_size = 250;
 $portrait_url = '/wp-content/uploads/pad-portrait/';
 $fullimg_url = '/wp-content/uploads/pad-img/';
-function connect_sql($host, $user, $pass, $schema){
-	// Create connection
-	$conn = new mysqli($host, $user, $pass);
-	// Check connection
-	if ($conn->connect_error) {
-		trigger_error('Connection failed: ' . $conn->connect_error);
-		header( 'HTTP/1.0 403 Forbidden', TRUE, 403 );
-		die('you cannot');
-	}
-	$conn->set_charset('utf8');
-	$conn->select_db($schema);
-	return $conn;
-}
 class mySQLConn{
+	function connect_sql($host, $user, $pass, $schema){
+		// Create connection
+		$conn = new mysqli($host, $user, $pass);
+		// Check connection
+		if ($conn->connect_error) {
+			trigger_error('Connection failed: ' . $conn->connect_error);
+			header( 'HTTP/1.0 403 Forbidden', TRUE, 403 );
+			die('you cannot');
+		}
+		$conn->set_charset('utf8');
+		$conn->select_db($schema);
+		return $conn;
+	}
 	public $conn;
     function __construct() {
 		include 'sql_param.php';
-        $this->conn = connect_sql($host, $user, $pass, $schema);
+        $this->conn = $this->connect_sql($host, $user, $pass, $schema);
     }
     function __destruct() {
         $this->conn->close();
