@@ -406,7 +406,7 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1] . PHP_EOL . $supers[1]);
 }
-function get_card_grid($id, $right_side_table = false, $headings = true){
+function get_card_grid($id, $right_side_table = false, $headings = false){
 	global $fullimg_url;
 	$data = select_card($id);
 	if(!$data){
