@@ -127,3 +127,15 @@ input[type="checkbox"].rem-icon-cb:checked + label > img {
 	width:70px;
 	height:70px;
 }
+
+.stone-count{
+	width: 3ch;
+	height: 1em;
+	font-size:inherit;
+}
+.stone-count + img{
+	display: inline-block;
+	position: relative;
+	top: 0.2em;
+	height: 1em;
+}

@@ -54,17 +54,18 @@ function load_rem_by_region($region = 'jp'){
 		}
 		krsort($sorted);
 		$comments = explode('|', $machine['clean_comment']);
-		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $machine['egg_machine_row'];
+		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $region . '-' . $machine['egg_machine_row'];
 		if($region == 'jp'){
 			$tl_name = rem_name_tl($machine['clean_name']);
 		}
 		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . (isset($tl_name) ? $tl_name : $machine['clean_name']) . '</li>';
-		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1>' . (isset($tl_name) ? '<h2/>' . $tl_name . '</h2>' : '') . ($is_pem ? '' : '<h2>Total Rates = <span class="total-rate">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2>');
+		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1>' . (isset($tl_name) ? '<h2/>' . $tl_name . '</h2>' : '') . ($is_pem ? '' : '<h2 >Total Rate = <span class="total-rate" data-machineid="' . $machine_id . '">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2><h3>Chance to get at least 1 desired card, given <input type="text" class="stone-count" data-machineid="' . $machine_id . '" value="0"  maxlength = "3" data-cost="' . $machine['cost'] . '"> <img src="/wp-content/uploads/pad-icons/Magic-Stone.png">: <span class="cumulative-rate" data-machineid="' . $machine_id . '">0.00</span>%</h3>');
 		foreach($sorted as $rarity => $rates){
 			ksort($rates);
 			foreach($rates as $r_rate => $cards){
+				$rg_id = $machine_id . '-' . $rarity . '-' . $r_rate;
 				$rate = $r_rate/100;
-				$out .= '<div class="' . ($is_pem ? 'pem' : 'rem') . '-wrapper-rarity">' . get_egg($rarity)['html'] . '<strong>' . $rarity . '★' . ($is_pem ? '</strong>' : ' | ' . $rate . '% each, ' . ($rate * sizeof($cards)) . '% total<br/></strong>') . '<div class="rate-group" data-rate="' . $rate . '">';
+				$out .= '<div class="' . ($is_pem ? 'pem' : 'rem') . '-wrapper-rarity">' . get_egg($rarity)['html'] . '<strong>' . $rarity . '★' . ($is_pem ? '</strong>' : ' | ' . $rate . '% each, ' . ($rate * sizeof($cards)) . '% total</strong> <input type="checkbox" class="select-group" id="' . $rg_id . '"><label for="' . $rg_id . '">Select All</label>') . '<br/><div class="rate-group" data-rate="' . $rate . '" data-rategroupid="' . $rg_id . '">';
 				if($is_pem){
 					foreach($cards as $mon){
 						$out .= '<div class="pem-icon"><img src="' . $portrait_url . $mon['MONSTER_NO'] . '.png" title="' . $mon['MONSTER_NO'] . '-' . $mon['TM_NAME_US'] . '"/></div>';

@@ -14,6 +14,15 @@ function sumRates(){
 			}
 		}
 		rem.querySelector("#"+remID+" span.total-rate").innerHTML = Number(sumSelected).toFixed(2);
+		if(sumSelected != 0){
+			var stones = rem.querySelector("#"+remID+" input.stone-count");
+			var rolls = Math.floor(parseInt(stones.value) / parseInt(stones.getAttribute("data-cost")));
+			if(rolls != 0 && rolls != NaN){
+				rem.querySelector("#"+remID+" span.cumulative-rate").innerHTML = Number((1 - Math.pow(1 - sumSelected/100, rolls))*100).toFixed(2);
+			}
+		}else{
+			rem.querySelector("#"+remID+" span.cumulative-rate").innerHTML = "0.00";
+		}
 	}
 }
 function showRegion(){
@@ -50,14 +59,34 @@ window.onload=function(){
 	for(var cb of padCheckbox){
 		cb.addEventListener("change", sumRates);
 	}
+	var stoneCount = document.getElementsByClassName("stone-count");
+	for(var txt of stoneCount){
+		txt.addEventListener("change", sumRates);
+	}
+	
 	var clearBtns = document.getElementsByClassName("clear-selected");
 	for(var btn of clearBtns){
 		btn.addEventListener("click", 
 			function(){
 				document.querySelector("#"+event.srcElement.getAttribute("data-machineid")+" span.total-rate").innerHTML = "0.00";
+				document.querySelector("#"+event.srcElement.getAttribute("data-machineid")+" span.cumulative-rate").innerHTML = "0.00";
 			}
 		);
 	}
+	
+	var selectGroup = document.getElementsByClassName("select-group");
+	for(var select of selectGroup){
+		select.addEventListener("change", 
+			function(){
+				var padCheckbox = document.querySelectorAll("div[data-rategroupid='"+event.srcElement.id+"'] .rem-icon-cb");
+				for(var cb of padCheckbox){
+					cb.checked = event.srcElement.checked;
+				}
+			}
+		);
+	}
+
+	
 	var tabLinks = document.getElementsByClassName("egg-machine-tab-link");
 	for(var link of tabLinks){
 		link.addEventListener("click", 
