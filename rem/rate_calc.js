@@ -82,6 +82,7 @@ window.onload=function(){
 				for(var cb of padCheckbox){
 					cb.checked = event.srcElement.checked;
 				}
+				sumRates();
 			}
 		);
 	}
