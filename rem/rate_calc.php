@@ -5,6 +5,11 @@
 	<title>Rate Calculator</title>
 	<link rel="stylesheet" type="text/css" href="rate_calc.css">
 	<script src="rate_calc.js"></script>
+	<script>
+	window.onload=function(){
+		initializeRateCalc();
+	}
+	</script>
 </head>
 <body>
 <div id="egg-machine-region"></div>
