@@ -16,18 +16,12 @@
 <?php
 include '../miru_common.php';
 mb_internal_encoding('UTF-8');
-$jp_en_regex = array(
-	'/スーパー/' => ' Super ',
-	'/ゴッドフェス/' => ' Godfest ',
-	'/魔法石(\d*?)個！/' => ' $1 Magic Stones!',
-	'/コラボ/' => ' Collab ',
-	'/ガチャ/' => ' Machine '
-);
+$jp_en_regex = json_decode(file_get_contents('jp_en_tl.json'), true);
 function rem_name_tl($jp_name){
 	global $jp_en_regex;
 	$result = $jp_name;
 	foreach($jp_en_regex as $regex => $replace){
-		$result = preg_replace($regex, $replace, $result);
+		$result = preg_replace('/'.$regex.'/', ' '.$replace.' ', $result);
 	}
 	return ($result != $jp_name ? trim($result) : null);
 }

@@ -17,13 +17,9 @@ foreach($res as $r){
 		echo 'No Portrait - ' . $r['MONSTER_NO'] . PHP_EOL;
 	}
 	if(grab_img_if_exists($miru_full_url, $r['MONSTER_NO'], $_SERVER['DOCUMENT_ROOT'] . $fullimg_url)){
-		echo 'Full(Miru) - ' . $r['MONSTER_NO'] . PHP_EOL;
+		echo 'Full Img - ' . $r['MONSTER_NO'] . PHP_EOL;
 	}else{
-		if(grab_img_if_exists($pad_illust_url, $r['MONSTER_NO'], $_SERVER['DOCUMENT_ROOT'] . $fullimg_url)){
-			echo 'Full(GHJP) - ' . $r['MONSTER_NO'] . PHP_EOL;
-		}else{
-			echo 'No Full Img - ' . $r['MONSTER_NO'] . PHP_EOL;
-		}
+		echo 'No Full Img - ' . $r['MONSTER_NO'] . PHP_EOL;
 	}
 }
 
