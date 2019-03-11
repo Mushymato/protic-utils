@@ -29,8 +29,8 @@ $xpath = new DOMXpath($doc);
 
 $buff_tables = $xpath->query("//table[@class='monster_list twi_icon']");
 foreach ($buff_tables as $tbl){
-	$output_arr['html'] .= '<table><thead><tr><td>Card</th><td>Change</td></tr></thead>';
-	$output_arr['shortcode'] .= '<table><thead><tr><td>Card</th><td>Change</td></tr></thead>';
+	$output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
+	$output_arr['shortcode'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
 	$awakes = array(
 		'added' => array(),
 		'changed' => array(),
