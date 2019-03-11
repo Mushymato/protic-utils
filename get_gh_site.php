@@ -12,9 +12,7 @@ $awk = array_key_exists('awk', $_POST) ? $_POST['awk'] : 'yes';
 <!-- <p>Show only 追加/変更 awakes?: <input type="radio" name="awk" value="yes" <?php if($awk == 'yes'){echo 'checked';}?>> Yes <input type="radio" name="awk" value="no" <?php if($awk == 'no'){echo 'checked';}?>> No <input type="submit"></p> -->
 
 <p>Paste URL Here:</p>
-<textarea name="input" style="width:80vw;height:20vh;">
-<?php echo $input_str;?>
-</textarea>
+<input type='text' name="input" style="width:80vw;" value="<?php echo $input_str;?>">
 <input type="submit">
 </form>
 <?php
