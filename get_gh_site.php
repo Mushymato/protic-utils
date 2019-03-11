@@ -24,7 +24,7 @@ curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 $html = curl_exec($handle);
 libxml_use_internal_errors(true); // Prevent HTML errors from displaying
 $doc = new DOMDocument();
-$doc->loadHTML(file_get_contents($input_str));
+$doc->loadHTML($html);
 $xpath = new DOMXpath($doc);
 
 $buff_tables = $xpath->query("//table[@class='monster_list twi_icon']");
