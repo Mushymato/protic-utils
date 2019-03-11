@@ -301,7 +301,7 @@ function grab_img_if_exists($url, $id, $savedir, $override = false){
 	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	curl_close($ch);
 	if($httpCode >= 200 && $httpCode < 300){
-		$fp = fopen($saveto ,'x');
+		$fp = fopen($saveto ,'w');
 		fwrite($fp, $raw);
 		fclose($fp);
 		return true;
