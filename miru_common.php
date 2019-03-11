@@ -382,24 +382,26 @@ function lead_mult($lead){
 	return '[' . $ls['1'] * $ls['1'] . '/' . $ls['2'] * $ls['2'] . '/' . $ls['3'] * $ls['3'] . ($ls['4'] == 0 ? '' : ', ' . round(100 * (1 - (1-$ls['4']) * (1-$ls['4'])), 2) . '%') . ']';
 }
 $aw = array(2765 => 3, 2766 => 4, 2767 => 5, 2768 => 6, 2769 => 7, 2770 => 8, 2771 => 9, 2772 => 10, 2773 => 11, 2774 => 12, 2775 => 13, 2776 => 14, 2777 => 15, 2778 => 16, 2779 => 17, 2780 => 18, 2781 => 19, 2782 => 20, 2783 => 21, 2784 => 22, 2785 => 23, 2786 => 24, 2787 => 25, 2788 => 26, 2789 => 27, 2790 => 28, 2791 => 29, 3897 => 30, 7593 => 31, 7878 => 33, 7879 => 35, 7880 => 36, 7881 => 34, 7882 => 32, 9024 => 37, 9025 => 38, 9026 => 39, 9113 => 40, 9224 => 41, 9397 => 43, 9481 => 42, 10261 => 44, 11353 => 45, 11619 => 46, 12490 => 47, 12735 => 48, 12736 => 49, 13057 => 50, 13567 => 51, 13764 => 52, 13765 => 53, 13898 => 54, 13899 => 55, 13900 => 56, 13901 => 57, 13902 => 58, 14073 => 59, 14074 => 60, 14075 => 61, 14076 => 62, 14950 => 63, 15821 => 64, 15822 => 65, 15823 => 66);
+function awake_icon($id, $w = '31', $h = '32', $awake_url = '/wp-content/uploads/pad-awakenings/', $info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s='){
+	return array('html' => '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>', 'shortcode' => '[awak id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']');
+}
 function awake_list($awakenings, $w = '31', $h = '32'){
 	if(!$awakenings){
 		return array('', '');
 	}
 	global $aw;
-	$info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s=';
-	$awake_url = '/wp-content/uploads/pad-awakenings/';
 	$awakes = array('<div>', '');
 	$supers = array('<div>', '');
 	
 	foreach($awakenings as $awk){
-		$id =  $aw[$awk['TS_SEQ']];
+		$id = $aw[$awk['TS_SEQ']];
+		$awks = awake_icon($id);
 		if($awk['IS_SUPER'] == 1){
-			$supers[0] = $supers[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
-			$supers[1] = $supers[1] . '[awak id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']';
+			$supers[0] = $supers[0] . $awks['html'];
+			$supers[1] = $supers[1] . $awks['shortcode'];
 		}else{
-			$awakes[0] = $awakes[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
-			$awakes[1] = $awakes[1] . '[awak id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']';
+			$awakes[0] = $awakes[0] . $awks['html'];
+			$awakes[1] = $awakes[1] . $awks['shortcode'];
 		}
 	}
 	$awakes[0] = $awakes[0] . '</div>';
