@@ -317,8 +317,12 @@ function card_icon_img($id, $name = '', $w = '63', $h = '63', $href = 'http://ww
 function lb_stat($base, $mult){
 	return round($base * (100 + $mult)/100);
 }
-function weighted($data){
-	return array(99 => round($data['HP_MAX'] / 10 + $data['ATK_MAX'] / 5 + $data['RCV_MAX'] / 3), 110 => round(lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) / 10 + lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) / 5 + lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) / 3));
+function weighted($data, $level){
+	if($level == 99){
+		return round($data['HP_MAX'] / 10 + $data['ATK_MAX'] / 5 + $data['RCV_MAX'] / 3);
+	}else if ($level == 110){
+		return round(lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) / 10 + lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) / 5 + lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) / 3);
+	}
 }
 function stat_table($data, $plus = false){
 	if($data['LIMIT_MULT'] == 0){
@@ -430,7 +434,7 @@ function get_card_grid($id, $right_side_table = false, $headings = false){
 	$head = $headings ? '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' : '';
 	return array(
 		'html' => $head . '<div class="cardgrid"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/><b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/><b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US'])) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>' . PHP_EOL . '</div>' . PHP_EOL . '</div>');
+		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US'] . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>') . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
 function get_card_summary($id){
 	global $portrait_url;
@@ -441,10 +445,15 @@ function get_card_summary($id){
 
 	$card = card_icon_img($id, $data['TM_NAME_US']);
 	$awakes = awake_list($data['AWAKENINGS']);
+	if($data['LIMIT_MULT']){
+		$stats = ' <p><b>Lv.110</b> <b>HP</b> ' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . ' <b>ATK</b> ' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . ' <b>RCV</b> ' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . ' (' . weighted($data, 110) . ' weighted)</p>';
+	}else{
+		$stats = ' <p><b>Lv.99</b> <b>HP</b> ' . $data['HP_MAX'] . ' <b>ATK</b> ' . $data['ATK_MAX'] . ' <b>RCV</b> ' . $data['RCV_MAX'] . ' (' . weighted($data, 99) . ' weighted)</p>';
+	}
 	
 	return array(
-		'html' => '<h2 id="card_' . $id . '">' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) . '</h2>' . $awakes[0], 
-		'shortcode' => '<h2 id="card_' . $id . '">' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) . '</h2>' . $awakes[1]);
+		'html' => '<h2 id="card_' . $id . '">' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) .'</h2>' . $stats . $awakes[0], 
+		'shortcode' => '<h2 id="card_' . $id . '">' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) .'</h2>' . $stats . $awakes[1]);
 }
 function get_lb_stats_row($id, $sa){
 	global $portrait_url;
@@ -474,7 +483,7 @@ function get_lb_stats_row($id, $sa){
 		$supers[1] = $supers[1] . '</td>';
 	}
 	
-	$stats = '<td>' . weighted($data)[110] . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td>';
+	$stats = '<td>' . weighted($data, 110) . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td>';
 	
 	return array(
 		'html' => '<tr><td>' . $card['html'] . '</td>' . $stats . $supers[0] . '</tr>', 
