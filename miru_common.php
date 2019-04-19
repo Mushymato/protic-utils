@@ -197,6 +197,7 @@ function single_param_stmt($query, $q_str){
 }
 function query_monster($q_str){
 	global $miru;
+	$q_str = trim($q_str);
 	if($q_str == ''){
 		return false;
 	}
