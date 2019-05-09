@@ -31,11 +31,7 @@ $buff_tables = $xpath->query("//table[@class='monster_list twi_icon']");
 foreach ($buff_tables as $tbl){
 	$output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
 	$output_arr['shortcode'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
-	$awakes = array(
-		'added' => array(),
-		'changed' => array(),
-		'other' => array(),
-	);
+	$awakes = array();
 	$output_arr['html'] .= '<tr>';
 	$output_arr['shortcode'] .= '<tr>';
 	$first_card = TRUE;
@@ -52,26 +48,13 @@ foreach ($buff_tables as $tbl){
 								if (strpos($src, 'm_icon') !== FALSE){
 									$found_card = TRUE;
 									if(!$first_card){
-										foreach($awakes as $type => $arr){
-											if (sizeof($arr) == 0 || 
-											($awk == 'yes' && $type == 'other' && 
-												(sizeof($awakes['added']) > 0 || sizeof($awakes['changed']) > 0))){
-												continue;
-											}
-											$output_arr['html'] .= '<td>' . $type . ' ';
-											$output_arr['shortcode'] .= '<td>' . $type  . ' ';
-											foreach($arr as $icon){
-												$output_arr['html'] .= $icon['html'];
-												$output_arr['shortcode'] .= $icon['shortcode'];
-											}
-											$output_arr['html'] .= '</td>';
-											$output_arr['shortcode'] .= '</td>';
+										foreach($awakes as $arr){
+											$icon = $arr[0];
+											$class = $arr[1] == '' ? '' : 'class="awk-' . $arr[1] . '"';
+											$output_arr['html'] .= '<td ' . $class . '> ' . $icon['html'] . '</td>';
+											$output_arr['shortcode'] .= '<td ' . $class . '> ' . $icon['shortcode'] . '</td>';
 										}
-										$awakes = array(
-											'added' => array(),
-											'changed' => array(),
-											'other' => array(),
-										);
+										$awakes = array();
 										$output_arr['html'] .= '</tr><tr>';
 										$output_arr['shortcode'] .= '</tr><tr>';
 									}
@@ -85,11 +68,11 @@ foreach ($buff_tables as $tbl){
 									$found_awake = TRUE;
 									$awk_icon = awake_icon(intval(str_replace('.png', '', basename($src))) + 2);
 									if (strpos($td->nodeValue, '追加') !== FALSE){
-										array_push($awakes['added'], $awk_icon);
+										array_push($awakes, array($awk_icon, 'added'));
 									}else if (strpos($td->nodeValue, '変更') !== FALSE){
-										array_push($awakes['changed'], $awk_icon);
+										array_push($awakes, array($awk_icon, 'changed'));
 									}else{
-										array_push($awakes['other'], $awk_icon);
+										array_push($awakes, array($awk_icon, ''));
 									}
 								}
 							}
@@ -103,29 +86,12 @@ foreach ($buff_tables as $tbl){
 			}
 		}
 	}
-	foreach($awakes as $type => $arr){
-		if (sizeof($arr) == 0 || 
-		($type == 'other' && 
-			(sizeof($awakes['added']) > 0 || sizeof($awakes['changed']) > 0))){
-			continue;
-		}
-		$output_arr['html'] .= '<td>' . $type . ' ';
-		$output_arr['shortcode'] .= '<td>' . $type  . ' ';
-		foreach($arr as $icon){
-			$output_arr['html'] .= $icon['html'];
-			$output_arr['shortcode'] .= $icon['shortcode'];
-		}
-		$output_arr['html'] .= '</td>';
-		$output_arr['shortcode'] .= '</td>';
-	}
-	$awakes = array(
-		'added' => array(),
-		'changed' => array(),
-		'other' => array(),
-	);
-	$output_arr['html'] .= '</tr><tr>';
-	$output_arr['shortcode'] .= '</tr><tr>';
-
+	foreach($awakes as $arr){
+		$icon = $arr[0];
+		$class = $arr[1] == '' ? '' : 'class="awk-' . $arr[1] . '"';
+		$output_arr['html'] .= '<td ' . $class . '> ' . $icon['html'] . '</td>';
+		$output_arr['shortcode'] .= '<td ' . $class . '> ' . $icon['shortcode'] . '</td>';
+}
 	$output_arr['html'] .= '</tr>';
 	$output_arr['shortcode'] .= '</tr>';
 	$output_arr['html'] .= '</table>';
