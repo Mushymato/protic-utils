@@ -9,7 +9,6 @@ $awk = array_key_exists('awk', $_POST) ? $_POST['awk'] : 'yes';
 ?>
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
-<!-- <p>Show only 追加/変更 awakes?: <input type="radio" name="awk" value="yes" <?php if($awk == 'yes'){echo 'checked';}?>> Yes <input type="radio" name="awk" value="no" <?php if($awk == 'no'){echo 'checked';}?>> No <input type="submit"></p> -->
 
 <p>Paste URL Here:</p>
 <input type='text' name="input" style="width:80vw;" value="<?php echo $input_str;?>">
@@ -50,7 +49,7 @@ foreach ($buff_tables as $tbl){
 									if(!$first_card){
 										foreach($awakes as $arr){
 											$icon = $arr[0];
-											$class = $arr[1] == '' ? '' : 'class="awk-' . $arr[1] . '"';
+											$class = 'class="awk-' . $arr[1] . '"';
 											$output_arr['html'] .= '<td ' . $class . '> ' . $icon['html'] . '</td>';
 											$output_arr['shortcode'] .= '<td ' . $class . '> ' . $icon['shortcode'] . '</td>';
 										}
@@ -72,7 +71,7 @@ foreach ($buff_tables as $tbl){
 									}else if (strpos($td->nodeValue, '変更') !== FALSE){
 										array_push($awakes, array($awk_icon, 'changed'));
 									}else{
-										array_push($awakes, array($awk_icon, ''));
+										array_push($awakes, array($awk_icon, 'same'));
 									}
 								}
 							}
@@ -88,7 +87,7 @@ foreach ($buff_tables as $tbl){
 	}
 	foreach($awakes as $arr){
 		$icon = $arr[0];
-		$class = $arr[1] == '' ? '' : 'class="awk-' . $arr[1] . '"';
+		$class = 'class="awk-' . $arr[1] . '"';
 		$output_arr['html'] .= '<td ' . $class . '> ' . $icon['html'] . '</td>';
 		$output_arr['shortcode'] .= '<td ' . $class . '> ' . $icon['shortcode'] . '</td>';
 }
