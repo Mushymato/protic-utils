@@ -3,7 +3,17 @@
 <body>
 <?php
 include 'miru_common.php';
-$input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
+function convert_awk($src){
+	$id = intval(str_replace('.png', '', basename($src))) + 2;
+	if(($id >= 38 && $id <= 40) || ($id >= 42 && $id <= 44)){
+		$id -= 1;
+	}else if($id == 37 || $id == 41){
+		$id += 3;
+	}
+	return awake_icon($id);
+}
+
+$input_str = array_key_exists('input', $_POST) ? 'https://pad.gungho.jp/member/' . $_POST['input'] . '.html': '';
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
 $awk = array_key_exists('awk', $_POST) ? $_POST['awk'] : 'yes';
 ?>
@@ -20,6 +30,7 @@ $output_arr = array('html' => '', 'shortcode' => '');
 
 $handle = curl_init($input_str);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
 $html = curl_exec($handle);
 libxml_use_internal_errors(true); // Prevent HTML errors from displaying
 $doc = new DOMDocument();
@@ -65,7 +76,7 @@ foreach ($buff_tables as $tbl){
 									$first_card = FALSE;
 								}else if (strpos($src, 'kakusei_icon') !== FALSE){
 									$found_awake = TRUE;
-									$awk_icon = awake_icon(intval(str_replace('.png', '', basename($src))) + 2);
+									$awk_icon = convert_awk($src);
 									if (strpos($td->nodeValue, '追加') !== FALSE){
 										array_push($awakes, array($awk_icon, 'added'));
 									}else if (strpos($td->nodeValue, '変更') !== FALSE){
