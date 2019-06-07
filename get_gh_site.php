@@ -12,6 +12,19 @@ function convert_awk($src){
 	}
 	return awake_icon($id);
 }
+function awk_td($awakes, $output_arr){
+	$output_arr['html'] .= '<td>';
+	$output_arr['shortcode'] .= '<td>';
+	foreach($awakes as $arr){
+		$icon = $arr[0];
+		$class = 'class="awk-' . $arr[1] . '"';
+		$output_arr['html'] .= '<span ' . $class . '> ' . $icon['html'] . '</span>';
+		$output_arr['shortcode'] .= '<span ' . $class . '> ' . $icon['shortcode'] . '</span>';
+	}
+	$output_arr['html'] .= '</td>';
+	$output_arr['shortcode'] .= '</td>';
+	return $output_arr;
+}
 
 $input_str = array_key_exists('input', $_POST) ? 'https://pad.gungho.jp/member/' . $_POST['input'] . '.html': '';
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
@@ -20,8 +33,8 @@ $awk = array_key_exists('awk', $_POST) ? $_POST['awk'] : 'yes';
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
 
-<p>Paste URL Here:</p>
-<input type='text' name="input" style="width:80vw;" value="<?php echo $input_str;?>">
+<p>Paste partial URL Here:</p>
+https://pad.gungho.jp/member/<input type='text' name="input" size="50" value="<?php echo $_POST['input'];?>">.html
 <input type="submit">
 </form>
 <?php
@@ -45,6 +58,7 @@ foreach ($buff_tables as $tbl){
 	$output_arr['html'] .= '<tr>';
 	$output_arr['shortcode'] .= '<tr>';
 	$first_card = TRUE;
+	$current_card = 0;
 	foreach ($tbl->childNodes as $tr){
 		if (isset($tr->childNodes)){
 			$found_awake = FALSE;
@@ -58,18 +72,13 @@ foreach ($buff_tables as $tbl){
 								if (strpos($src, 'm_icon') !== FALSE){
 									$found_card = TRUE;
 									if(!$first_card){
-										foreach($awakes as $arr){
-											$icon = $arr[0];
-											$class = 'class="awk-' . $arr[1] . '"';
-											$output_arr['html'] .= '<td ' . $class . '> ' . $icon['html'] . '</td>';
-											$output_arr['shortcode'] .= '<td ' . $class . '> ' . $icon['shortcode'] . '</td>';
-										}
+										$output_arr = awk_td($awakes, $output_arr);
 										$awakes = array();
 										$output_arr['html'] .= '</tr><tr>';
 										$output_arr['shortcode'] .= '</tr><tr>';
 									}
-
-									$card = card_icon_img(str_replace('.jpg', '', basename($src)));
+									$current_card = intval(str_replace('.jpg', '', basename($src)));
+									$card = card_icon_img($current_card);
 									$output_arr['html'] .= '<td>' . $card['html'] . '</td>';
 									$output_arr['shortcode'] .= '<td>' . $card['shortcode'] . '</td>';
 
@@ -89,19 +98,39 @@ foreach ($buff_tables as $tbl){
 						}
 					}
 					if (!$found_card && !$found_awake){
-						$output_arr['html'] .= '<td>' . $td->nodeValue . '</td>';
-						$output_arr['shortcode'] .= '<td>' . $td->nodeValue . '</td>';	
+						$new_card_info = $td->nodeValue;
+						$compare_info = '';
+						preg_match('/HP:(\d+).*?攻撃:(\d+).*?回復:(\d+).*?↓.*?HP:(\d+).*?攻撃:(\d+).*?回復:(\d+)/s', $new_card_info, $matches);
+						if(sizeof($matches) === 7){
+							$changed_stats = array();
+							foreach (array('HP', 'ATK', 'RCV') as $i => $stat){
+								$value = intval($matches[$i+4]) - intval($matches[$i+1]);
+								if ($value > 0){
+									array_push($changed_stats, '+' . $value . ' ' . $stat);
+								}
+							}
+							$output_arr['html'] .= '<td>' . implode(', ', $changed_stats) . '</td>';
+							$output_arr['shortcode'] .= '<td>' . implode(', ', $changed_stats) . '</td>';	
+						}else{
+							$old_card_info = select_card($current_card);
+							if($old_card_info !== false){
+								if (preg_match('/^\s*リーダースキル：/', $new_card_info) === 1){
+									$compare_info .= '<span>Leader Skill: ' . $old_card_info['LS_DESC_US'] . '</span>';
+								} 
+								if(preg_match('/^\s*スキル：/', $new_card_info) === 1){
+									$compare_info .= '<span>Active Skill: ' . $old_card_info['AS_DESC_US'] . '</span>';
+								}	
+							}	
+							$output_arr['html'] .= '<td><span>' . $new_card_info . '</span>' . $compare_info . '</td>';
+							$output_arr['shortcode'] .= '<td><span>' . $new_card_info . '</span>' . $compare_info . '</td>';	
+						}
 					}
 				}
 			}
 		}
 	}
-	foreach($awakes as $arr){
-		$icon = $arr[0];
-		$class = 'class="awk-' . $arr[1] . '"';
-		$output_arr['html'] .= '<td ' . $class . '> ' . $icon['html'] . '</td>';
-		$output_arr['shortcode'] .= '<td ' . $class . '> ' . $icon['shortcode'] . '</td>';
-}
+	$output_arr = awk_td($awakes, $output_arr);
+
 	$output_arr['html'] .= '</tr>';
 	$output_arr['shortcode'] .= '</tr>';
 	$output_arr['html'] .= '</table>';
