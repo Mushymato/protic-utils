@@ -13,17 +13,19 @@ function convert_awk($src){
 	return awake_icon($id);
 }
 function awk_td($awakes, $output_arr){
-	$output_arr['html'] .= '<td>';
-	$output_arr['shortcode'] .= '<td>';
-	foreach($awakes as $arr){
-		$icon = $arr[0];
-		$class = 'class="awk-' . $arr[1] . '"';
-		$output_arr['html'] .= '<span ' . $class . '> ' . $icon['html'] . '</span>';
-		$output_arr['shortcode'] .= '<span ' . $class . '> ' . $icon['shortcode'] . '</span>';
+	if (sizeof($awakes) > 0){
+		$output_arr['html'] .= '<td>';
+		$output_arr['shortcode'] .= '<td>';
+		foreach($awakes as $arr){
+			$icon = $arr[0];
+			$class = 'class="awk-' . $arr[1] . '"';
+			$output_arr['html'] .= '<span ' . $class . '> ' . $icon['html'] . '</span>';
+			$output_arr['shortcode'] .= '<span ' . $class . '> ' . $icon['shortcode'] . '</span>';
+		}
+		$output_arr['html'] .= '</td>';
+		$output_arr['shortcode'] .= '</td>';
 	}
-	$output_arr['html'] .= '</td>';
-	$output_arr['shortcode'] .= '</td>';
-	return $output_arr;
+	return $output_arr;	
 }
 
 $input_str = array_key_exists('input', $_POST) ? 'https://pad.gungho.jp/member/' . $_POST['input'] . '.html': '';
@@ -34,7 +36,7 @@ $awk = array_key_exists('awk', $_POST) ? $_POST['awk'] : 'yes';
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
 
 <p>Paste partial URL Here:</p>
-https://pad.gungho.jp/member/<input type='text' name="input" size="50" value="<?php echo $_POST['input'];?>">.html
+https://pad.gungho.jp/member/<input type='text' name="input" size="50" value="<?php echo array_key_exists('input', $_POST) ? $_POST['input'] : '';?>">.html
 <input type="submit">
 </form>
 <?php
