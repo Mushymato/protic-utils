@@ -4,12 +4,13 @@
 <?php
 include 'miru_common.php';
 function convert_awk($src){
-	$id = intval(str_replace('.png', '', basename($src))) + 2;
-	if(($id >= 38 && $id <= 40) || ($id >= 42 && $id <= 44)){
-		$id -= 1;
-	}else if($id == 37 || $id == 41){
-		$id += 3;
-	}
+	$id = intval(str_replace('.png', '', basename($src)));
+	// $id = intval(str_replace('.png', '', basename($src))) + 2;
+	// if(($id >= 38 && $id <= 40) || ($id >= 42 && $id <= 44)){
+	// 	$id -= 1;
+	// }else if($id == 37 || $id == 41){
+	// 	$id += 3;
+	// }
 	return awake_icon($id);
 }
 function awk_td($awakes, $output_arr){
