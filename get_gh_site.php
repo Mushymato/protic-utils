@@ -48,7 +48,14 @@ foreach ($buff_tables as $tbl){
 									$found_card = TRUE;
 									$current_card = intval(str_replace('.jpg', '', basename($src)));
 									if(!array_key_exists($current_card, $monster_output)){
+										$old_card_info = select_card($current_card);
+										if($old_card_info !== false){
+											$name = $old_card_info['TM_NAME_US'];
+										}else{
+											$name = '';
+										}
 										$monster_output[$current_card] = array(
+											'NAME' => $name,
 											'AWK' => array(),
 											'SA' => array(),
 											'INFO' => '',
@@ -88,10 +95,10 @@ foreach ($buff_tables as $tbl){
 							$old_card_info = select_card($current_card);
 							if($old_card_info !== false){
 								if (preg_match('/\nリーダースキル：/', $new_info) === 1){
-									$monster_output[$current_card]['COMP'] .= 'Leader Skill: ' . $old_card_info['LS_DESC_US'] . PHP_EOL;
+									$monster_output[$current_card]['COMP'] .= '<u>Leader Skill</u>: ' . $old_card_info['LS_DESC_US'] . PHP_EOL;
 								} 
 								if(preg_match('/\nスキル：/', $new_info) === 1){
-									$monster_output[$current_card]['COMP'] .= '<span>Active Skill: ' . $old_card_info['AS_DESC_US'] . PHP_EOL;
+									$monster_output[$current_card]['COMP'] .= '<u>Active Skill</u>: ' . $old_card_info['AS_DESC_US'] . PHP_EOL;
 								}	
 							}	
 						}
@@ -135,7 +142,7 @@ function fmt_card_buff($id, $mons, $mode){
 		$output .= '</td></tr>';
 		$rowspan += 1;
 	}
-	$output = '<tr><td class="card-change-icon" rowspan="' . $rowspan . '">' . card_icon_img($id)[$mode] . '</td>' . substr($output, 4);
+	$output = '<tr><td class="card-change-icon" rowspan="' . $rowspan . '">' . card_icon_img($id)[$mode] . ($mons['NAME'] !== '' ? '<span class="card-change-name">' . $mons['NAME'] . '</span>' : '') . '</td>' . substr($output, 4);
 	return $output;
 }
 $output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></thead>';
