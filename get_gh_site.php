@@ -3,31 +3,6 @@
 <body>
 <?php
 include 'miru_common.php';
-function convert_awk($src){
-	$id = intval(str_replace('.png', '', basename($src)));
-	// $id = intval(str_replace('.png', '', basename($src))) + 2;
-	// if(($id >= 38 && $id <= 40) || ($id >= 42 && $id <= 44)){
-	// 	$id -= 1;
-	// }else if($id == 37 || $id == 41){
-	// 	$id += 3;
-	// }
-	return awake_icon($id);
-}
-function awk_td($awakes, $output_arr){
-	if (sizeof($awakes) > 0){
-		$output_arr['html'] .= '<td>';
-		$output_arr['shortcode'] .= '<td>';
-		foreach($awakes as $arr){
-			$icon = $arr[0];
-			$class = 'class="awk-' . $arr[1] . '"';
-			$output_arr['html'] .= '<span ' . $class . '> ' . $icon['html'] . '</span>';
-			$output_arr['shortcode'] .= '<span ' . $class . '> ' . $icon['shortcode'] . '</span>';
-		}
-		$output_arr['html'] .= '</td>';
-		$output_arr['shortcode'] .= '</td>';
-	}
-	return $output_arr;	
-}
 
 $input_str = array_key_exists('input', $_POST) ? 'https://pad.gungho.jp/member/' . $_POST['input'] . '.html': '';
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
@@ -54,14 +29,11 @@ $doc->loadHTML($html);
 $xpath = new DOMXpath($doc);
 
 $buff_tables = $xpath->query("//table[@class='monster_list twi_icon']");
+$monster_output = array();
+$found_card = FALSE;
+$current_card = 0;
+$awk_key = 'AWK';
 foreach ($buff_tables as $tbl){
-	$output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
-	$output_arr['shortcode'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
-	$awakes = array();
-	$output_arr['html'] .= '<tr>';
-	$output_arr['shortcode'] .= '<tr>';
-	$first_card = TRUE;
-	$current_card = 0;
 	foreach ($tbl->childNodes as $tr){
 		if (isset($tr->childNodes)){
 			$found_awake = FALSE;
@@ -74,71 +46,106 @@ foreach ($buff_tables as $tbl){
 								$src = $img->getAttribute('src');
 								if (strpos($src, 'm_icon') !== FALSE){
 									$found_card = TRUE;
-									if(!$first_card){
-										$output_arr = awk_td($awakes, $output_arr);
-										$awakes = array();
-										$output_arr['html'] .= '</tr><tr>';
-										$output_arr['shortcode'] .= '</tr><tr>';
-									}
 									$current_card = intval(str_replace('.jpg', '', basename($src)));
-									$card = card_icon_img($current_card);
-									$output_arr['html'] .= '<td>' . $card['html'] . '</td>';
-									$output_arr['shortcode'] .= '<td>' . $card['shortcode'] . '</td>';
-
-									$first_card = FALSE;
+									if(!array_key_exists($current_card, $monster_output)){
+										$monster_output[$current_card] = array(
+											'AWK' => array(),
+											'SA' => array(),
+											'INFO' => '',
+											'COMP' => '',
+											'STAT' => array()
+										);
+									}else if (sizeof($monster_output[$current_card]['AWK']) > 0){
+										# array_push($monster_output[$current_card]['AWK'], array(-1, 'SA'));
+										$awk_key = 'SA';
+									}
 								}else if (strpos($src, 'kakusei_icon') !== FALSE){
 									$found_awake = TRUE;
-									$awk_icon = convert_awk($src);
+									$aid = intval(str_replace('.png', '', basename($src)));
 									if (strpos($td->nodeValue, '追加') !== FALSE){
-										array_push($awakes, array($awk_icon, 'added'));
+										array_push($monster_output[$current_card][$awk_key], array($aid, 'added'));
 									}else if (strpos($td->nodeValue, '変更') !== FALSE){
-										array_push($awakes, array($awk_icon, 'changed'));
+										array_push($monster_output[$current_card][$awk_key], array($aid, 'changed'));
 									}else{
-										array_push($awakes, array($awk_icon, 'same'));
+										array_push($monster_output[$current_card][$awk_key], array($aid, 'same'));
 									}
 								}
 							}
 						}
 					}
 					if (!$found_card && !$found_awake){
-						$new_card_info = $td->nodeValue;
-						$compare_info = '';
-						preg_match('/HP:(\d+).*?攻撃:(\d+).*?回復:(\d+).*?↓.*?HP:(\d+).*?攻撃:(\d+).*?回復:(\d+)/s', $new_card_info, $matches);
+						$monster_output[$current_card]['INFO'] .= $td->nodeValue . PHP_EOL;
+						$new_info = $td->nodeValue;
+						preg_match('/HP:(\d+).*?攻撃:(\d+).*?回復:(\d+).*?↓.*?HP:(\d+).*?攻撃:(\d+).*?回復:(\d+)/s', $new_info, $matches);
 						if(sizeof($matches) === 7){
-							$changed_stats = array();
 							foreach (array('HP', 'ATK', 'RCV') as $i => $stat){
 								$value = intval($matches[$i+4]) - intval($matches[$i+1]);
 								if ($value > 0){
-									array_push($changed_stats, '+' . $value . ' ' . $stat);
+									array_push($monster_output[$current_card]['STAT'], '+' . $value . ' ' . $stat);
 								}
 							}
-							$output_arr['html'] .= '<td>' . implode(', ', $changed_stats) . '</td>';
-							$output_arr['shortcode'] .= '<td>' . implode(', ', $changed_stats) . '</td>';	
 						}else{
 							$old_card_info = select_card($current_card);
 							if($old_card_info !== false){
-								if (preg_match('/^\s*リーダースキル：/', $new_card_info) === 1){
-									$compare_info .= '<span>Leader Skill: ' . $old_card_info['LS_DESC_US'] . '</span>';
+								if (preg_match('/\nリーダースキル：/', $new_info) === 1){
+									$monster_output[$current_card]['COMP'] .= 'Leader Skill: ' . $old_card_info['LS_DESC_US'] . PHP_EOL;
 								} 
-								if(preg_match('/^\s*スキル：/', $new_card_info) === 1){
-									$compare_info .= '<span>Active Skill: ' . $old_card_info['AS_DESC_US'] . '</span>';
+								if(preg_match('/\nスキル：/', $new_info) === 1){
+									$monster_output[$current_card]['COMP'] .= '<span>Active Skill: ' . $old_card_info['AS_DESC_US'] . PHP_EOL;
 								}	
 							}	
-							$output_arr['html'] .= '<td><span>' . $new_card_info . '</span>' . $compare_info . '</td>';
-							$output_arr['shortcode'] .= '<td><span>' . $new_card_info . '</span>' . $compare_info . '</td>';	
 						}
 					}
 				}
 			}
 		}
 	}
-	$output_arr = awk_td($awakes, $output_arr);
-
-	$output_arr['html'] .= '</tr>';
-	$output_arr['shortcode'] .= '</tr>';
-	$output_arr['html'] .= '</table>';
-	$output_arr['shortcode'] .= '</table>';
 }
+function fmt_card_buff($id, $mons, $mode){
+	$card_icon = card_icon_img($id);
+	$output = '';
+	$rowspan = 0;
+	if ($mons['STAT'] !== ''){
+		$output .= '<tr><td class="card-change-stats">' . implode(', ', $mons['STAT']) . '</td></tr>';
+		$rowspan += 1;
+	}
+	if ($mons['INFO'] !== ''){
+		$output .= '<tr><td class="card-change-info">' . $mons['INFO'];
+		$rowspan += 1;
+		if ($mons['COMP'] !== ''){
+			$output .= PHP_EOL . $mons['COMP'];
+		}
+		$output .= '</td></tr>';
+	}
+	if (sizeof($mons['AWK']) > 0){
+		$output .= '<tr><td class="card-change-awakes">';
+		foreach($mons['AWK'] as $ak){
+			$icon = awake_icon($ak[0]);
+			$output .= '<span class="card-awk-' . $ak[1] . '"> ' . $icon[$mode] . '</span>';
+		}
+		$output .= '</td></tr>';
+		$rowspan += 1;
+	}
+	if (sizeof($mons['SA']) > 0){
+		$output .= '<tr><td class="card-change-sa">';
+		foreach($mons['SA'] as $ak){
+			$icon = awake_icon($ak[0]);
+			$output .= '<span class="card-awk-sa"> ' . $icon[$mode] . '</span>';
+		}
+		$output .= '</td></tr>';
+		$rowspan += 1;
+	}
+	$output = '<tr><td class="card-change-icon" rowspan="' . $rowspan . '">' . card_icon_img($id)[$mode] . '</td>' . substr($output, 4);
+	return $output;
+}
+$output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></thead>';
+$output_arr['shortcode'] .= '<table><thead><tr><td>Card</td><td>Change</td></thead>';
+foreach($monster_output as $id => $mons){
+	$output_arr['html'] .= fmt_card_buff($id, $mons, 'html');
+	$output_arr['shortcode'] .= fmt_card_buff($id, $mons, 'shortcode');
+}
+$output_arr['html'] .= '</table>';
+$output_arr['shortcode'] .= '</table>';
 
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>';
 ?>
