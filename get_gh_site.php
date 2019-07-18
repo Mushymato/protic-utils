@@ -142,7 +142,7 @@ function fmt_card_buff($id, $mons, $mode){
 		$output .= '</td></tr>';
 		$rowspan += 1;
 	}
-	$output = '<tr><td class="card-change-icon" rowspan="' . $rowspan . '">' . card_icon_img($id)[$mode] . ($mons['NAME'] !== '' ? '<span class="card-change-name">' . $mons['NAME'] . '</span>' : '') . '</td>' . substr($output, 4);
+	$output = '<tr><td class="card-change-icon" rowspan="' . $rowspan . '">' . card_icon_img($id)[$mode] . ($mons['NAME'] !== '' ? '<p class="card-change-name">' . $mons['NAME'] . '</p>' : '') . '</td>' . substr($output, 4);
 	return $output;
 }
 $output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></thead>';
