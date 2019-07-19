@@ -58,7 +58,8 @@ foreach ($buff_tables as $tbl){
 											'SA' => array(),
 											'INFO' => '',
 											'COMP' => '',
-											'STAT' => array()
+											'STAT_DIF' => array(),
+											'STAT_MAX' => array()
 										);
 									}
 									continue;
@@ -93,10 +94,11 @@ foreach ($buff_tables as $tbl){
 						foreach (array('HP', 'ATK', 'RCV') as $i => $stat){
 							$value = intval($matches[$i+4]) - intval($matches[$i+1]);
 							if ($value > 0){
-								array_push($monster_output[$current_card]['STAT'], '+' . $value . ' ' . $stat);
+								array_push($monster_output[$current_card]['STAT_DIF'], '+' . $value . ' ' . $stat);
 							}
+							array_push($monster_output[$current_card]['STAT_MAX'], intval($matches[$i+4]) . ' ' . $stat);
 						}
-						if (sizeof($monster_output[$current_card]['STAT']) > 0){
+						if (sizeof($monster_output[$current_card]['STAT_DIF']) > 0){
 							$monster_output[$current_card]['INFO'] .= $td->nodeValue . PHP_EOL;
 						}
 					}else{
@@ -123,46 +125,49 @@ function fmt_card_buff($id, $mons, $mode){
 	$card_icon = card_icon_img($id);
 	$output = '';
 	$rowspan = 0;
-	if (sizeof($mons['STAT']) > 0){
-		$output .= '<tr><td class="card-change-stats">' . implode(', ', $mons['STAT']) . '</td></tr>';
+	if (sizeof($mons['STAT_DIF']) > 0){
+		$output .= '<div class="card-change-stats"><span>Stat Changes</span><div>' . implode(', ', $mons['STAT_DIF']) . '</div><div>(Now ' . implode(' / ', $mons['STAT_MAX']) . ')</div></div>';
 		$rowspan += 1;
 	}
 	if ($mons['INFO'] !== ''){
-		$output .= '<tr><td class="card-change-info">' . $mons['INFO'];
+		$output .= '<div class="card-change-info">' . $mons['INFO'];
 		$rowspan += 1;
 		if ($mons['COMP'] !== ''){
 			$output .= PHP_EOL . $mons['COMP'];
 		}
-		$output .= '</td></tr>';
+		$output .= '</div>';
 	}
+	$awake_output = '';
 	if (sizeof($mons['OLD_AWK']) > 0){
-		$output .= '<tr><td class="card-change-old-awakes"><u>Old:</u> ';
+		$awake_output .= '<div class="card-change-old-awakes"><u>Old:</u> ';
 		foreach($mons['OLD_AWK'] as $ak){
 			$icon = awake_icon($ak);
-			$output .= $icon[$mode];
+			$awake_output .= $icon[$mode];
 		}
-		$output .= '</td></tr>';
+		$awake_output .= '</div>';
 		$rowspan += 1;
 	}
 	if (sizeof($mons['NEW_AWK']) > 0){
-		$output .= '<tr><td class="card-change-new-awakes"><u>New:</u> ';
+		$awake_output .= '<div class="card-change-new-awakes"><u>New:</u> ';
 		foreach($mons['NEW_AWK'] as $ak){
 			$icon = awake_icon($ak);
-			$output .= $icon[$mode];
+			$awake_output .= $icon[$mode];
 		}
-		$output .= '</td></tr>';
+		$awake_output .= '</div>';
 		$rowspan += 1;
 	}
 	if (sizeof($mons['SA']) > 0){
-		$output .= '<tr><td class="card-change-sa"><u>SA:</u> ';
+		$awake_output .= '<div class="card-change-sa"><u>SA:</u> ';
 		foreach($mons['SA'] as $ak){
 			$icon = awake_icon($ak);
-			$output .= $icon[$mode];
+			$awake_output .= $icon[$mode];
 		}
-		$output .= '</td></tr>';
-		$rowspan += 1;
+		$awake_output .= '</div>';
 	}
-	$output = '<tr><td class="card-change-icon" rowspan="' . $rowspan . '">' . card_icon_img($id)[$mode] . ($mons['NAME_EN'] !== '' ? '<p class="card-change-name">' . $mons['NAME_EN'] . '</p>' : '') . ($mons['NAME_JP'] !== '' ? '<p class="card-change-name">' . $mons['NAME_JP'] . '</p>' : '') . '</td>' . substr($output, 4);
+	if (strlen($awake_output) > 0){
+		$output .= '<div class="card-change-awakes"><span>Awakening Changes</span>' . $awake_output . '</div>';
+	}
+	$output = '<tr><td class="card-change-icon">' . card_icon_img($id)[$mode] . ($mons['NAME_EN'] !== '' ? '<p class="card-change-name">' . $mons['NAME_EN'] . '</p>' : '') . ($mons['NAME_JP'] !== '' ? '<p class="card-change-name">' . $mons['NAME_JP'] . '</p>' : '') . '</td><td>' . $output . '</td></tr>';
 	return $output;
 }
 $output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></thead>';
