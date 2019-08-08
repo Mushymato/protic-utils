@@ -454,7 +454,13 @@ $aw = array(
 	15823 => 64,
 	16460 => 65,
 	16461 => 66,
-	16462 => 67);
+	16462 => 67,
+	16675 => 68,
+	16676 => 69,
+	16677 => 70,
+	16678 => 71,
+	16679 => 72
+);
 function awake_icon($id, $w = '31', $h = '32', $awake_url = '/wp-content/uploads/pad-awks/', $info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s='){
 	return array('html' => '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>', 'shortcode' => '[awk id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']');
 }
