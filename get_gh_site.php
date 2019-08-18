@@ -5,7 +5,7 @@
 include 'miru_common.php';
 
 $input_str = array_key_exists('input', $_POST) ? 'https://pad.gungho.jp/member/' . $_POST['input'] . '.html': '';
-$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
+$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 $awk = array_key_exists('awk', $_POST) ? $_POST['awk'] : 'yes';
 ?>
 <form method="post">
@@ -28,13 +28,13 @@ $doc = new DOMDocument();
 $doc->loadHTML($html);
 $xpath = new DOMXpath($doc);
 
-$buff_tables = $xpath->query("//table[@class='monster_list']");
+$buff_tables = $xpath->query("//table[contains(@class, 'monster_list')]");
 $monster_output = array();
 $current_card = 0;
 foreach ($buff_tables as $tbl){
 	foreach ($tbl->childNodes as $tr){
 		if (isset($tr->childNodes)){
-			$awk_key = 'NEW_AWK';
+			$awk_key = 'SA';
 			foreach ($tr->childNodes as $td){
 				if (isset($td->tagName) && $td->tagName == 'td'){
 					foreach ($td->childNodes as $n){
@@ -43,6 +43,9 @@ foreach ($buff_tables as $tbl){
 								$src = $n->getAttribute('src');
 								if (strpos($src, 'm_icon') !== FALSE){
 									$current_card = intval(str_replace('.jpg', '', basename($src)));
+									if($n->getAttribute('rowspan') == '2'){
+										$awk_key = 'SA';
+									}
 									if(!array_key_exists($current_card, $monster_output)){
 										$old_card_info = select_card($current_card);
 										if($old_card_info !== false){
@@ -79,9 +82,6 @@ foreach ($buff_tables as $tbl){
 									continue;
 								}else if($n->nodeValue == '調整前'){
 									$awk_key = 'OLD_AWK';
-									continue;
-								}else if($n->nodeValue == '超覚醒'){
-									$awk_key = 'SA';
 									continue;
 								}
 							}
@@ -126,7 +126,7 @@ function fmt_card_buff($id, $mons, $mode){
 	$output = '';
 	$rowspan = 0;
 	if (sizeof($mons['STAT_DIF']) > 0){
-		$output .= '<div class="card-change-stats"><span>Stat Changes</span><div>' . implode(', ', $mons['STAT_DIF']) . '</div><div>(Now ' . implode(' / ', $mons['STAT_MAX']) . ')</div></div>';
+		$output .= '<div class="card-change-stats"><div class="card-change-stats-name">Stat Changes</div><div>' . implode(', ', $mons['STAT_DIF']) . '</div><div>(Now ' . implode(' / ', $mons['STAT_MAX']) . ')</div></div>';
 		$rowspan += 1;
 	}
 	if ($mons['INFO'] !== ''){
@@ -165,13 +165,14 @@ function fmt_card_buff($id, $mons, $mode){
 		$awake_output .= '</div>';
 	}
 	if (strlen($awake_output) > 0){
-		$output .= '<div class="card-change-awakes"><span>Awakening Changes</span>' . $awake_output . '</div>';
+		$output .= '<div class="card-change-awakes"><div class="card-change-awakes-name">Awakening Changes</div>' . $awake_output . '</div>';
 	}
 	$output = '<tr><td class="card-change-icon">' . card_icon_img($id)[$mode] . ($mons['NAME_EN'] !== '' ? '<p class="card-change-name">' . $mons['NAME_EN'] . '</p>' : '') . ($mons['NAME_JP'] !== '' ? '<p class="card-change-name">' . $mons['NAME_JP'] . '</p>' : '') . '</td><td>' . $output . '</td></tr>';
 	return $output;
 }
-$output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></thead>';
-$output_arr['shortcode'] .= '<table><thead><tr><td>Card</td><td>Change</td></thead>';
+$output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
+$output_arr['shortcode'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
+ksort($monster_output);
 foreach($monster_output as $id => $mons){
 	$output_arr['html'] .= fmt_card_buff($id, $mons, 'html');
 	$output_arr['shortcode'] .= fmt_card_buff($id, $mons, 'shortcode');

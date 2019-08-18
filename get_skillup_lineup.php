@@ -7,7 +7,7 @@
 <?php
 include 'miru_common.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : 'TITLE' . PHP_EOL . '2969/4428';
-$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
+$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 ?>
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>

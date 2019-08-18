@@ -5,7 +5,7 @@
 include 'miru_common.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '4428';
 $ids = search_ids($input_str);
-$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
+$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 $sa = array_key_exists('sa', $_POST) ? $_POST['sa'] : 'yes';
 ?>
 <form method="post">

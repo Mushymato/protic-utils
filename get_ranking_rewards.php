@@ -4,7 +4,7 @@
 <?php
 include 'miru_common.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
-$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
+$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 function endsWith($haystack, $needle)
 {
     $length = strlen($needle);

@@ -2,7 +2,7 @@
 include 'miru_common.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
 $ids = search_ids($input_str);
-$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'html';
+$om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 $rg = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
 $tf = array_key_exists('tf', $_POST) ? $_POST['tf'] : 'rem';
 ?>
