@@ -599,4 +599,31 @@ function search_ids($input_str){
 	}
 	return $ids;
 }
+
+function get_button_info($id, $button_type_name){
+	global $portrait_url;
+	$data = select_card($id);
+	if(!$data){
+		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
+	}
+	$card = card_icon_img($id, $data['TM_NAME_US']);	
+	return array(
+		'html' => '<tr><td> <h2 id="card_' . $id . '">' . $card['html'] . '</h2></td>' . '<td>' . htmlentities($button_type_name) . '</td></tr>');
+}
+
+function retrieve_some_buttons($button_type_id, $button_type_name)	{	
+	global $miru;
+	$sql = 'SELECT buttonList.MONSTER_NO from buttonList WHERE buttonList.SKILL_TYPE=? AND buttonList.INHERITABLE = 1;';
+	$stmt = $miru->conn->prepare($sql);
+	$stmt->bind_param('i', $button_type_id);
+	$res = execute_select_stmt($stmt);
+	$stmt->free_result();
+	$stmt->close();
+	echo ('<h1><span id=' . $button_type_name . '>' . $button_type_name . '</span></h1><table><thead><tr><td>Card</td><td>Active Skill</td></tr></thead><tbody>');
+	foreach ($res as $id)	{
+		echo (get_button_info($id['MONSTER_NO'], $button_type_name)['html']);
+	}
+echo ('</tbody></table>');
+}
+
 ?>
