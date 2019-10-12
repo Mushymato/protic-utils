@@ -487,7 +487,7 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1]  . '<br/>' . PHP_EOL . $supers[1]);
 }
-function get_card_grid($id, $right_side_table = false, $headings = false){
+function get_card_grid($id, $right_side_table = false, $headings){
 	global $fullimg_url;
 	$data = select_card($id);
 	if(!$data){
@@ -506,10 +506,17 @@ function get_card_grid($id, $right_side_table = false, $headings = false){
 		$stat1 = stat_table($data, true);
 	}
 	$name_arr = explode(', ', $data['TM_NAME_US']);
-	$head = $headings ? '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' : '';
+	$head = '';
+	if ($headings == 'yes'){
+		$head = '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' . PHP_EOL . '<div class="cardgrid">';
+	} else if ($headings == 'tocOnly'){
+		$head = '<div class="cardgrid" id="card_' . $id . '">';
+	} else {
+		$head = '<div class="cardgrid">';
+	}
 	return array(
-		'html' => $head . '<div class="cardgrid"><div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/><b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/><b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="cardgrid"><div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US'] . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>') . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
+		'html' => $head . '<div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/><b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/><b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
+		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US'] . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>') . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
 function get_card_summary($id){
 	global $portrait_url;
