@@ -2,6 +2,8 @@
 $insert_size = 250;
 $portrait_url = '/wp-content/uploads/pad-portrait/';
 $fullimg_url = '/wp-content/uploads/pad-img/';
+$portrait_url_na = '/wp-content/uploads/na/pad-portrait/';
+$fullimg_url_na = '/wp-content/uploads/na/pad-img/';
 class mySQLConn{
 	function connect_sql($host, $user, $pass, $schema){
 		// Create connection
@@ -290,6 +292,7 @@ function select_card($id){
 }
 function grab_img_if_exists($url, $id, $savedir, $override = false){
 	$saveto = $savedir . $id . '.png';
+	// echo realpath($saveto) . PHP_EOL;
 	if (!file_exists($savedir)) {
 		mkdir($savedir, 0777, true);
 	}else if(file_exists($saveto) && !$override){
