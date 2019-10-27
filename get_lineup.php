@@ -3,7 +3,6 @@
 <script type="text/javascript">
 function showHide(self, target){
 	if(document.getElementById(self).checked){
-		console.log(self, target);
 		document.getElementById(target).style.display = 'block';
 	}else{
 		document.getElementById(target).style.display = 'none';
@@ -79,7 +78,7 @@ function populate_from_mirubot($rem_name, $region){
 	$mons_array = array();
 	foreach($contents as $id => $rate){
 		$rate = $rate * 100;
-		$mon = query_monster($q_str, $region);
+		$mon = query_monster($id, $region);
 		if($mon){
 			$mon['EVOS'] = array();
 			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
