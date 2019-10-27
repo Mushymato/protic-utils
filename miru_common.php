@@ -192,21 +192,32 @@ function check_table_exists($tablename){
 function single_param_stmt($query, $q_str){
 	global $miru;
 	$stmt = $miru->conn->prepare($query);
+	if (!$stmt){
+		echo $query . PHP_EOL;
+	}
 	$stmt->bind_param('s', $q_str);
 	$res = execute_select_stmt($stmt);
 	$stmt->close();
 	return $res;
 }
-function query_monster($q_str){
+function query_monster($q_str, $region = 'JP'){
 	global $miru;
 	$q_str = trim($q_str);
 	if($q_str == ''){
 		return false;
 	}
 	if(ctype_digit($q_str)){
-		$sql = 'SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE MONSTER_NO=? ORDER BY MONSTER_NO DESC';
+		$sql = 'SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE MONSTER_NO_'.$region.'=? ORDER BY MONSTER_NO DESC';
 		$res = single_param_stmt($sql, $q_str);
 		if(sizeof($res) > 0){
+			if(sizeof($res) > 1){
+				foreach($res as $r){
+					if (($region == 'US' && $r['MONSTER_NO'] !== $r['MONSTER_NO_US']) ||
+							($region == 'JP' && $r['MONSTER_NO'] === $r['MONSTER_NO_JP'])){
+					return $r;
+					}
+				}
+			}
 			return $res[0];
 		}
 	}
@@ -217,10 +228,10 @@ function query_monster($q_str){
 	);
 	$query = array();
 	if(!mb_check_encoding($q_str, 'ASCII')){
-		$query['SELECT MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
+		$query['SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
 	}else{
-		$query['SELECT monsterList.MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
-		$query['SELECT MONSTER_NO_US MONSTER_NO, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';
+		$query['SELECT monsterList.MONSTER_NO as MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO_'.$region.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
+		$query['SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
@@ -228,6 +239,14 @@ function query_monster($q_str){
 			if(sizeof($res) > 0){
 				if($res[0]['MONSTER_NO'] > 10000){ // crows in computedNames
 					$res[0]['MONSTER_NO'] = $res[0]['MONSTER_NO'] - 10000;
+				}
+				if(sizeof($res) > 1){
+					foreach($res as $r){
+						if (($region == 'US' && $r['MONSTER_NO'] !== $r['MONSTER_NO_US']) ||
+								($region == 'JP' && $r['MONSTER_NO'] === $r['MONSTER_NO_JP'])){
+							return $r;
+						}
+					}
 				}
 				return $res[0];
 			}
@@ -273,8 +292,11 @@ function select_evolutions($id){
 }
 function select_card($id){
 	global $miru;
-	$sql = 'SELECT monsterList.ATK_MAX, monsterList.HP_MAX, monsterList.RCV_MAX, monsterList.LEVEL, monsterList.LIMIT_MULT, monsterList.TA_SEQ ATT_1, monsterList.TA_SEQ_SUB ATT_2, monsterList.TE_SEQ, monsterList.TM_NAME_JP, monsterList.TM_NAME_US, monsterList.TT_SEQ TYPE_1, monsterList.TT_SEQ_SUB TYPE_2, monsterAddInfoList.SUB_TYPE TYPE_3, leadSkill.TS_DESC_US LS_DESC_US, leadSkillData.LEADER_DATA, active.TS_DESC_US AS_DESC_US, active.TURN_MAX AS_TURN_MAX, active.TURN_MIN AS_TURN_MIN FROM monsterList LEFT JOIN skillList leadSkill ON monsterList.TS_SEQ_LEADER=leadSkill.TS_SEQ LEFT JOIN skillLeaderDataList leadSkillData ON monsterList.TS_SEQ_LEADER=leadSkillData.TS_SEQ LEFT JOIN skillList active ON monsterList.TS_SEQ_SKILL=active.TS_SEQ LEFT JOIN monsterAddInfoList ON monsterList.MONSTER_NO=monsterAddInfoList.MONSTER_NO WHERE monsterList.MONSTER_NO=?;';
+	$sql = 'SELECT monsterList.MONSTER_NO, monsterList.MONSTER_NO_JP, monsterList.MONSTER_NO_US, monsterList.ATK_MAX, monsterList.HP_MAX, monsterList.RCV_MAX, monsterList.LEVEL, monsterList.LIMIT_MULT, monsterList.TA_SEQ ATT_1, monsterList.TA_SEQ_SUB ATT_2, monsterList.TE_SEQ, monsterList.TM_NAME_JP, monsterList.TM_NAME_US, monsterList.TT_SEQ TYPE_1, monsterList.TT_SEQ_SUB TYPE_2, monsterAddInfoList.SUB_TYPE TYPE_3, leadSkill.TS_DESC_US LS_DESC_US, leadSkillData.LEADER_DATA, active.TS_DESC_US AS_DESC_US, active.TURN_MAX AS_TURN_MAX, active.TURN_MIN AS_TURN_MIN FROM monsterList LEFT JOIN skillList leadSkill ON monsterList.TS_SEQ_LEADER=leadSkill.TS_SEQ LEFT JOIN skillLeaderDataList leadSkillData ON monsterList.TS_SEQ_LEADER=leadSkillData.TS_SEQ LEFT JOIN skillList active ON monsterList.TS_SEQ_SKILL=active.TS_SEQ LEFT JOIN monsterAddInfoList ON monsterList.MONSTER_NO=monsterAddInfoList.MONSTER_NO WHERE monsterList.MONSTER_NO=?;';
 	$stmt = $miru->conn->prepare($sql);
+	if (!$stmt){
+		echo $sql . PHP_EOL;
+	}
 	$stmt->bind_param('i', $id);
 	$res = execute_select_stmt($stmt);
 	$stmt->free_result();
@@ -490,8 +512,9 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1]  . '<br/>' . PHP_EOL . $supers[1]);
 }
-function get_card_grid($id, $right_side_table = false, $headings){
+function get_card_grid($id, $region = 'JP', $right_side_table = false, $headings = false){
 	global $fullimg_url;
+	global $fullimg_url_na;
 	$data = select_card($id);
 	if(!$data){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
@@ -517,9 +540,12 @@ function get_card_grid($id, $right_side_table = false, $headings){
 	} else {
 		$head = '<div class="cardgrid">';
 	}
+	$monster_no = $data['MONSTER_NO_'.$region];
+	$regional_img_url = ($region == 'JP') ? $fullimg_url : $fullimg_url_na;
+	echo $regional_img_url;
 	return array(
-		'html' => $head . '<div class="col1"><img src="'. $fullimg_url . $id . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $id . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/><b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/><b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $id . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $id . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US'] . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>') . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
+		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/><b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/><b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
+		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US'] . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>') . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
 function get_card_summary($id){
 	global $portrait_url;
@@ -599,10 +625,10 @@ function get_egg($rare){
 		return array('html' => '[EGG]', 'shortcode' => '[EGG]');
 	}
 }
-function search_ids($input_str){
+function search_ids($input_str, $region = 'JP'){
 	$ids = array();
 	foreach(explode("\n", $input_str) as $line){
-		$mon = query_monster(trim($line));
+		$mon = query_monster(trim($line), $region);
 		if($mon){
 			$ids[] = $mon['MONSTER_NO'];
 		}
