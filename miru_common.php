@@ -206,14 +206,18 @@ function query_monster($q_str, $region = 'JP'){
 	if($q_str == ''){
 		return false;
 	}
+	if ($region != ''){
+		$region = '_'.$region;
+	}
 	if(ctype_digit($q_str)){
-		$sql = 'SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE MONSTER_NO_'.$region.'=? ORDER BY MONSTER_NO DESC';
+		$sql = 'SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE MONSTER_NO'.$region.'=? ORDER BY MONSTER_NO DESC';
+		echo $sql;
 		$res = single_param_stmt($sql, $q_str);
 		if(sizeof($res) > 0){
 			if(sizeof($res) > 1){
 				foreach($res as $r){
-					if (($region == 'US' && $r['MONSTER_NO'] !== $r['MONSTER_NO_US']) ||
-							($region == 'JP' && $r['MONSTER_NO'] === $r['MONSTER_NO_JP'])){
+					if (($region == '_US' && $r['MONSTER_NO'] !== $r['MONSTER_NO_US']) ||
+							($region == '_JP' && $r['MONSTER_NO'] === $r['MONSTER_NO_JP'])){
 					return $r;
 					}
 				}
@@ -230,23 +234,24 @@ function query_monster($q_str, $region = 'JP'){
 	if(!mb_check_encoding($q_str, 'ASCII')){
 		$query['SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
 	}else{
-		$query['SELECT monsterList.MONSTER_NO as MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO_'.$region.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
+		$query['SELECT monsterList.MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO'.$region.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
 		$query['SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
 			$res = single_param_stmt($q . $m[0] . $o, $m[1]);
 			if(sizeof($res) > 0){
-				if($res[0]['MONSTER_NO'] > 10000){ // crows in computedNames
-					$res[0]['MONSTER_NO'] = $res[0]['MONSTER_NO'] - 10000;
-				}
 				if(sizeof($res) > 1){
 					foreach($res as $r){
-						if (($region == 'US' && $r['MONSTER_NO'] !== $r['MONSTER_NO_US']) ||
-								($region == 'JP' && $r['MONSTER_NO'] === $r['MONSTER_NO_JP'])){
+						print_r($r);
+						if (($region == '_US' && $r['MONSTER_NO'] != $r['MONSTER_NO_US']) ||
+								($region == '_JP' && $r['MONSTER_NO'] == $r['MONSTER_NO_JP'])){
 							return $r;
 						}
 					}
+				}
+				if($res[0]['MONSTER_NO'] > 10000){ // crows in computedNames
+					$res[0]['MONSTER_NO'] = $res[0]['MONSTER_NO'] - 10000;
 				}
 				return $res[0];
 			}
@@ -334,10 +339,12 @@ function grab_img_if_exists($url, $id, $savedir, $override = false){
 	}
 	return false;
 }
-function card_icon_img($id, $name = '', $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
+function card_icon_img($id, $name = '', $region = 'JP', $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
 	global $portrait_url;
+	global $portrait_url_na;
+	$regional_img_url = $region == 'JP' ? $portrait_url : $portrait_url_na;
 	return array(
-		'html' => '<a href="' . $href . $id . '"><img src="' . $portrait_url . $id . '.png" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
+		'html' => '<a href="' . $href . $id . '"><img src="' . $regional_img_url . $id . '.png" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
 		'shortcode' => '[pdx id=' . $id . ($w == $h && $w == '63' ? '' : ' w=' . $w . ' h=' . $h) . ']');
 }
 function lb_stat($base, $mult){

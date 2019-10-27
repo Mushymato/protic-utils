@@ -30,7 +30,7 @@ function machine_selector($selected = ''){
 	}
 	return '<select id="rem_selector" name="rem_name" style="width:80vw;height:2em;">' . $output . '</select>';
 }
-function populate_from_input($input_str){
+function populate_from_input($input_str, $region){
 	$mons_array = array();
 	foreach(explode("\n", $input_str) as $line){
 		if(trim($line) == '★'){
@@ -46,11 +46,12 @@ function populate_from_input($input_str){
 			$q_str = $parts[sizeof($parts)-2];
 			$rate = floatval(str_replace('%', '', $parts[sizeof($parts)-1]));
 		}
-		$mon = query_monster($q_str);
+		$mon = query_monster($q_str, $region);
 		if($mon){
 			$mon['EVOS'] = array();
 			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
-				$mon['EVOS'][] = query_monster($eid);
+				$mon['EVOS'][] = query_monster($eid, '');
+				echo $eid . query_monster($eid, '')['TM_NAME_US'];
 			}
 			if(array_key_exists($mon['RARITY'] . '|' . $rate, $mons_array)){
 				$mons_array[$mon['RARITY'] . '|' . $rate][] = $mon;
@@ -61,7 +62,7 @@ function populate_from_input($input_str){
 	}
 	return sort_mons_array($mons_array);
 }
-function populate_from_mirubot($rem_name){
+function populate_from_mirubot($rem_name, $region){
 	global $data;
 	$contents = false;
 	foreach($data as $machine){
@@ -79,11 +80,11 @@ function populate_from_mirubot($rem_name){
 	$mons_array = array();
 	foreach($contents as $id => $rate){
 		$rate = $rate * 100;
-		$mon = query_monster($id);
+		$mon = query_monster($q_str, $region);
 		if($mon){
 			$mon['EVOS'] = array();
 			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
-				$mon['EVOS'][] = query_monster($eid);
+				$mon['EVOS'][] = query_monster($eid, '');
 			}
 			if(array_key_exists($mon['RARITY'] . '|' . $rate, $mons_array)){
 				$mons_array[$mon['RARITY'] . '|' . $rate][] = $mon;
@@ -112,7 +113,7 @@ function sort_mons_array($mons_array){
 	});
 	return $mons_array;
 }
-function detailed_lineup($mons_array){
+function detailed_lineup($mons_array, $region){
 	$output_arr = array('html' => '', 'shortcode' => '');
 	foreach($mons_array as $key => $mons){
 		$rr = explode('|', $key);
@@ -128,14 +129,15 @@ function detailed_lineup($mons_array){
 		$output_arr['html'] = $output_arr['html'] . '</strong></div><div class="rem-wrapper-block">'  . PHP_EOL;
 		$output_arr['shortcode'] = $output_arr['shortcode'] . '</strong></div><div class="rem-wrapper-block">'  . PHP_EOL;
 		foreach($mons as $mon){
-			$card = card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US']);
-			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $mon['MONSTER_NO'] . '] <strong>' . $mon['TM_NAME_US'] . '</strong><br/>' . $mon['TM_NAME_JP'];
-			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $mon['MONSTER_NO'] . '] <strong>' . $mon['TM_NAME_US'] . '</strong><br/>' . $mon['TM_NAME_JP'];
+			$monster_no = $mon['MONSTER_NO_'.$region];
+			$card = card_icon_img($monster_no, $mon['TM_NAME_US'], $region);
+			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['TM_NAME_US'] . '</strong><br/>' . $mon['TM_NAME_JP'];
+			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['TM_NAME_US'] . '</strong><br/>' . $mon['TM_NAME_JP'];
 			if(sizeof($mon['EVOS']) > 0){
 				$output_arr['html'] = $output_arr['html'] . '<br/><span>';
 				$output_arr['shortcode'] = $output_arr['shortcode'] . '<br/><span>';
 				foreach($mon['EVOS'] as $evo){
-					$card = card_icon_img($evo['MONSTER_NO'], $evo['TM_NAME_US'], '40', '40');
+					$card = card_icon_img($evo['MONSTER_NO_'.$region], $evo['TM_NAME_US'], $region, '40', '40');
 					$output_arr['html'] = $output_arr['html'] . $card['html'] . ' ';
 					$output_arr['shortcode'] = $output_arr['shortcode'] . $card['shortcode'] . ' ';
 				}
@@ -150,7 +152,7 @@ function detailed_lineup($mons_array){
 	}
 	return $output_arr;
 }
-function rate_groups_lineup($mons_array){
+function rate_groups_lineup($mons_array, $region){
 	$output_arr = array('html' => '', 'shortcode' => '');
 	foreach($mons_array as $key => $mons){
 		$rr = explode('|', $key);
@@ -165,7 +167,8 @@ function rate_groups_lineup($mons_array){
 		$output_arr['html'] .= '<div>';
 		$output_arr['shortcode'] .= PHP_EOL . PHP_EOL;
 		foreach($mons as $mon){
-			$card = card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US']);
+			$monster_no = $mon['MONSTER_NO_'.$region];
+			$card = card_icon_img($monster_no, $mon['TM_NAME_US'], $region);
 			$output_arr['html'] .= $card['html'];
 			$output_arr['shortcode'] .= $card['shortcode'];
 		}
@@ -178,6 +181,7 @@ function rate_groups_lineup($mons_array){
 <body>
 <?php
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
+$re = array_key_exists('r', $_POST) ? $_POST['r'] : 'JP';
 $om = array_key_exists('om', $_POST) ? $_POST['om'] : 'html';
 $st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';
 $ir = array_key_exists('ir', $_POST) ? $_POST['ir'] : 'mirubot';
@@ -186,6 +190,7 @@ $rem = array_key_exists('rem_name', $_POST) ? $_POST['rem_name'] : '';
 <form method="post">
 Output Mode: <input type="radio" name="om" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="om" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"><br/>
 Output Style: <input type="radio" name="st" value="rates" <?php if($st == 'rates'){echo 'checked';}?>> Rate Groups <input type="radio" name="st" value="cards" <?php if($st == 'cards'){echo 'checked';}?>> Card Details<br/>
+<p>Region: <input type="radio" name="r" value="JP" <?php if($re == 'JP'){echo 'checked';}?>> JP <input type="radio" name="r" value="US" <?php if($re == 'US'){echo 'checked';}?>> US</p>
 <p>Enter <input type="radio" name="ir" value="mirubot" id="ir_mirubot" <?php if($ir == 'mirubot'){echo 'checked';}?>> REM Name <input type="radio" name="ir" value="ingame" id="ir_ingame" <?php if($ir == 'ingame'){echo 'checked';}?>> In-game Lineup</p>
 <?php echo machine_selector($rem);?>
 <textarea id="txt_input" name="input" style="width:80vw;height:20vh;">
@@ -195,8 +200,8 @@ Output Style: <input type="radio" name="st" value="rates" <?php if($st == 'rates
 <?php
 $time_start = microtime(true);
 
-$mons_array = $ir == 'mirubot' ? populate_from_mirubot($rem) : populate_from_input($input_str);
-$output_arr = $st == 'rates' ? rate_groups_lineup($mons_array) : detailed_lineup($mons_array);
+$mons_array = $ir == 'mirubot' ? populate_from_mirubot($rem, $re) : populate_from_input($input_str, $re);
+$output_arr = $st == 'rates' ? rate_groups_lineup($mons_array, $re) : detailed_lineup($mons_array, $re);
 
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>';
 ?>

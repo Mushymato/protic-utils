@@ -15,7 +15,7 @@ $hd = array_key_exists('h', $_POST) ? $_POST['h'] : 'tocOnly';
 ?>
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
-<p>Region: <input type="radio" name="r" value="JP" <?php if($re == 'JP'){echo 'checked';}?>> JP <input type="radio" name="r" value="US" <?php if($re == 'US'){echo 'checked';}?>> NA</p>
+<p>Region: <input type="radio" name="r" value="JP" <?php if($re == 'JP'){echo 'checked';}?>> JP <input type="radio" name="r" value="US" <?php if($re == 'US'){echo 'checked';}?>> US</p>
 <p>Table Side: <input type="radio" name="t" value="left" <?php if($tb == 'left'){echo 'checked';}?>> Left <input type="radio" name="t" value="right" <?php if($tb == 'right'){echo 'checked';}?>> Right</p>
 <p>ToC and Headings? <input type="radio" name="h" value="yes" <?php if($hd == 'yes'){echo 'checked';}?>> Yes <input type="radio" name="h" value="tocOnly" <?php if($hd == 'tocOnly'){echo 'checked';}?>> ToC only <input type="radio" name="h" value="no" <?php if($hd == 'no'){echo 'checked';}?>> No</p>
 <p>Enter search terms, one per line:</p>
