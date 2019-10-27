@@ -51,7 +51,6 @@ function populate_from_input($input_str, $region){
 			$mon['EVOS'] = array();
 			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
 				$mon['EVOS'][] = query_monster($eid, '');
-				echo $eid . query_monster($eid, '')['TM_NAME_US'];
 			}
 			if(array_key_exists($mon['RARITY'] . '|' . $rate, $mons_array)){
 				$mons_array[$mon['RARITY'] . '|' . $rate][] = $mon;
