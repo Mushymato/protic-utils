@@ -19,15 +19,16 @@ window.onload = function(){
 <html>
 <?php
 include 'miru_common.php';
-$region = 'jp';
-$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
+$data_jp = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/jp/egg_machines.json'), true);
+$data_na = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/na/egg_machines.json'), true);
+$data = array_merge($data_jp, $data_na);
 function machine_selector($selected = ''){
 	global $data;
 	$output = '';
-	foreach($data as $machine){
-		$output .= '<option value="' . $machine['clean_name'] . '"' . ($machine['clean_name'] == $selected ? ' selected' : '' ) . '>' . $machine['clean_name'] . '</option>';
+	foreach($data as $idx => $machine){
+		$output .= '<option value="' . $idx . '"' . ($idx == $selected ? ' selected' : '' ) . '>' . $machine['clean_name'] . '</option>';
 	}
-	return '<select id="rem_selector" name="rem_name" style="width:80vw;height:2em;">' . $output . '</select>';
+	return '<select id="rem_selector" name="rem" style="width:80vw;height:2em;">' . $output . '</select>';
 }
 function populate_from_input($input_str, $region){
 	$mons_array = array();
@@ -48,31 +49,22 @@ function populate_from_input($input_str, $region){
 		$mon = query_monster($q_str, $region);
 		if($mon){
 			$mon['EVOS'] = array();
-			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
+			foreach(select_evolutions($mon['monster_id']) as $eid){
 				$mon['EVOS'][] = query_monster($eid, '');
 			}
-			if(array_key_exists($mon['RARITY'] . '|' . $rate, $mons_array)){
-				$mons_array[$mon['RARITY'] . '|' . $rate][] = $mon;
+			if(array_key_exists($mon['rarity'] . '|' . $rate, $mons_array)){
+				$mons_array[$mon['rarity'] . '|' . $rate][] = $mon;
 			}else{
-				$mons_array[$mon['RARITY'] . '|' . $rate] = array($mon);
+				$mons_array[$mon['rarity'] . '|' . $rate] = array($mon);
 			}
 		}
 	}
 	return sort_mons_array($mons_array);
 }
-function populate_from_mirubot($rem_name, $region){
+function populate_from_mirubot($rem, $region){
 	global $data;
-	$contents = false;
-	foreach($data as $machine){
-		if(sizeof($machine['contents']) == 0){
-			continue;
-		}
-		if($machine['clean_name'] == $rem_name){
-			$contents = $machine['contents'];
-			break;
-		}
-	}
-	if(!$contents){
+	$contents = $data[$rem]['contents'];
+	if(sizeof($contents) == 0){
 		return array();
 	}
 	$mons_array = array();
@@ -81,13 +73,13 @@ function populate_from_mirubot($rem_name, $region){
 		$mon = query_monster($id, $region);
 		if($mon){
 			$mon['EVOS'] = array();
-			foreach(select_evolutions($mon['MONSTER_NO']) as $eid){
+			foreach(select_evolutions($mon['monster_id']) as $eid){
 				$mon['EVOS'][] = query_monster($eid, '');
 			}
-			if(array_key_exists($mon['RARITY'] . '|' . $rate, $mons_array)){
-				$mons_array[$mon['RARITY'] . '|' . $rate][] = $mon;
+			if(array_key_exists($mon['rarity'] . '|' . $rate, $mons_array)){
+				$mons_array[$mon['rarity'] . '|' . $rate][] = $mon;
 			}else{
-				$mons_array[$mon['RARITY'] . '|' . $rate] = array($mon);
+				$mons_array[$mon['rarity'] . '|' . $rate] = array($mon);
 			}
 		}
 	}
@@ -127,15 +119,15 @@ function detailed_lineup($mons_array, $region){
 		$output_arr['html'] = $output_arr['html'] . '</strong></div><div class="rem-wrapper-block">'  . PHP_EOL;
 		$output_arr['shortcode'] = $output_arr['shortcode'] . '</strong></div><div class="rem-wrapper-block">'  . PHP_EOL;
 		foreach($mons as $mon){
-			$monster_no = $mon['MONSTER_NO_'.$region];
-			$card = card_icon_img($monster_no, $mon['TM_NAME_US'], $region);
-			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['TM_NAME_US'] . '</strong><br/>' . $mon['TM_NAME_JP'];
-			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['TM_NAME_US'] . '</strong><br/>' . $mon['TM_NAME_JP'];
+			$monster_no = $mon['monster_no_'.$region];
+			$card = card_icon_img($monster_no, $mon['name_na'], $region);
+			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['TM_NAME_JP'];
+			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['TM_NAME_JP'];
 			if(sizeof($mon['EVOS']) > 0){
 				$output_arr['html'] = $output_arr['html'] . '<br/><span>';
 				$output_arr['shortcode'] = $output_arr['shortcode'] . '<br/><span>';
 				foreach($mon['EVOS'] as $evo){
-					$card = card_icon_img($evo['MONSTER_NO_'.$region], $evo['TM_NAME_US'], $region, '40', '40');
+					$card = card_icon_img($evo['monster_no_'.$region], $evo['name_na'], $region, '40', '40');
 					$output_arr['html'] = $output_arr['html'] . $card['html'] . ' ';
 					$output_arr['shortcode'] = $output_arr['shortcode'] . $card['shortcode'] . ' ';
 				}
@@ -165,8 +157,8 @@ function rate_groups_lineup($mons_array, $region){
 		$output_arr['html'] .= '<div>';
 		$output_arr['shortcode'] .= PHP_EOL . PHP_EOL;
 		foreach($mons as $mon){
-			$monster_no = $mon['MONSTER_NO_'.$region];
-			$card = card_icon_img($monster_no, $mon['TM_NAME_US'], $region);
+			$monster_no = $mon['monster_no_'.$region];
+			$card = card_icon_img($monster_no, $mon['name_na'], $region);
 			$output_arr['html'] .= $card['html'];
 			$output_arr['shortcode'] .= $card['shortcode'];
 		}
@@ -179,16 +171,16 @@ function rate_groups_lineup($mons_array, $region){
 <body>
 <?php
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
-$re = array_key_exists('r', $_POST) ? $_POST['r'] : 'JP';
-$om = array_key_exists('om', $_POST) ? $_POST['om'] : 'html';
+$om = array_key_exists('om', $_POST) ? $_POST['om'] : 'shortcode';
+$re = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
 $st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';
 $ir = array_key_exists('ir', $_POST) ? $_POST['ir'] : 'mirubot';
-$rem = array_key_exists('rem_name', $_POST) ? $_POST['rem_name'] : '';
+$rem = array_key_exists('rem', $_POST) ? $_POST['rem'] : '';
 ?>
 <form method="post">
 Output Mode: <input type="radio" name="om" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="om" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"><br/>
 Output Style: <input type="radio" name="st" value="rates" <?php if($st == 'rates'){echo 'checked';}?>> Rate Groups <input type="radio" name="st" value="cards" <?php if($st == 'cards'){echo 'checked';}?>> Card Details<br/>
-<p>Region: <input type="radio" name="r" value="JP" <?php if($re == 'JP'){echo 'checked';}?>> JP <input type="radio" name="r" value="US" <?php if($re == 'US'){echo 'checked';}?>> US</p>
+<p>Region: <input type="radio" name="r" value="jp" <?php if($re == 'jp'){echo 'checked';}?>> JP <input type="radio" name="r" value="na" <?php if($re == 'na'){echo 'checked';}?>> NA</p>
 <p>Enter <input type="radio" name="ir" value="mirubot" id="ir_mirubot" <?php if($ir == 'mirubot'){echo 'checked';}?>> REM Name <input type="radio" name="ir" value="ingame" id="ir_ingame" <?php if($ir == 'ingame'){echo 'checked';}?>> In-game Lineup</p>
 <?php echo machine_selector($rem);?>
 <textarea id="txt_input" name="input" style="width:80vw;height:20vh;">
