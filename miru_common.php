@@ -354,6 +354,10 @@ function card_icon_img($id, $name = '', $region = 'jp', $w = '63', $h = '63', $h
 	global $portrait_url;
 	global $portrait_url_na;
 	$regional_img_url = $region == 'jp' ? $portrait_url : $portrait_url_na;
+	if (!file_exists($_SERVER['DOCUMENT_ROOT'].$regional_img_url.$id.'.png')){
+		# fallback to jp
+		$regional_img_url = $portrait_url;
+	}
 	return array(
 		'html' => '<a href="' . $href . $id . '"><img src="' . $regional_img_url . $id . '.png" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
 		'shortcode' => '[pdx id=' . $id . ($w == $h && $w == '63' ? '' : ' w=' . $w . ' h=' . $h) . ']');
@@ -474,6 +478,10 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 	}
 	$monster_no = $data['monster_no_'.$region];
 	$regional_img_url = ($region == 'jp') ? $fullimg_url : $fullimg_url_na;
+	if (!file_exists($_SERVER['DOCUMENT_ROOT'].$regional_img_url.$monster_no.'.png')){
+		# fallback to jp
+		$regional_img_url = $fullimg_url;
+	}
 	return array(
 		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['as_desc_na']) . '<br/><b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b></p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/><b>' . lead_mult($data) . '</b></p>') . '</div></div>', 
 		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL . '<b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b>') . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');

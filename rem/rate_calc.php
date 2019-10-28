@@ -28,8 +28,6 @@ function rem_name_tl($jp_name){
 function load_rem_by_region($region = 'jp'){
 	global $portrait_url;
 	global $portrait_url_na;
-	// $regional_portrait_url = $region == 'jp' ? $portrait_url : $portrait_url_na;
-	$regional_portrait_url = $portrait_url;
 	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
 	$output_array = array();
 	$output_tabs = array();
@@ -41,7 +39,7 @@ function load_rem_by_region($region = 'jp'){
 		}
 		foreach($machine['contents'] as $card => $rate){
 			$is_pem = ($rate == 0);
-			$mon = query_monster(trim($card));
+			$mon = query_monster(trim($card), $region);
 			if(!$mon){
 				continue;
 			}
@@ -65,16 +63,21 @@ function load_rem_by_region($region = 'jp'){
 		foreach($sorted as $rarity => $rates){
 			ksort($rates);
 			foreach($rates as $r_rate => $cards){
+				$regional_img_url = $region == 'jp' ? $portrait_url : $portrait_url_na;
+				if (!file_exists($_SERVER['DOCUMENT_ROOT'].$regional_img_url.$mon['monster_no_'.$region].'.png')){
+					# fallback to jp
+					$regional_img_url = $portrait_url;
+				}			
 				$rg_id = $machine_id . '-' . $rarity . '-' . $r_rate;
 				$rate = $r_rate/100;
 				$out .= '<div class="' . ($is_pem ? 'pem' : 'rem') . '-wrapper-rarity">' . get_egg($rarity)['html'] . '<strong>' . $rarity . '★' . ($is_pem ? '</strong>' : ' | ' . $rate . '% each, ' . ($rate * sizeof($cards)) . '% total</strong> <input type="checkbox" class="select-group" id="' . $rg_id . '"><label for="' . $rg_id . '">Select All</label>') . '<br/><div class="rate-group" data-rate="' . $rate . '" data-rategroupid="' . $rg_id . '">';
 				if($is_pem){
 					foreach($cards as $mon){
-						$out .= '<div class="pem-icon"><img src="' . $regional_portrait_url . $mon['monster_id'] . '.png" title="' . $mon['monster_id'] . '-' . $mon['name_na'] . '"/></div>';
+						$out .= '<div class="pem-icon"><img src="' . $regional_img_url . $mon['monster_no_'.$region] . '.png" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_na'] . '"/></div>';
 					}
 				}else{
 					foreach($cards as $mon){
-						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['egg_machine_row'] . '-' . $mon['monster_id'] . '"/><label for="remcard-' . $machine['egg_machine_row'] . '-' . $mon['monster_id'] . '"><img src="' . $regional_portrait_url . $mon['monster_id'] . '.png" title="' . $mon['monster_id'] . '-' . $mon['name_na'] . '"/></label></div>';
+						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['egg_machine_row'] . '-' . $mon['monster_no_'.$region] . '"/><label for="remcard-' . $machine['egg_machine_row'] . '-' . $mon['monster_no_'.$region] . '"><img src="' . $regional_img_url . $mon['monster_no_'.$region] . '.png" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_na'] . '"/></label></div>';
 					}
 				}
 				$out .= '</div></div>';
