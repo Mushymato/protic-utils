@@ -475,8 +475,8 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 	$monster_no = $data['monster_no_'.$region];
 	$regional_img_url = ($region == 'jp') ? $fullimg_url : $fullimg_url_na;
 	return array(
-		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($region == 'jp' ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['as_desc_na']) . '<br/><b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b></p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/><b>' . lead_mult($data) . '</b></p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($region == 'jp' ? '<br/>' . $data['name_jp'] : '') . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL . '<b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b>') . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
+		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['as_desc_na']) . '<br/><b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b></p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/><b>' . lead_mult($data) . '</b></p>') . '</div></div>', 
+		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL . '<b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b>') . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
 function get_card_summary($id, $region = 'jp'){
 	$data = select_card($id);
@@ -555,12 +555,16 @@ function get_egg($rare){
 		return array('html' => '[EGG]', 'shortcode' => '[EGG]');
 	}
 }
-function search_ids($input_str, $region = 'jp'){
+function search_ids($input_str, $region = 'jp', $include_mon_no=TRUE){
 	$ids = array();
 	foreach(explode("\n", $input_str) as $line){
 		$mon = query_monster(trim($line), $region);
 		if($mon){
-			$ids[] = array($mon['monster_id'], $mon['monster_no_'.$region]);
+			if ($include_mon_no){
+				$ids[] = array($mon['monster_id'], $mon['monster_no_'.$region]);
+			}else{
+				$ids[] = $mon['monster_id'];
+			}
 		}
 	}
 	return $ids;

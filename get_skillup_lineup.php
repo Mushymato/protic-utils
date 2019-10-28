@@ -25,10 +25,7 @@ foreach(explode(PHP_EOL, $input_str) as $line){
 	if(sizeof($monsters) > 1){
 		foreach($monsters as $name){
 			$mon = query_monster($name);
-			if($mon['MONSTER_NO'] > 10000){ // crows in computedNames
-				$mon['MONSTER_NO'] = $mon['MONSTER_NO'] - 10000;
-			}
-			$card = card_icon_img($mon['MONSTER_NO'], $mon['TM_NAME_US']);
+			$card = card_icon_img($mon['monster_id'], $mon['name_na']);
 			$output_arr['html'][] = $card['html'];
 			$output_arr['shortcode'][] = $card['shortcode'];
 		}
