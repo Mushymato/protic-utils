@@ -49,7 +49,7 @@ foreach ($buff_tables as $tbl){
 									if(!array_key_exists($current_card, $monster_output)){
 										$old_card_info = select_card($current_card);
 										if($old_card_info !== false){
-											$name = $old_card_info['TM_NAME_US'];
+											$name = $old_card_info['name_na'];
 										}else{
 											$name = '';
 										}
@@ -106,13 +106,13 @@ foreach ($buff_tables as $tbl){
 						if (preg_match('/\nリーダースキル：/', $new_info) === 1){
 							$monster_output[$current_card]['INFO'] .= $td->nodeValue . PHP_EOL;
 							if($old_card_info !== false){
-								$monster_output[$current_card]['COMP'] .= '<u>Leader Skill</u>: ' . $old_card_info['LS_DESC_US'] . PHP_EOL;
+								$monster_output[$current_card]['COMP'] .= '<u>Leader Skill</u>: ' . $old_card_info['ls_desc_na'] . PHP_EOL;
 							}
 						} 
 						if(preg_match('/\nスキル：/', $new_info) === 1){
 							$monster_output[$current_card]['INFO'] .= $td->nodeValue . PHP_EOL;
 							if($old_card_info !== false){
-								$monster_output[$current_card]['COMP'] .= '<u>Active Skill</u>: ' . $old_card_info['AS_DESC_US'] . PHP_EOL;
+								$monster_output[$current_card]['COMP'] .= '<u>Active Skill</u>: ' . $old_card_info['as_desc_na'] . '('. $old_card_info['turn_max'] . ' &#10151; ' . $old_card_info['turn_min'] . ')' . PHP_EOL;
 							}
 						}
 					}
