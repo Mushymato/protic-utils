@@ -497,14 +497,13 @@ function get_card_summary($id, $region = 'jp'){
 		'html' => '<h2 id="card_' . $monster_no . '">' . $card['html'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[0], 
 		'shortcode' => '<h2 id="card_' . $monster_no . '">' . $card['shortcode'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[1]);
 }
-function get_lb_stats_row($id, $sa){
-	global $portrait_url;
+function get_lb_stats_row($id, $sa, $region = 'jp'){
 	$data = select_card($id);
 	if(!$data){
 		return array('html' => '', 'shortcode' => '');
 	}
 
-	$card = card_icon_img($id, $data['name_na']);
+	$card = card_icon_img($id, $data['name_na'], $region);
 	$supers = array('','');
 	if($sa){
 		global $aw;
@@ -515,10 +514,10 @@ function get_lb_stats_row($id, $sa){
 		$awake_url = '/wp-content/uploads/pad-awakenings/';
 		$supers = array('<td>', '<td>');
 		foreach($awakenings as $awk){
-			$id =  $aw[$awk['TS_SEQ']];
-			if($awk['IS_SUPER'] == 1){
-				$supers[0] = $supers[0] . '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>';
-				$supers[1] = $supers[1] . '[awk id=' . $id . ' w=' . $w . ' h=' . $h . ']';
+			if($awk['is_super'] == 1){
+				$aid = $awk['awoken_skill_id'];
+				$supers[0] = $supers[0] . '<a href="' . $info_url . $aid . '"><img src="' . $awake_url . $aid . '.png" width="' . $w. '" height="' . $h. '"/></a>';
+				$supers[1] = $supers[1] . '[awk id=' . $aid . ' w=' . $w . ' h=' . $h . ']';
 			}
 		}
 		$supers[0] = $supers[0] . '</td>';

@@ -4,12 +4,14 @@
 <?php
 include 'miru_common.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '4428';
-$ids = search_ids($input_str);
+$re = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
+$ids = search_ids($input_str, $re);
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 $sa = array_key_exists('sa', $_POST) ? $_POST['sa'] : 'yes';
 ?>
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
+<p>Region: <input type="radio" name="r" value="jp" <?php if($re == 'jp'){echo 'checked';}?>> JP <input type="radio" name="r" value="na" <?php if($re == 'na'){echo 'checked';}?>> NA</p>
 <p>Show Super Awakes? <input type="radio" name="sa" value="yes" <?php if($sa == 'yes'){echo 'checked';}?>> yes <input type="radio" name="sa" value="no" <?php if($sa == 'no'){echo 'checked';}?>> no </p>
 <p>Enter search terms, one per line:</p>
 <textarea name="input" style="width:80vw;height:20vh;"><?php echo $input_str;?></textarea>
@@ -18,7 +20,7 @@ $sa = array_key_exists('sa', $_POST) ? $_POST['sa'] : 'yes';
 $time_start = microtime(true);
 $output_arr = array('html' => array(), 'shortcode' => array());
 foreach($ids as $id){
-	$card = get_lb_stats_row($id, $sa == 'yes');
+	$card = get_lb_stats_row($id[1], $sa == 'yes', $re);
 	$output_arr['html'][] = $card['html'];
 	$output_arr['shortcode'][] = $card['shortcode'];
 }
