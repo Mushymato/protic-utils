@@ -121,8 +121,8 @@ function detailed_lineup($mons_array, $region){
 		foreach($mons as $mon){
 			$monster_no = $mon['monster_no_'.$region];
 			$card = card_icon_img($monster_no, $mon['name_na'], $region);
-			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['TM_NAME_JP'];
-			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['TM_NAME_JP'];
+			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['name_jp'];
+			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['name_jp'];
 			if(sizeof($mon['EVOS']) > 0){
 				$output_arr['html'] = $output_arr['html'] . '<br/><span>';
 				$output_arr['shortcode'] = $output_arr['shortcode'] . '<br/><span>';
@@ -175,7 +175,7 @@ $om = array_key_exists('om', $_POST) ? $_POST['om'] : 'shortcode';
 $re = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
 $st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';
 $ir = array_key_exists('ir', $_POST) ? $_POST['ir'] : 'mirubot';
-$rem = array_key_exists('rem', $_POST) ? $_POST['rem'] : '';
+$rem = array_key_exists('rem', $_POST) ? $_POST['rem'] : 0;
 ?>
 <form method="post">
 Output Mode: <input type="radio" name="om" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="om" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"><br/>

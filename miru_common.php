@@ -503,7 +503,7 @@ function get_lb_stats_row($id, $sa, $region = 'jp'){
 		return array('html' => '', 'shortcode' => '');
 	}
 
-	$card = card_icon_img($id, $data['name_na'], $region);
+	$card = card_icon_img($data['monster_no_'.$region], $data['name_na'], $region);
 	$supers = array('','');
 	if($sa){
 		global $aw;

@@ -41,6 +41,9 @@ $time_start = microtime(true);
 $output_arr = array('html' => '', 'shortcode' => '');
 foreach(explode("\n", $input_str) as $line){
 	$parts = array_values(array_filter(explode(' ', trim($line))));
+	if (sizeof($parts) == 0){
+		continue;
+	}
 	$reward = $parts[0];
 	$extra_str = implode('', array_slice($parts, 1));
 	if(endsWith($parts[0], '%')){

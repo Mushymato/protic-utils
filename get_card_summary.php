@@ -18,7 +18,7 @@ $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 $time_start = microtime(true);
 $output_arr = array('html' => array(), 'shortcode' => array());
 foreach($ids as $id){
-	$card = get_card_summary($id, $re);
+	$card = get_card_summary($id[0], $re);
 	$output_arr['html'][] = $card['html'];
 	$output_arr['shortcode'][] = $card['shortcode'];
 }

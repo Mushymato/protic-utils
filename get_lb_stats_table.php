@@ -20,7 +20,7 @@ $sa = array_key_exists('sa', $_POST) ? $_POST['sa'] : 'yes';
 $time_start = microtime(true);
 $output_arr = array('html' => array(), 'shortcode' => array());
 foreach($ids as $id){
-	$card = get_lb_stats_row($id[1], $sa == 'yes', $re);
+	$card = get_lb_stats_row($id[0], $sa == 'yes', $re);
 	$output_arr['html'][] = $card['html'];
 	$output_arr['shortcode'][] = $card['shortcode'];
 }
