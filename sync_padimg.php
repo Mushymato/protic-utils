@@ -2,7 +2,7 @@
 include 'miru_common.php';
 $time_start = microtime(true);
 
-$sql = 'SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US FROM monsterList';
+$sql = 'SELECT monster_id, monster_no_jp, monster_no_na FROM monsters';
 $stmt = $miru->conn->prepare($sql);
 $res = execute_select_stmt($stmt);
 $stmt->close();
@@ -21,12 +21,12 @@ function download_image($source, $target, $id, $type){
 }
 
 foreach($res as $r){
-	download_image($miru_portrait_url, $portrait_url, $r['MONSTER_NO_JP'], 'Portrait');
-	download_image($miru_full_url, $fullimg_url, $r['MONSTER_NO_JP'], 'Full Img');
-	// if ($r['MONSTER_NO'] != $r['MONSTER_NO_US']) {
-	download_image($miru_portrait_url_na, $portrait_url_na, $r['MONSTER_NO_US'], 'Portrait');
-	download_image($miru_full_url_na, $fullimg_url_na, $r['MONSTER_NO_US'], 'Full Img');
-	// }
+	download_image($miru_portrait_url, $portrait_url, $r['monster_no_jp'], 'Portrait');
+	download_image($miru_full_url, $fullimg_url, $r['monster_no_jp'], 'Full Img');
+	if ($r['monster_id'] != $r['monster_no_na']) {
+		download_image($miru_portrait_url_na, $portrait_url_na, $r['monster_no_na'], 'Portrait');
+		download_image($miru_full_url_na, $fullimg_url_na, $r['monster_no_na'], 'Full Img');
+	}
 }
 
 echo 'Total execution time in seconds: ' . (microtime(true) - $time_start);
