@@ -278,6 +278,7 @@ function select_card($id){
 		monsters.monster_no_na,
 		monsters.name_jp,
 		monsters.name_na,
+		monsters.name_na_override,
 		monsters.hp_max,
 		monsters.atk_max,
 		monsters.rcv_max,
@@ -313,7 +314,15 @@ function select_card($id){
 	}else{
 		$res = $res[0];
 	}
-	
+
+	if ($res['name_na_override'] != NULL){
+		$res['name_na'] = $res['name_na_override'];
+	}
+	foreach(array('1', '2') as $i){
+		if ($res['attribute_'.$i.'_id'] !== NULL){
+			$res['attribute_'.$i.'_id'] = strval(intval($res['attribute_'.$i.'_id'])+1);
+		}
+	}
 	$res['awakenings'] = select_awakenings($id);
 	//$res['EVOLUTIONS'] = select_evolutions($id);
 	
@@ -341,10 +350,10 @@ function grab_img_if_exists($url, $id, $savedir, $override = false){
 	}
 	return false;
 }
-function card_icon_img($id, $name = '', $region = 'JP', $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
+function card_icon_img($id, $name = '', $region = 'jp', $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
 	global $portrait_url;
 	global $portrait_url_na;
-	$regional_img_url = $region == 'JP' ? $portrait_url : $portrait_url_na;
+	$regional_img_url = $region == 'jp' ? $portrait_url : $portrait_url_na;
 	return array(
 		'html' => '<a href="' . $href . $id . '"><img src="' . $regional_img_url . $id . '.png" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
 		'shortcode' => '[pdx id=' . $id . ($w == $h && $w == '63' ? '' : ' w=' . $w . ' h=' . $h) . ']');
@@ -371,7 +380,7 @@ function stat_table($data, $plus = false){
 	}
 }
 function att_orbs($att1, $att2){
-	return array('<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att1 . '.png">' . ($att2 == 0 ? '' : '<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att2 . '.png">'), '[orb id=' . $att1 . ']' . ($att2 == 0 ? '' : '[orb id=' . $att2 . ']'));
+	return array('<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att1 . '.png">' . ($att2 == 0 ? '' : '<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att2 . '.png">'), '[orb id=' . $att1 . ']' . ($att2 == NULL ? '' : '[orb id=' . $att2 . ']'));
 }
 $type = array('Evolve', 'Balanced', 'Physical', 'Healer', 'Dragon', 'God', 'Attacker', 'Devil', 'Machine', '', '', '', 'Awoken', '', 'Enhance', 'Vendor');
 function typings($t1, $t2, $t3){
@@ -469,14 +478,14 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($region == 'jp' ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['as_desc_na']) . '<br/><b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b></p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/><b>' . lead_mult($data) . '</b></p>') . '</div></div>', 
 		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($region == 'jp' ? PHP_EOL . $data['name_jp'] : '') . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL . '<b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b>') . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
-function get_card_summary($id){
-	global $portrait_url;
+function get_card_summary($id, $region = 'jp'){
 	$data = select_card($id);
 	if(!$data){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
 
-	$card = card_icon_img($id, $data['name_na']);
+	$monster_no = $data['monster_no_'.$region];
+	$card = card_icon_img($monster_no, $data['name_na'], $region);
 	$awakes = awake_list($data['awakenings']);
 	if($data['limit_mult']){
 		$stats = ' <p><b>Lv.110</b> <b>HP</b> ' . lb_stat($data['hp_max'], $data['limit_mult']) . ' <b>ATK</b> ' . lb_stat($data['atk_max'], $data['limit_mult']) . ' <b>RCV</b> ' . lb_stat($data['rcv_max'], $data['limit_mult']) . ' (' . weighted($data, 110) . ' weighted)</p>';
@@ -485,8 +494,8 @@ function get_card_summary($id){
 	}
 	
 	return array(
-		'html' => '<h2 id="card_' . $id . '">' . $card['html'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[0], 
-		'shortcode' => '<h2 id="card_' . $id . '">' . $card['shortcode'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[1]);
+		'html' => '<h2 id="card_' . $monster_no . '">' . $card['html'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[0], 
+		'shortcode' => '<h2 id="card_' . $monster_no . '">' . $card['shortcode'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[1]);
 }
 function get_lb_stats_row($id, $sa){
 	global $portrait_url;
@@ -552,7 +561,7 @@ function search_ids($input_str, $region = 'jp'){
 	foreach(explode("\n", $input_str) as $line){
 		$mon = query_monster(trim($line), $region);
 		if($mon){
-			$ids[] = $mon['monster_id'];
+			$ids[] = array($mon['monster_id'], $mon['monster_no_'.$region]);
 		}
 	}
 	return $ids;

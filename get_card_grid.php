@@ -25,7 +25,7 @@ $hd = array_key_exists('h', $_POST) ? $_POST['h'] : 'tocOnly';
 $time_start = microtime(true);
 $output_arr = array('html' => array(), 'shortcode' => array());
 foreach($ids as $id){
-	$card = get_card_grid($id, $re, $tb == 'right', $hd);
+	$card = get_card_grid($id[0], $re, $tb == 'right', $hd);
 	$output_arr['html'][] = $card['html'];
 	$output_arr['shortcode'][] = $card['shortcode'];
 }
@@ -37,7 +37,7 @@ echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . 
 	if($om == 'shortcode' && $hd != 'no'){
 		echo '[shortcode_box title="Click on the icon to jump to the card:"]';
 		foreach($ids as $id){
-			echo '[pdx id=' . $id . ' a=#card_' . $id . ' r=' . $re . ']';
+			echo '[pdx id=' . $id[1] . ' a=#card_' . $id[0] . ' r=' . $re . ']';
 		}
 		echo '[/shortcode_box]' . PHP_EOL . PHP_EOL;
 	}
