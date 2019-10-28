@@ -35,6 +35,7 @@ function default_fieldnames($entry){
 	}
 	return $fieldnames;
 }
+
 function recreate_table($data, $tablename, $fieldnames, $pk){
 	global $miru;
 	$sql = 'DROP TABLE IF EXISTS ' . $tablename;
@@ -131,21 +132,6 @@ function populate_table($data, $tablename, $fieldnames){
 	}
 	echo 'Imported ' . $count . ' records out of ' . sizeof($data) . ' to ' . $tablename . PHP_EOL;
 }
-function get_google_sheets_data($url, $fieldnames){
-	$data = array();
-	if ($fh = fopen($url, 'r')) {
-		if(!feof($fh)){fgets($fh);}
-		while (!feof($fh)) {
-			$tmp = explode(',',fgets($fh));
-			$data[] = array(
-				$fieldnames[0] => trim($tmp[0]),
-				$fieldnames[1] => trim($tmp[1])
-			);
-		}
-		fclose($fh);
-	}
-	return $data;
-}
 function execute_select_stmt($stmt, $pk = null){
 	global $miru;
 	if(!$stmt->execute()){
@@ -181,14 +167,6 @@ function execute_select_stmt($stmt, $pk = null){
 	}
 	return $res;
 }
-function check_table_exists($tablename){
-	global $miru;
-	$sql = 'DESCRIBE ' . $tablename;
-	if(!$miru->conn->query($sql)){
-		trigger_error('Describe' . $tablename . 'failed: ' . $miru->conn->error);
-		return false;
-	}
-}
 function single_param_stmt($query, $q_str){
 	global $miru;
 	$stmt = $miru->conn->prepare($query);
@@ -200,23 +178,25 @@ function single_param_stmt($query, $q_str){
 	$stmt->close();
 	return $res;
 }
-function query_monster($q_str, $region = 'JP'){
+function query_monster($q_str, $region = 'jp'){
 	global $miru;
 	$q_str = trim($q_str);
 	if($q_str == ''){
 		return false;
 	}
+	$region_key = 'monster_id';
 	if ($region != ''){
-		$region = '_'.$region;
+		$region_key = 'monster_no_'.$region;
 	}
+	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_jp, name_na, name_na_override, rarity';
 	if(ctype_digit($q_str)){
-		$sql = 'SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE MONSTER_NO'.$region.'=? ORDER BY MONSTER_NO DESC';
+		$sql = 'SELECT '.$monster_table_fields.' FROM monsters WHERE '.$region_key.'=? ORDER BY monster_id DESC';
 		$res = single_param_stmt($sql, $q_str);
 		if(sizeof($res) > 0){
 			if(sizeof($res) > 1){
 				foreach($res as $r){
-					if (($region == '_US' && $r['MONSTER_NO'] !== $r['MONSTER_NO_US']) ||
-							($region == '_JP' && $r['MONSTER_NO'] === $r['MONSTER_NO_JP'])){
+					if (($region == 'na' && $r['monster_id'] !== $r['monster_no_na']) ||
+							($region == 'jp' && $r['monster_id'] === $r['monster_no_jp'])){
 					return $r;
 					}
 				}
@@ -231,10 +211,10 @@ function query_monster($q_str, $region = 'JP'){
 	);
 	$query = array();
 	if(!mb_check_encoding($q_str, 'ASCII')){
-		$query['SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_JP'] = ' ORDER BY MONSTER_NO DESC';
+		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_jp'] = ' ORDER BY monster_id DESC';
 	}else{
-		$query['SELECT monsterList.MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY, COMPUTED_NAME FROM monsterList LEFT JOIN computedNames ON monsterList.MONSTER_NO'.$region.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
-		$query['SELECT MONSTER_NO, MONSTER_NO_JP, MONSTER_NO_US, TM_NAME_JP, TM_NAME_US, RARITY FROM monsterList WHERE TM_NAME_US'] = ' ORDER BY MONSTER_NO DESC';
+		$query['SELECT '.$monster_table_fields.' FROM monsters LEFT JOIN computedNames ON monsters.'.$region_key.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
+		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_na'] = ' ORDER BY monster_id DESC';
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
@@ -242,15 +222,11 @@ function query_monster($q_str, $region = 'JP'){
 			if(sizeof($res) > 0){
 				if(sizeof($res) > 1){
 					foreach($res as $r){
-						print_r($r);
-						if (($region == '_US' && $r['MONSTER_NO'] != $r['MONSTER_NO_US']) ||
-								($region == '_JP' && $r['MONSTER_NO'] == $r['MONSTER_NO_JP'])){
-							return $r;
+						if (($region == 'na' && $r['monster_id'] !== $r['monster_no_na']) ||
+								($region == 'jp' && $r['monster_id'] === $r['monster_no_jp'])){
+								return $r;
 						}
 					}
-				}
-				if($res[0]['MONSTER_NO'] > 10000){ // crows in computedNames
-					$res[0]['MONSTER_NO'] = $res[0]['MONSTER_NO'] - 10000;
 				}
 				return $res[0];
 			}
@@ -260,7 +236,7 @@ function query_monster($q_str, $region = 'JP'){
 }
 function select_awakenings($id){
 	global $miru;
-	$sql = 'SELECT awokenSkillList.IS_SUPER, awokenSkillList.TS_SEQ FROM awokenSkillList WHERE awokenSkillList.monster_no=?;';
+	$sql = 'SELECT is_super, awoken_skill_id FROM awakenings WHERE monster_id=?;';
 	$stmt = $miru->conn->prepare($sql);
 	$stmt->bind_param('i', $id);
 	$res = execute_select_stmt($stmt);
@@ -274,7 +250,7 @@ function select_awakenings($id){
 }
 function select_evolutions($id){
 	global $miru;
-	$sql = 'select MONSTER_NO, TO_NO from evolutionList where MONSTER_NO=?';
+	$sql = 'SELECt from_id, to_id FROM evolutions where from_id=?';
 	$stmt = $miru->conn->prepare($sql);
 	$stmt->bind_param('i', $id);
 	$res = execute_select_stmt($stmt);
@@ -285,7 +261,7 @@ function select_evolutions($id){
 	}else{
 		$evo_ids = array();
 		foreach($res as $r){
-			$evo_ids[] = $r['TO_NO'];
+			$evo_ids[] = $r['to_id'];
 		}
 		foreach($evo_ids as $eid){
 			$evo_ids = array_merge($evo_ids, select_evolutions($eid));
@@ -296,7 +272,34 @@ function select_evolutions($id){
 }
 function select_card($id){
 	global $miru;
-	$sql = 'SELECT monsterList.MONSTER_NO, monsterList.MONSTER_NO_JP, monsterList.MONSTER_NO_US, monsterList.ATK_MAX, monsterList.HP_MAX, monsterList.RCV_MAX, monsterList.LEVEL, monsterList.LIMIT_MULT, monsterList.TA_SEQ ATT_1, monsterList.TA_SEQ_SUB ATT_2, monsterList.TE_SEQ, monsterList.TM_NAME_JP, monsterList.TM_NAME_US, monsterList.TT_SEQ TYPE_1, monsterList.TT_SEQ_SUB TYPE_2, monsterAddInfoList.SUB_TYPE TYPE_3, leadSkill.TS_DESC_US LS_DESC_US, leadSkillData.LEADER_DATA, active.TS_DESC_US AS_DESC_US, active.TURN_MAX AS_TURN_MAX, active.TURN_MIN AS_TURN_MIN FROM monsterList LEFT JOIN skillList leadSkill ON monsterList.TS_SEQ_LEADER=leadSkill.TS_SEQ LEFT JOIN skillLeaderDataList leadSkillData ON monsterList.TS_SEQ_LEADER=leadSkillData.TS_SEQ LEFT JOIN skillList active ON monsterList.TS_SEQ_SKILL=active.TS_SEQ LEFT JOIN monsterAddInfoList ON monsterList.MONSTER_NO=monsterAddInfoList.MONSTER_NO WHERE monsterList.MONSTER_NO=?;';
+	$sql = 'SELECT 
+		monsters.monster_id,
+		monsters.monster_no_jp,
+		monsters.monster_no_na,
+		monsters.name_jp,
+		monsters.name_na,
+		monsters.hp_max,
+		monsters.atk_max,
+		monsters.rcv_max,
+		monsters.level,
+		monsters.limit_mult,
+		monsters.attribute_1_id,
+		monsters.attribute_2_id,
+		monsters.type_1_id,
+		monsters.type_2_id,
+		monsters.type_3_id, 
+		leader_skills.desc_na AS ls_desc_na,
+		leader_skills.max_hp AS lead_hp, 
+		leader_skills.max_atk AS lead_atk,
+		leader_skills.max_rcv AS lead_rcv,
+		leader_skills.max_shield AS lead_shield,
+		active_skills.desc_na AS as_desc_na, 
+		active_skills.turn_max, 
+		active_skills.turn_min 
+	FROM monsters 
+	LEFT JOIN leader_skills ON monsters.leader_skill_id=leader_skills.leader_skill_id 
+	LEFT JOIN active_skills ON monsters.active_skill_id=active_skills.active_skill_id
+	WHERE monster_id=?;';
 	$stmt = $miru->conn->prepare($sql);
 	if (!$stmt){
 		echo $sql . PHP_EOL;
@@ -311,7 +314,7 @@ function select_card($id){
 		$res = $res[0];
 	}
 	
-	$res['AWAKENINGS'] = select_awakenings($id);
+	$res['awakenings'] = select_awakenings($id);
 	//$res['EVOLUTIONS'] = select_evolutions($id);
 	
 	return $res;
@@ -351,26 +354,26 @@ function lb_stat($base, $mult){
 }
 function weighted($data, $level){
 	if($level == 99){
-		return round($data['HP_MAX'] / 10 + $data['ATK_MAX'] / 5 + $data['RCV_MAX'] / 3);
+		return round($data['hp_max'] / 10 + $data['atk_max'] / 5 + $data['rcv_max'] / 3);
 	}else if ($level == 110){
-		return round(lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) / 10 + lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) / 5 + lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) / 3);
+		return round(lb_stat($data['hp_max'], $data['limit_mult']) / 10 + lb_stat($data['atk_max'], $data['limit_mult']) / 5 + lb_stat($data['rcv_max'], $data['limit_mult']) / 3);
 	}
 }
 function stat_table($data, $plus = false){
-	if($data['LIMIT_MULT'] == 0){
-		return '<table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['LEVEL'] . '</td><td>+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . ($data['HP_MAX'] + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . ($data['ATK_MAX'] + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . ($data['RCV_MAX'] + 297) . '</td></tr></tbody></table>';
+	if($data['limit_mult'] == 0){
+		return '<table style="width:100%"><thead><tr><td>Stat</td><td>Lv.' . $data['level'] . '</td><td>+297</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['hp_max'] . '</td><td>' . ($data['hp_max'] + 990) . '</td></tr><tr><td>ATK</td><td>' . $data['atk_max'] . '</td><td>' . ($data['atk_max'] + 495) . '</td></tr><tr><td>RCV</td><td>' . $data['rcv_max'] . '</td><td>' . ($data['rcv_max'] + 297) . '</td></tr></tbody></table>';
 	}else{
 		if($plus){
-			return '<table class="card-stats-table"><thead><tr><td>Stat</td><td>Lv.99 (+297)</td><td>Lv.110 (+297)</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . ' (' . ($data['HP_MAX'] + 990) . ')</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) + 990) . ')</tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . ' (' . ($data['ATK_MAX'] + 495) . ')</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) + 495) . ')</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . ' (' . ($data['RCV_MAX'] + 297) . ')</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . ' (' . (lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) + 297) . ')</td></tr></tbody></table>';
+			return '<table class="card-stats-table"><thead><tr><td>Stat</td><td>Lv.99 (+297)</td><td>Lv.110 (+297)</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['hp_max'] . ' (' . ($data['hp_max'] + 990) . ')</td><td>' . lb_stat($data['hp_max'], $data['limit_mult']) . ' (' . (lb_stat($data['hp_max'], $data['limit_mult']) + 990) . ')</tr><tr><td>ATK</td><td>' . $data['atk_max'] . ' (' . ($data['atk_max'] + 495) . ')</td><td>' . lb_stat($data['atk_max'], $data['limit_mult']) . ' (' . (lb_stat($data['atk_max'], $data['limit_mult']) + 495) . ')</td></tr><tr><td>RCV</td><td>' . $data['rcv_max'] . ' (' . ($data['rcv_max'] + 297) . ')</td><td>' . lb_stat($data['rcv_max'], $data['limit_mult']) . ' (' . (lb_stat($data['rcv_max'], $data['limit_mult']) + 297) . ')</td></tr></tbody></table>';
 		}else{
-			return '<table style="width:100%" class="base-stat"><thead><tr><td>Stat</td><td>Lv.99</td><td>Lv.110</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['HP_MAX'] . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>ATK</td><td>' . $data['ATK_MAX'] . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td></tr><tr><td>RCV</td><td>' . $data['RCV_MAX'] . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td></tr></tbody></table>';
+			return '<table style="width:100%" class="base-stat"><thead><tr><td>Stat</td><td>Lv.99</td><td>Lv.110</td></tr></thead><tbody><tr><td>HP</td><td>' . $data['hp_max'] . '</td><td>' . lb_stat($data['hp_max'], $data['limit_mult']) . '</td></tr><tr><td>ATK</td><td>' . $data['atk_max'] . '</td><td>' . lb_stat($data['atk_max'], $data['limit_mult']) . '</td></tr><tr><td>RCV</td><td>' . $data['rcv_max'] . '</td><td>' . lb_stat($data['rcv_max'], $data['limit_mult']) . '</td></tr></tbody></table>';
 		}
 	}
 }
 function att_orbs($att1, $att2){
 	return array('<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att1 . '.png">' . ($att2 == 0 ? '' : '<img width="20" height="20" src="/wp-content/uploads/pad-orbs/' . $att2 . '.png">'), '[orb id=' . $att1 . ']' . ($att2 == 0 ? '' : '[orb id=' . $att2 . ']'));
 }
-$type = array('', 'Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evolve', 'Enhance', 'Protected', 'Devil', '', '', 'Awoken', 'Machine', 'Vendor');
+$type = array('Evolve', 'Balanced', 'Physical', 'Healer', 'Dragon', 'God', 'Attacker', 'Devil', 'Machine', '', '', '', 'Awoken', '', 'Enhance', 'Vendor');
 function typings($t1, $t2, $t3){
 	global $type;
 	return $type[$t1] . ($t2 == 0 ? '' : ' / ' . $type[$t2]) . ($t3 == 0 ? '' : ' / ' . $type[$t3]);
@@ -385,13 +388,13 @@ function typing_killer_tooltip($t1, $t2, $t3){
 		$types_out[] = $type[$t];
 		if(!in_array('All', $latents)){
 			switch($t){
-				case 1: case 3: $add = array('Machine', 'Healer'); break; //dragon phys
-				case 2: $latents = array('All'); break; //balance
-				case 4: $add = array('Dragon', 'Attacker'); break; //healer
-				case 5: $add = array('Devil', 'Physical'); break; //attacker
-				case 6: $add = array('Devil'); break; //god
-				case 10: $add = array('God'); break; //devil
-				case 14: $add = array('God', 'Balanced'); break; //machine
+				case 2: case 4: $add = array('Machine', 'Healer'); break; //dragon phys
+				case 1: $latents = array('All'); break; //balance
+				case 3: $add = array('Dragon', 'Attacker'); break; //healer
+				case 6: $add = array('Devil', 'Physical'); break; //attacker
+				case 5: $add = array('Devil'); break; //god
+				case 7: $add = array('God'); break; //devil
+				case 8: $add = array('God', 'Balanced'); break; //machine
 			}
 			$latents = array_unique(array_merge($latents, $add));
 		}
@@ -404,94 +407,9 @@ function typing_killer_tooltip($t1, $t2, $t3){
 		return array('<span class="su-tooltip" data-close="no" data-behavior="hover" data-my="bottom center" data-at="top center" data-classes="su-qtip qtip-light su-qtip-size-default" data-title="" data-hasqtip="0" oldtitle="Available Killers: ' . $latent_txt . '" title="" aria-describedby="qtip-0">' . $type_txt . '</span>', '[shortcode_tooltip style="light" content="Available Killers: ' . $latent_txt . '"]' . $type_txt . '[/shortcode_tooltip]');
 	}
 }
-function lead_mult($lead){
-	$ls = array('1' => 1, '2' => 1, '3' => 1, '4' => 0);
-	$lead = str_replace('///', '', $lead);
-	$array = explode('|',$lead);
-	foreach($array as $value){
-		$seg = explode('/',$value);
-		if(sizeof($seg) != 2){
-			continue;
-		}
-		$ls[$seg[0]] = ctype_digit($seg[1]) ? intval($seg[1]) : floatval($seg[1]);
-	}
-	return '[' . $ls['1'] * $ls['1'] . '/' . $ls['2'] * $ls['2'] . '/' . $ls['3'] * $ls['3'] . ($ls['4'] == 0 ? '' : ', ' . round(100 * (1 - (1-$ls['4']) * (1-$ls['4'])), 2) . '%') . ']';
+function lead_mult($data){
+	return '['.pow($data['lead_hp'], 2).'/'.pow($data['lead_atk'], 2).'/'.pow($data['lead_rcv'], 2).($data['lead_shield'] == 0 ? '' : ', ' . round(100 * (1 - pow((1-$data['lead_shield']), 2)), 2) . '%').']';
 }
-// $aw = array(2765 => 3, 2766 => 4, 2767 => 5, 2768 => 6, 2769 => 7, 2770 => 8, 2771 => 9, 2772 => 10, 2773 => 11, 2774 => 12, 2775 => 13, 2776 => 14, 2777 => 15, 2778 => 16, 2779 => 17, 2780 => 18, 2781 => 19, 2782 => 20, 2783 => 21, 2784 => 22, 2785 => 23, 2786 => 24, 2787 => 25, 2788 => 26, 2789 => 27, 2790 => 28, 2791 => 29, 3897 => 30, 7593 => 31, 7878 => 33, 7879 => 35, 7880 => 36, 7881 => 34, 7882 => 32, 9024 => 37, 9025 => 38, 9026 => 39, 9113 => 40, 9224 => 41, 9397 => 43, 9481 => 42, 10261 => 44, 11353 => 45, 11619 => 46, 12490 => 47, 12735 => 48, 12736 => 49, 13057 => 50, 13567 => 51, 13764 => 52, 13765 => 53, 13898 => 54, 13899 => 55, 13900 => 56, 13901 => 57, 13902 => 58, 14073 => 59, 14074 => 60, 14075 => 61, 14076 => 62, 14950 => 63, 15821 => 64, 15822 => 65, 15823 => 66);
-$aw = array(
-	2765 => 1, 
-	2766 => 2,
-	2767 => 3,
-	2768 => 4,
-	2769 => 5,
-	2770 => 6,
-	2771 => 7,
-	2772 => 8,
-	2773 => 9,
-	2774 => 10,
-	2775 => 11,
-	2776 => 12,
-	2777 => 13,
-	2778 => 14,
-	2779 => 15,
-	2780 => 16,
-	2781 => 17,
-	2782 => 18,
-	2783 => 19,
-	2784 => 20,
-	2785 => 21,
-	2786 => 22,
-	2787 => 23,
-	2788 => 24,
-	2789 => 25,
-	2790 => 26,
-	2791 => 27,
-	3897 => 28,
-	7593 => 29,
-	7882 => 30,
-	7878 => 31,
-	7881 => 32,
-	7879 => 33,
-	7880 => 34,
-	9113 => 35,
-	9024 => 36,
-	9025 => 37,
-	9026 => 38,
-	10261 => 39,
-	9224 => 40,
-	9481 => 41,
-	9397 => 42,
-	11353 => 43,
-	11619 => 44,
-	12490 => 45,
-	12735 => 46,
-	12736 => 47,
-	13057 => 48,
-	13567 => 49,
-	13764 => 50,
-	13765 => 51,
-	13898 => 52,
-	13899 => 53,
-	13900 => 54,
-	13901 => 55,
-	13902 => 56,
-	14073 => 57,
-	14074 => 58,
-	14075 => 59,
-	14076 => 60,
-	14950 => 61,
-	15821 => 62,
-	15822 => 63,
-	15823 => 64,
-	16460 => 65,
-	16461 => 66,
-	16462 => 67,
-	16675 => 68,
-	16676 => 69,
-	16677 => 70,
-	16678 => 71,
-	16679 => 72
-);
 function awake_icon($id, $w = '31', $h = '32', $awake_url = '/wp-content/uploads/pad-awks/', $info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s='){
 	return array('html' => '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>', 'shortcode' => '[awk id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']');
 }
@@ -504,9 +422,8 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers = array('<div>', '');
 	
 	foreach($awakenings as $awk){
-		$id = $aw[$awk['TS_SEQ']];
-		$awks = awake_icon($id);
-		if($awk['IS_SUPER'] == 1){
+		$awks = awake_icon($awk['awoken_skill_id']);
+		if($awk['is_super'] == 1){
 			$supers[0] = $supers[0] . $awks['html'];
 			$supers[1] = $supers[1] . $awks['shortcode'];
 		}else{
@@ -518,7 +435,7 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1]  . '<br/>' . PHP_EOL . $supers[1]);
 }
-function get_card_grid($id, $region = 'JP', $right_side_table = false, $headings = false){
+function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings = false){
 	global $fullimg_url;
 	global $fullimg_url_na;
 	$data = select_card($id);
@@ -526,9 +443,9 @@ function get_card_grid($id, $region = 'JP', $right_side_table = false, $headings
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
 
-	$atts = att_orbs($data['ATT_1'], $data['ATT_2']);
-	$types = typing_killer_tooltip($data['TYPE_1'], $data['TYPE_2'], $data['TYPE_3']);
-	$awakes = awake_list($data['AWAKENINGS']);
+	$atts = att_orbs($data['attribute_1_id'], $data['attribute_2_id']);
+	$types = typing_killer_tooltip($data['type_1_id'], $data['type_2_id'], $data['type_3_id']);
+	$awakes = awake_list($data['awakenings']);
 	
 	$stat1 = '';
 	$stat2 = '';
@@ -537,7 +454,7 @@ function get_card_grid($id, $region = 'JP', $right_side_table = false, $headings
 	}else{
 		$stat1 = stat_table($data, true);
 	}
-	$name_arr = explode(', ', $data['TM_NAME_US']);
+	$name_arr = explode(', ', $data['name_na']);
 	$head = '';
 	if ($headings == 'yes'){
 		$head = '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' . PHP_EOL . '<div class="cardgrid">';
@@ -546,11 +463,11 @@ function get_card_grid($id, $region = 'JP', $right_side_table = false, $headings
 	} else {
 		$head = '<div class="cardgrid">';
 	}
-	$monster_no = $data['MONSTER_NO_'.$region];
-	$regional_img_url = ($region == 'JP') ? $fullimg_url : $fullimg_url_na;
+	$monster_no = $data['monster_no_'.$region];
+	$regional_img_url = ($region == 'jp') ? $fullimg_url : $fullimg_url_na;
 	return array(
-		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['TM_NAME_US']) . '<br/>' . $data['TM_NAME_JP'] . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US']) . '<br/><b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b></p>' . (strlen($data['LS_DESC_US']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/><b>' . lead_mult($data['LEADER_DATA']) . '</b></p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['TM_NAME_US']) . PHP_EOL . $data['TM_NAME_JP'] . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['AS_DESC_US'] . '<br/>' . PHP_EOL . '<b>(' . $data['AS_TURN_MAX'] . ' &#10151; ' . $data['AS_TURN_MIN'] . ')</b>') . (strlen($data['LS_DESC_US']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['LS_DESC_US']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data['LEADER_DATA']) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
+		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($region == 'jp' ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['as_desc_na']) . '<br/><b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b></p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/><b>' . lead_mult($data) . '</b></p>') . '</div></div>', 
+		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($region == 'jp' ? PHP_EOL . $data['name_jp'] : '') . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL . '<b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b>') . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
 function get_card_summary($id){
 	global $portrait_url;
@@ -559,17 +476,17 @@ function get_card_summary($id){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
 
-	$card = card_icon_img($id, $data['TM_NAME_US']);
-	$awakes = awake_list($data['AWAKENINGS']);
-	if($data['LIMIT_MULT']){
-		$stats = ' <p><b>Lv.110</b> <b>HP</b> ' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . ' <b>ATK</b> ' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . ' <b>RCV</b> ' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . ' (' . weighted($data, 110) . ' weighted)</p>';
+	$card = card_icon_img($id, $data['name_na']);
+	$awakes = awake_list($data['awakenings']);
+	if($data['limit_mult']){
+		$stats = ' <p><b>Lv.110</b> <b>HP</b> ' . lb_stat($data['hp_max'], $data['limit_mult']) . ' <b>ATK</b> ' . lb_stat($data['atk_max'], $data['limit_mult']) . ' <b>RCV</b> ' . lb_stat($data['rcv_max'], $data['limit_mult']) . ' (' . weighted($data, 110) . ' weighted)</p>';
 	}else{
-		$stats = ' <p><b>Lv.99</b> <b>HP</b> ' . $data['HP_MAX'] . ' <b>ATK</b> ' . $data['ATK_MAX'] . ' <b>RCV</b> ' . $data['RCV_MAX'] . ' (' . weighted($data, 99) . ' weighted)</p>';
+		$stats = ' <p><b>Lv.99</b> <b>HP</b> ' . $data['hp_max'] . ' <b>ATK</b> ' . $data['atk_max'] . ' <b>RCV</b> ' . $data['rcv_max'] . ' (' . weighted($data, 99) . ' weighted)</p>';
 	}
 	
 	return array(
-		'html' => '<h2 id="card_' . $id . '">' . $card['html'] . ' ' . htmlentities($data['TM_NAME_US']) .'</h2>' . $stats . $awakes[0], 
-		'shortcode' => '<h2 id="card_' . $id . '">' . $card['shortcode'] . ' ' . htmlentities($data['TM_NAME_US']) .'</h2>' . $stats . $awakes[1]);
+		'html' => '<h2 id="card_' . $id . '">' . $card['html'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[0], 
+		'shortcode' => '<h2 id="card_' . $id . '">' . $card['shortcode'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[1]);
 }
 function get_lb_stats_row($id, $sa){
 	global $portrait_url;
@@ -578,13 +495,13 @@ function get_lb_stats_row($id, $sa){
 		return array('html' => '', 'shortcode' => '');
 	}
 
-	$card = card_icon_img($id, $data['TM_NAME_US']);
+	$card = card_icon_img($id, $data['name_na']);
 	$supers = array('','');
 	if($sa){
 		global $aw;
 		$w = '31';
 		$h = '32';
-		$awakenings = $data['AWAKENINGS'];
+		$awakenings = $data['awakenings'];
 		$info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s=';
 		$awake_url = '/wp-content/uploads/pad-awakenings/';
 		$supers = array('<td>', '<td>');
@@ -599,7 +516,7 @@ function get_lb_stats_row($id, $sa){
 		$supers[1] = $supers[1] . '</td>';
 	}
 	
-	$stats = '<td>' . weighted($data, 110) . '</td><td>' . lb_stat($data['HP_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['ATK_MAX'], $data['LIMIT_MULT']) . '</td><td>' . lb_stat($data['RCV_MAX'], $data['LIMIT_MULT']) . '</td>';
+	$stats = '<td>' . weighted($data, 110) . '</td><td>' . lb_stat($data['hp_max'], $data['limit_mult']) . '</td><td>' . lb_stat($data['atk_max'], $data['limit_mult']) . '</td><td>' . lb_stat($data['rcv_max'], $data['limit_mult']) . '</td>';
 	
 	return array(
 		'html' => '<tr><td>' . $card['html'] . '</td>' . $stats . $supers[0] . '</tr>', 
@@ -630,12 +547,12 @@ function get_egg($rare){
 		return array('html' => '[EGG]', 'shortcode' => '[EGG]');
 	}
 }
-function search_ids($input_str, $region = 'JP'){
+function search_ids($input_str, $region = 'jp'){
 	$ids = array();
 	foreach(explode("\n", $input_str) as $line){
 		$mon = query_monster(trim($line), $region);
 		if($mon){
-			$ids[] = $mon['MONSTER_NO'];
+			$ids[] = $mon['monster_id'];
 		}
 	}
 	return $ids;
@@ -647,7 +564,7 @@ function get_button_info($id, $button_type_name){
 	if(!$data){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
-	$card = card_icon_img($id, $data['TM_NAME_US']);	
+	$card = card_icon_img($id, $data['name_na']);	
 	return array(
 		'html' => '<tr><td> <h2 id="card_' . $id . '">' . $card['html'] . '</h2></td>' . '<td>' . htmlentities($button_type_name) . '</td></tr>');
 }
