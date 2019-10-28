@@ -555,16 +555,12 @@ function get_egg($rare){
 		return array('html' => '[EGG]', 'shortcode' => '[EGG]');
 	}
 }
-function search_ids($input_str, $region = 'jp', $include_mon_no=TRUE){
+function search_ids($input_str, $region = 'jp'){
 	$ids = array();
 	foreach(explode("\n", $input_str) as $line){
 		$mon = query_monster(trim($line), $region);
 		if($mon){
-			if ($include_mon_no){
-				$ids[] = array($mon['monster_id'], $mon['monster_no_'.$region]);
-			}else{
-				$ids[] = $mon['monster_id'];
-			}
+			$ids[] = array($mon['monster_id'], $mon['monster_no_'.$region]);
 		}
 	}
 	return $ids;

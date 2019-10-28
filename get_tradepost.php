@@ -2,7 +2,7 @@
 include 'miru_common.php';
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
 $re = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
-$ids = search_ids($input_str, $re, $include_mon_no);
+$ids = search_ids($input_str, $re);
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
 $tf = array_key_exists('tf', $_POST) ? $_POST['tf'] : 'rem';
 ?>
@@ -63,7 +63,7 @@ function get_tradepost_farmable($data, $region, $include = array()){
 	foreach ($invert_arr as $req_id => $arr_1){
 		$req = query_monster($req_id, $region);
 		if(!$req){continue;}
-		$req_card = card_icon_img($mon['monster_no_'.$region], $req['name_na'], $region);
+		$req_card = card_icon_img($req['monster_no_'.$region], $req['name_na'], $region);
 		foreach ($arr_1 as $req_count => $arr_2){
 			foreach ($arr_2 as $mon_id){
 				$mon = query_monster($mon_id, $region);
@@ -79,7 +79,8 @@ function get_tradepost_farmable($data, $region, $include = array()){
 	return $out;
 }
 $data = json_decode(file_get_contents("https://storage.googleapis.com/mirubot/protic/paddata/processed/{$re}_exchange.json"), true);
-$output_arr = $tf == 'rem' ? get_tradepost_rare($data, $re, $ids) : get_tradepost_farmable($data, $re, $ids);?>
+$include = array_map(function($x) {return $x[1];}, $ids);
+$output_arr = $tf == 'rem' ? get_tradepost_rare($data, $re, $include) : get_tradepost_farmable($data, $re, $include);?>
 <p>Output</p>
 <?php echo '<textarea style="width:80vw;height:20vh;" readonly>' . $output_arr[$om] . '</textarea>'; ?>
 <p>Preview</p>
