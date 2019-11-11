@@ -18,15 +18,25 @@ window.onload = function(){
 </header>
 <html>
 <?php
+$input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
+$om = array_key_exists('om', $_POST) ? $_POST['om'] : 'shortcode';
+$re = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
+$st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';
+$ir = array_key_exists('ir', $_POST) ? $_POST['ir'] : 'mirubot';
+$rem = array_key_exists('rem', $_POST) ? $_POST['rem'] : 0;
+
 include 'miru_common.php';
-$data_jp = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/jp/egg_machines.json'), true);
-$data_na = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/na/egg_machines.json'), true);
-$data = array_merge($data_jp, $data_na);
+$data = get_egg_machine_lineups();
 function machine_selector($selected = ''){
+	$server_mapping = array(
+		'0' => '(JP) ',
+		'1' => '(NA) ',
+		'2' => '(KR) ',
+	);
 	global $data;
 	$output = '';
 	foreach($data as $idx => $machine){
-		$output .= '<option value="' . $idx . '"' . ($idx == $selected ? ' selected' : '' ) . '>' . $machine['clean_name'] . '</option>';
+		$output .= '<option value="' . $idx . '"' . ($idx == $selected ? ' selected' : '' ) . '>' . $server_mapping[$machine['server_id']] . $machine['name'] . '</option>';
 	}
 	return '<select id="rem_selector" name="rem" style="width:80vw;height:2em;">' . $output . '</select>';
 }
@@ -70,7 +80,7 @@ function populate_from_mirubot($rem, $region){
 	$mons_array = array();
 	foreach($contents as $id => $rate){
 		$rate = $rate * 100;
-		$mon = query_monster($id, $region);
+		$mon = query_monster($id, '');
 		if($mon){
 			$mon['EVOS'] = array();
 			foreach(select_evolutions($mon['monster_id']) as $eid){
@@ -169,14 +179,6 @@ function rate_groups_lineup($mons_array, $region){
 }
 ?>
 <body>
-<?php
-$input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
-$om = array_key_exists('om', $_POST) ? $_POST['om'] : 'shortcode';
-$re = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
-$st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';
-$ir = array_key_exists('ir', $_POST) ? $_POST['ir'] : 'mirubot';
-$rem = array_key_exists('rem', $_POST) ? $_POST['rem'] : 0;
-?>
 <form method="post">
 Output Mode: <input type="radio" name="om" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="om" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"><br/>
 Output Style: <input type="radio" name="st" value="rates" <?php if($st == 'rates'){echo 'checked';}?>> Rate Groups <input type="radio" name="st" value="cards" <?php if($st == 'cards'){echo 'checked';}?>> Card Details<br/>

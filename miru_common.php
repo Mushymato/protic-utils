@@ -329,7 +329,7 @@ function select_card($id){
 	return $res;
 }
 function get_monster_exchange($server, $limited = TRUE){
-	$sql = 'SELECT server_id, target_monster_id, required_monster_ids, required_count, start_timestamp, end_timestamp, permanent FROM exchanges WHERE server_id=?';
+	$sql = 'SELECT server_id, target_monster_id, required_monster_ids, required_count, start_timestamp, end_timestamp, permanent FROM exchanges WHERE end_timestamp>unix_timestamp() AND server_id=?';
 	if ($limited){
 		$sql .= ' AND permanent=0';
 	}
@@ -338,6 +338,30 @@ function get_monster_exchange($server, $limited = TRUE){
 	if(sizeof($res) > 0){
 		foreach($res as $k => $r){
 			$res[$k]['required_monster_ids'] = explode(',', str_replace(array('(', ')'), '', $r['required_monster_ids']));
+		}
+	}
+	return $res;
+}
+function get_egg_machine_lineups($server = NULL) {
+	$sql = 'SELECT server_id, egg_machine_type_id, start_timestamp, end_timestamp, machine_row, machine_type, name, contents FROM egg_machines WHERE end_timestamp>unix_timestamp()';
+	if ($server != NULL){
+		$sql .= ' AND server_id=?';
+		$server_id = $server == 'na' ? 1 : 0;
+		$res = single_param_stmt($sql, $server_id);
+	}else{
+		$sql .= ' ORDER BY server_id ASC';
+		global $miru;
+		$stmt = $miru->conn->prepare($sql);
+		$res = execute_select_stmt($stmt);
+		$stmt->close();
+	}
+	if(sizeof($res) > 0){
+		foreach($res as $k => $r){
+			$contents = array();
+			foreach(json_decode($r['contents'], TRUE) as $i => $c){
+				$contents[str_replace(array('(', ')'), '', $i)] = $c;
+			}
+			$res[$k]['contents'] = $contents;
 		}
 	}
 	return $res;
