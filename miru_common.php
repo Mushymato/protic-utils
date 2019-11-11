@@ -132,7 +132,7 @@ function populate_table($data, $tablename, $fieldnames){
 	}
 	echo 'Imported ' . $count . ' records out of ' . sizeof($data) . ' to ' . $tablename . PHP_EOL;
 }
-function execute_select_stmt($stmt, $pk = null){
+function execute_select_stmt($stmt, $pk = NULL){
 	global $miru;
 	if(!$stmt->execute()){
 		trigger_error($miru->conn->error . '[select]');
@@ -155,7 +155,7 @@ function execute_select_stmt($stmt, $pk = null){
 		foreach($row as $key => $val){
 			$c[$key] = $val; 
 		} 
-		if($pk != null){
+		if($pk != NULL){
 			if(array_key_exists($c[$pk], $res)){
 				$res[$c[$pk]][] = $c;
 			}else{
@@ -326,6 +326,20 @@ function select_card($id){
 	$res['awakenings'] = select_awakenings($id);
 	//$res['EVOLUTIONS'] = select_evolutions($id);
 	
+	return $res;
+}
+function get_monster_exchange($server, $limited = TRUE){
+	$sql = 'SELECT server_id, target_monster_id, required_monster_ids, required_count, start_timestamp, end_timestamp, permanent FROM exchanges WHERE server_id=?';
+	if ($limited){
+		$sql .= ' AND permanent=0';
+	}
+	$server_id = $server == 'na' ? 1 : 0;
+	$res = single_param_stmt($sql, $server_id);
+	if(sizeof($res) > 0){
+		foreach($res as $k => $r){
+			$res[$k]['required_monster_ids'] = explode(',', str_replace(array('(', ')'), '', $r['required_monster_ids']));
+		}
+	}
 	return $res;
 }
 function grab_img_if_exists($url, $id, $savedir, $override = false){
@@ -599,5 +613,4 @@ function retrieve_some_buttons($button_type_id, $button_type_name)	{
 	}
 echo ('</tbody></table>');
 }
-
 ?>
