@@ -28,7 +28,7 @@ function rem_name_tl($jp_name){
 function load_rem_by_region($region = 'jp'){
 	global $portrait_url;
 	global $portrait_url_na;
-	$data = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/raw/' . $region . '/egg_machines.json'), true);
+	$data = get_egg_machine_lineups($region);
 	$output_array = array();
 	$output_tabs = array();
 	foreach($data as $machine){
@@ -53,13 +53,12 @@ function load_rem_by_region($region = 'jp'){
 			$sorted[$mon['rarity']][$r_rate][] = $mon;
 		}
 		krsort($sorted);
-		$comments = explode('|', $machine['clean_comment']);
-		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $region . '-' . $machine['egg_machine_row'];
+		$machine_id = ($is_pem ? 'pem' : 'rem') . '-' . $region . '-' . $machine['machine_row'];
 		if($region == 'jp'){
-			$tl_name = rem_name_tl($machine['clean_name']);
+			$tl_name = rem_name_tl($machine['name']);
 		}
-		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . (isset($tl_name) ? $tl_name : $machine['clean_name']) . '</li>';
-		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['clean_name'] . '</h1>' . (isset($tl_name) ? '<h2/>' . $tl_name . '</h2>' : '') . ($is_pem ? '' : '<h2 >Total Rate = <span class="total-rate" data-machineid="' . $machine_id . '">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2><h3>Chance to get at least 1 desired card, given <input type="text" class="stone-count" data-machineid="' . $machine_id . '" value="0"  maxlength = "3" data-cost="' . $machine['cost'] . '"> <img src="/wp-content/uploads/pad-icons/Magic-Stone.png">: <span class="cumulative-rate" data-machineid="' . $machine_id . '">0.00</span>%</h3>');
+		$output_tabs[] = '<li class="egg-machine-tab-link" data-machineid="' . $machine_id . '">' . (isset($tl_name) ? $tl_name : $machine['name']) . '</li>';
+		$out = '<form id="' . $machine_id . '" data-timestart="' . $machine['start_timestamp'] . ' data-timeend="' . $machine['end_timestamp'] . '"><h1>' . $machine['name'] . '</h1>' . (isset($tl_name) ? '<h2/>' . $tl_name . '</h2>' : '') . ($is_pem ? '' : '<h2 >Total Rate = <span class="total-rate" data-machineid="' . $machine_id . '">0.00</span>%  <button type="reset" class="clear-selected" data-machineid="' . $machine_id . '" value="Reset">Reset</button></h2><h3>Chance to get at least 1 desired card, given <input type="text" class="stone-count" data-machineid="' . $machine_id . '" value="0"  maxlength = "3" data-cost="' . $machine['cost'] . '"> <img src="/wp-content/uploads/pad-icons/Magic-Stone.png">: <span class="cumulative-rate" data-machineid="' . $machine_id . '">0.00</span>%</h3>');
 		foreach($sorted as $rarity => $rates){
 			ksort($rates);
 			foreach($rates as $r_rate => $cards){
@@ -77,13 +76,13 @@ function load_rem_by_region($region = 'jp'){
 					}
 				}else{
 					foreach($cards as $mon){
-						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['egg_machine_row'] . '-' . $mon['monster_no_'.$region] . '"/><label for="remcard-' . $machine['egg_machine_row'] . '-' . $mon['monster_no_'.$region] . '"><img src="' . $regional_img_url . $mon['monster_no_'.$region] . '.png" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_na'] . '"/></label></div>';
+						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['machine_row'] . '-' . $mon['monster_no_'.$region] . '"/><label for="remcard-' . $machine['machine_row'] . '-' . $mon['monster_no_'.$region] . '"><img src="' . $regional_img_url . $mon['monster_no_'.$region] . '.png" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_na'] . '"/></label></div>';
 					}
 				}
 				$out .= '</div></div>';
 			}
 		}
-		$output_array[$machine['clean_name']] = $out . '</form>';
+		$output_array[$machine['name']] = $out . '</form>';
 	}	
 	return '<ul class="egg-machine-tabs">' . implode($output_tabs) . '</ul><div class="egg-machines">' . implode($output_array) . '</div>';
 }
