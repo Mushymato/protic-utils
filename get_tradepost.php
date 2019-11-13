@@ -35,8 +35,8 @@ function get_tradepost_rare($data, $region, $include = array()){
 		}
 		if($mon){
 			$card = card_icon_img($mon['monster_no_'.$region], $mon['name_na'], $region);
-			$out['html'] .= '<tr class="mon-exchange-card"><td style="width: 80px">' . $card['html'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' . $mon['name_jp'] : '') . '</strong></td></tr><tr class="mon-exchange-list"><td colspan="2"><p class="1"><strong>▼ Trade ' . $d['required_count'] . ' cards in.</strong><br/>';
-			$out['shortcode'] .= '<tr class="mon-exchange-card"><td style="width: 80px">' . $card['shortcode'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' . $mon['name_jp'] : '') . '</strong></td></tr>' . PHP_EOL . '<tr class="mon-exchange-list"><td colspan="2"><p class="1"><strong>▼ Trade ' . $d['required_count'] . ' cards in.</strong>' . PHP_EOL ;
+			$out['html'] .= '<tr class="mon-exchange-card"><td style="width: 80px"  rowspan="2">' . $card['html'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' .  '<br>' . $mon['name_jp'] : '') . '</strong><br><strong><span style="color: #ff6600;">▼ Trade ' . $d['required_count'] . ' cards in.</span></strong><br/></td></tr><tr class="mon-exchange-list"><td>';
+			$out['shortcode'] .= '<tr class="mon-exchange-card"><td style="width: 80px">' . $card['shortcode'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' .  '<br>' . $mon['name_jp'] : '') . '</strong><br><strong><span style="color: #ff6600;">▼ Trade ' . $d['required_count'] . ' cards in.</span></strong></td></tr>' . PHP_EOL . '<tr class="mon-exchange-list"><td>' . PHP_EOL ;
 			foreach($d['required_monster_ids'] as $req_id){
 				$mon = query_monster($req_id, $region);
 				if(!$mon){
