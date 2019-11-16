@@ -343,7 +343,7 @@ function get_monster_exchange($server, $limited = TRUE){
 	return $res;
 }
 function get_egg_machine_lineups($server = NULL) {
-	$sql = 'SELECT server_id, egg_machine_type_id, start_timestamp, end_timestamp, machine_row, machine_type, name, contents FROM egg_machines WHERE end_timestamp>unix_timestamp()';
+	$sql = 'SELECT server_id, egg_machine_type_id, start_timestamp, end_timestamp, machine_row, machine_type, cost, name, contents FROM egg_machines WHERE end_timestamp>unix_timestamp()';
 	if ($server != NULL){
 		$sql .= ' AND server_id=?';
 		$server_id = $server == 'na' ? 1 : 0;
