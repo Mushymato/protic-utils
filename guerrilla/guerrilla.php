@@ -49,18 +49,12 @@ function get_json($url){
 	return json_decode($data, true);
 }
 function get_icon($dungeon_id){
-	// if(substr($dungeon_name, 0, 1) == '$'){
-	// 	$dungeon_name = explode('$', $dungeon_name)[2];
-	// }
-	// global $icon;
-	// $icon_url = $icon['iconURL'] . $icon[$dungeon_name]['i'];
-	// $dungeon_url = $icon[$dungeon_name]['d'] == '' ? '#' : $icon['dungeonURL'] . $icon[$dungeon_name]['d'];
-	// return tag('a', "<img src=\"$icon_url\" class=\"dungeon-icon\">", "href=\"$dungeon_url\" title=\"$dungeon_name\"");
 	global $dungeon_info;
 	$dungeon = $dungeon_info[$dungeon_id];
-	$icon = '/wp-content/uploads/pad-portrait/'.$dungeon['icon_id'].'.png';
+	$icon_url = '/wp-content/uploads/pad-portrait/'.$dungeon['icon_id'].'.png';
 	$name = $dungeon['name'];
-	return "<img src=\"$icon\" class=\"dungeon-icon\" title=\"$name\">";
+	$pdx_search = 'http://www.puzzledragonx.com/en/search.asp?q='.$name;
+	return tag('a', "<img src=\"$icon_url\" class=\"dungeon-icon\">", "href=\"$pdx_search\" title=\"$name\"");
 }
 function get_orb($orb){
 	$orb_id = ['red' => '1', 'blue' => '2', 'green' => '3'];
