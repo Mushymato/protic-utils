@@ -17,7 +17,8 @@ function sumRates(){
 		if(sumSelected != 0){
 			var stones = rem.querySelector("#"+remID+" input.stone-count");
 			var rolls = Math.floor(parseInt(stones.value) / parseInt(stones.getAttribute("data-cost")));
-			if(rolls != 0 && rolls != NaN){
+			if(rolls != 0 && !(Number.isNan(rolls)){
+				var temp = Number((1 - Math.pow(1 - sumSelected/100, rolls))*100).toFixed(2);
 				rem.querySelector("#"+remID+" span.cumulative-rate").innerHTML = Number((1 - Math.pow(1 - sumSelected/100, rolls))*100).toFixed(2);
 			}
 		}else{
