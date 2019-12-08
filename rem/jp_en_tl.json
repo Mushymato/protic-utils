@@ -4,7 +4,8 @@
 	"魔法石(\\d*?)個！": "$1 Magic Stones!",
 	"コラボ": "Collab",
 	"ガチャ": "Egg Machine",
-	"ダンジョン": "Dungeon",
+	"ダンジョン": "Dungeon",	
+	"アンケート": "Player's Choice",
 	
 	"シンカリオン": "Shinkalion",
 	"ファンタジアレジェンド": "Fantasia Legend",
