@@ -13,13 +13,18 @@ $fieldnames = array('COMPUTED_NAME', 'MONSTER_NO');
 recreate_table($data, $tablename, $fieldnames, $pk);
 populate_table($data, $tablename, $fieldnames);
 
-$dadguide_sql_dump = file_get_contents('https://f002.backblazeb2.com/file/dadguide-data/db/dadguide.mysql');
-$miru->conn->multi_query($dadguide_sql_dump);
-//Make sure this keeps php waiting for queries to be done
-do{} while($miru->conn->more_results() && $miru->conn->next_result());
-echo 'Imported dadguide db' . PHP_EOL;
+// $dadguide_sql_dump = file_get_contents('https://f002.backblazeb2.com/file/dadguide-data/db/dadguide.mysql');
+// $miru->conn->multi_query($dadguide_sql_dump);
+// do{} while($miru->conn->more_results() && $miru->conn->next_result());
 
-$dungeon_icon_override = json_decode(file_get_contents('.guerrilla/dungeon_icon_overrides.json'), true);
+include 'sql_param.php';
+$file = fopen('dadguide.mysql', 'w');        
+fwrite($file, file_get_contents('https://f002.backblazeb2.com/file/dadguide-data/db/dadguide.mysql'));
+fclose($file);
+$cmd = "mysql -h {$host} -u {$user} -p{$pass} {$schema} < dadguide.mysql";
+exec($cmd);
+
+$dungeon_icon_override = json_decode(file_get_contents('./guerrilla/dungeon_icon_overrides.json'), true);
 $cond_types = array(
 	'dungeon_id' => 'ii',
 	'name_na' => 'is',

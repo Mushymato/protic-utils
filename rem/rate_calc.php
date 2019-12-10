@@ -66,7 +66,7 @@ function load_rem_by_region($region = 'jp'){
 				if (!file_exists($_SERVER['DOCUMENT_ROOT'].$regional_img_url.$mon['monster_no_'.$region].'.png')){
 					# fallback to jp
 					$regional_img_url = $portrait_url;
-				}			
+				}
 				$rg_id = $machine_id . '-' . $rarity . '-' . $r_rate;
 				$rate = $r_rate/100;
 				$out .= '<div class="' . ($is_pem ? 'pem' : 'rem') . '-wrapper-rarity">' . get_egg($rarity)['html'] . '<strong>' . $rarity . '★' . ($is_pem ? '</strong>' : ' | ' . $rate . '% each, ' . ($rate * sizeof($cards)) . '% total</strong> <input type="checkbox" class="select-group" id="' . $rg_id . '"><label for="' . $rg_id . '">Select All</label>') . '<br/><div class="rate-group" data-rate="' . $rate . '" data-rategroupid="' . $rg_id . '">';
