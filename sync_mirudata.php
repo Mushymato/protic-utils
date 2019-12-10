@@ -21,8 +21,33 @@ include 'sql_param.php';
 $file = fopen('dadguide.mysql', 'w');        
 fwrite($file, file_get_contents('https://f002.backblazeb2.com/file/dadguide-data/db/dadguide.mysql'));
 fclose($file);
-$cmd = "mysql -h {$host} -u {$user} -p{$pass} {$schema} < dadguide.mysql";
-exec($cmd);
+// $cmd = "mysql -h {$host} -u {$user} -p{$pass} {$schema} < dadguide.mysql";
+// exec($cmd);
+$templine = '';
+$delim = FALSE;
+$handle = fopen("dadguide.mysql", "r");
+if ($handle) {
+	$miru->conn->query('SET FOREIGN_KEY_CHECKS = 0;');
+    while (($line = fgets($handle)) !== false) {
+		// process the line read.
+		if (trim($line) == 'DELIMITER ;;'){$delim = TRUE; continue;}
+		if (trim($line) == 'DELIMITER ;'){$delim = FALSE; continue;}
+		if ($delim || substr($line, 0, 2) == '--' || substr($line, 0, 2) == '/*' || $line == '') {continue;}
+		$templine .= $line;
+		if (substr(trim($templine), -1, 1) == ';'){
+			// Perform the query
+			if (!$miru->conn->query($templine)){
+				echo 'Error performing query ' . $templine . ':' . PHP_EOL . $miru->conn->error . PHP_EOL;
+			}
+			// Reset temp variable to empty
+			$templine = '';
+		}
+    }
+	fclose($handle);
+	$miru->conn->query('SET FOREIGN_KEY_CHECKS = 1;');
+} else {
+    // error opening the file.
+}
 
 $dungeon_icon_override = json_decode(file_get_contents('./guerrilla/dungeon_icon_overrides.json'), true);
 $cond_types = array(
