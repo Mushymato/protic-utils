@@ -1,42 +1,4 @@
-<html>
-<title>Guerilla Dungeons</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" type="text/javascript"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js" type="text/javascript"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone-with-data.min.js" type="text/javascript"></script>
-<script src="./guerrilla.js" type="text/javascript"></script>
-<style>
-.highlight{
-	background-color:powderblue;
-}
-.highlight .highlight{
-	font-weight: bold;
-}
-.group-tag{
-	display: block;
-	text-align: center;
-	line-height: 1em;
-}
-.dungeon-icon{
-	width: 50px;
-	height: 50px;
-}
-.float{
-	float: left;
-}
-</style>
-
-</head>
-<body>
-<div>
-
-<button onclick="switchTimezone();">Timezone: <span id="timezone"></span></button>
-
-<button onclick="switchRegion();">Switch Region: <span id="region"></span></button><button onclick="pickMode('group');">By Group</button><button onclick="pickMode('schedule');">By Time</button><button onclick="pickMode('next');">By Countdown</button>
-
 <?php 
-
-include '../miru_common.php';
-
 date_default_timezone_set('UTC');
 ini_set('allow_url_fopen', 1);
 
@@ -197,7 +159,19 @@ function get_guerrilla_tables(){
 	}
 	return $out;
 }
-echo get_guerrilla_tables();
+function get_guerrilla_schedule(){
+	$btn = '
+	<div id="ltd-buttons">
+		<span id="ltd-buttons-top">
+			<button id="ltd-switchTimezone" onclick="switchTimezone();">Timezone: <span id="ltd-timezone"></span></button>
+			<button id="ltd-switchRegion" onclick="switchRegion();">Switch Region: <span id="ltd-region"></span></button>
+		</span>
+		<span id="ltd-buttons-bottom">
+			<button onclick="pickMode(\'group\');">By Group</button>
+			<button onclick="pickMode(\'schedule\');">By Time</button>
+			<button onclick="pickMode(\'next\');">By Countdown</button>
+		</span>
+	</div>';
+	return '<div>' . $btn . get_guerrilla_tables() . '</div>';
+}
 ?>
-</body>
-</html>

@@ -1,8 +1,20 @@
 [
     {
-        "dungeon_id": "bolb",
+        "dungeon_id": "3587",
         "name_na": "Gem Temple",
         "name_jp": "希石の神殿",
-        "icon_id": 4558
+        "icon_id": "4464"
+    },
+    {
+        "dungeon_id": "1747",
+        "name_na": "Spirit Jewel Rush!",
+        "name_jp": "精霊の宝玉ラッシュ！",
+        "icon_id": "1329"
+    },
+    {
+        "dungeon_id": "600",
+        "name_na": "Rare Monster Infestation!",
+        "name_jp": "レアキャラ大量発生！",
+        "icon_id": "752"
     }
 ]
