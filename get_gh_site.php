@@ -6,10 +6,11 @@ include 'miru_common.php';
 
 $input_str = array_key_exists('input', $_POST) ? 'https://pad.gungho.jp/member/' . $_POST['input'] . '.html': '';
 $om = array_key_exists('o', $_POST) ? $_POST['o'] : 'shortcode';
-$awk = array_key_exists('awk', $_POST) ? $_POST['awk'] : 'yes';
+$ev = array_key_exists('e', $_POST) ? $_POST['e'] : 'yes';
 ?>
 <form method="post">
 <p>Output Mode: <input type="radio" name="o" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="o" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"></p>
+<p>Grab Evomats? <input type="radio" name="e" value="yes" <?php if($ev == 'yes'){echo 'checked';}?>> Yes <input type="radio" name="e" value="no" <?php if($ev == 'no'){echo 'checked';}?>> No</p>
 
 <p>Paste partial URL Here:</p>
 https://pad.gungho.jp/member/<input type='text' name="input" size="50" value="<?php echo array_key_exists('input', $_POST) ? $_POST['input'] : '';?>">.html
@@ -62,7 +63,8 @@ foreach ($buff_tables as $tbl){
 											'INFO' => '',
 											'COMP' => '',
 											'STAT_DIF' => array(),
-											'STAT_MAX' => array()
+											'STAT_MAX' => array(),
+											'EVO_MATS' => array()
 										);
 									}
 									continue;
@@ -121,8 +123,47 @@ foreach ($buff_tables as $tbl){
 		}
 	}
 }
+if ($ev == 'yes'){
+	$evomat_tables = $xpath->query("//table[contains(@class, 'sozai_list')]");
+	$current_card = 0;
+	foreach ($evomat_tables as $tbl){
+		foreach ($tbl->childNodes as $tr){
+			if (isset($tr->childNodes)){
+				foreach ($tr->childNodes as $td){
+					if (isset($td->tagName) && $td->tagName == 'td'){
+						foreach ($td->childNodes as $n){
+							if (isset($n->tagName) && $n->tagName == 'img'){
+								$src = $n->getAttribute('src');
+								if (strpos($src, 'm_icon') !== FALSE){
+									$current_card = intval(str_replace('.jpg', '', basename($src)));
+									if(array_key_exists($current_card, $monster_output)){
+										$monster_output[$current_card]['EVO_MATS'] = array();
+									}
+								}
+							}
+							if (isset($n->tagName) && $n->tagName == 'ul'){
+								foreach ($n->childNodes as $li){
+									if (isset($li->childNodes)){
+										foreach ($li->childNodes as $img){
+											if (isset($img->tagName) && $img->tagName == 'img'){
+												$src = $img->getAttribute('src');
+												if (strpos($src, 'm_icon') !== FALSE){
+													$monster_output[$current_card]['EVO_MATS'][] = intval(str_replace('.jpg', '', basename($src)));
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 function fmt_card_buff($id, $mons, $mode){
-	$card_icon = card_icon_img($id);
 	$output = '';
 	$rowspan = 0;
 	if (sizeof($mons['STAT_DIF']) > 0){
@@ -167,9 +208,18 @@ function fmt_card_buff($id, $mons, $mode){
 	if (strlen($awake_output) > 0){
 		$output .= '<div class="card-change-awakes"><div class="card-change-awakes-name">Awakening Changes</div>' . $awake_output . '</div>';
 	}
-	$output = '<tr><td class="card-change-icon">' . card_icon_img($id)[$mode] . ($mons['NAME_EN'] !== '' ? '<p class="card-change-name">' . $mons['NAME_EN'] . '</p>' : '') . ($mons['NAME_JP'] !== '' ? '<p class="card-change-name">' . $mons['NAME_JP'] . '</p>' : '') . '</td><td>' . $output . '</td></tr>';
+	$evo_mats_output = '';
+	if (sizeof($mons['EVO_MATS']) > 0){
+		$evo_mats_output .= '<td><div class="card-evomats">';
+		foreach($mons['EVO_MATS'] as $mat){
+			$evo_mats_output .= card_icon_img($mat)[$mode];
+		}
+		$evo_mats_output .= '</div></td>';
+	}
+	$output = '<tr><td class="card-change-icon">' . card_icon_img($id)[$mode] . ($mons['NAME_EN'] !== '' ? '<p class="card-change-name">' . $mons['NAME_EN'] . '</p>' : '') . ($mons['NAME_JP'] !== '' ? '<p class="card-change-name">' . $mons['NAME_JP'] . '</p>' : '') . '</td><td>' . $output . '</td>' . $evo_mats_output . '</tr>';
 	return $output;
 }
+
 $output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
 $output_arr['shortcode'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
 ksort($monster_output);
