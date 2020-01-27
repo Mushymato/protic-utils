@@ -1,9 +1,7 @@
 <?php 
 $insert_size = 250;
-$portrait_url = '/wp-content/uploads/pad-portrait/';
-$fullimg_url = '/wp-content/uploads/pad-img/';
-$portrait_url_na = '/wp-content/uploads/na/pad-portrait/';
-$fullimg_url_na = '/wp-content/uploads/na/pad-img/';
+$portrait_url = '/wp-content/uploads/pad-portrait/%05d.png';
+$fullimg_url = '/wp-content/uploads/pad-img/%05d.png';
 class mySQLConn{
 	function connect_sql($host, $user, $pass, $schema){
 		// Create connection
@@ -367,14 +365,13 @@ function get_egg_machine_lineups($server = NULL) {
 	return $res;
 }
 function grab_img_if_exists($url, $id, $savedir, $override = false){
-	$saveto = $savedir . $id . '.png';
-	// echo realpath($saveto) . PHP_EOL;
-	if (!file_exists($savedir)) {
-		mkdir($savedir, 0777, true);
+	$saveto = sprintf($savedir, $id);
+	if (!file_exists(dirname($savedir))) {
+		mkdir(dirname($savedir), 0777, true);
 	}else if(file_exists($saveto) && !$override){
 		return true;
 	}
-	$ch = curl_init ($url . $id . '.png');
+	$ch = curl_init(sprintf($url, $id));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
 	$raw = curl_exec($ch);
@@ -390,14 +387,8 @@ function grab_img_if_exists($url, $id, $savedir, $override = false){
 }
 function card_icon_img($id, $name = '', $region = 'jp', $w = '63', $h = '63', $href = 'http://www.puzzledragonx.com/en/monster.asp?n='){
 	global $portrait_url;
-	global $portrait_url_na;
-	$regional_img_url = $region == 'jp' ? $portrait_url : $portrait_url_na;
-	if (!file_exists($_SERVER['DOCUMENT_ROOT'].$regional_img_url.$id.'.png')){
-		# fallback to jp
-		$regional_img_url = $portrait_url;
-	}
 	return array(
-		'html' => '<a href="' . $href . $id . '"><img src="' . $regional_img_url . $id . '.png" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
+		'html' => '<a href="' . $href . $id . '"><img src="' . sprintf($portrait_url, $id) . '" title="' . $id . ($name == '' ? '' : '-' . $name) . '" width="' . $w . '" height="' . $h . '"/></a>', 
 		'shortcode' => '[pdx id=' . $id . ($w == $h && $w == '63' ? '' : ' w=' . $w . ' h=' . $h) . ']');
 }
 function lb_stat($base, $mult){
@@ -514,14 +505,10 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 	} else {
 		$head = '<div class="cardgrid">';
 	}
+	$monster_id = $data['monster_id'];
 	$monster_no = $data['monster_no_'.$region];
-	$regional_img_url = ($region == 'jp') ? $fullimg_url : $fullimg_url_na;
-	if (!file_exists($_SERVER['DOCUMENT_ROOT'].$regional_img_url.$monster_no.'.png')){
-		# fallback to jp
-		$regional_img_url = $fullimg_url;
-	}
 	return array(
-		'html' => $head . '<div class="col1"><img src="'. $regional_img_url . $monster_no . '.png"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['as_desc_na']) . '<br/><b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b></p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/><b>' . lead_mult($data) . '</b></p>') . '</div></div>', 
+		'html' => $head . '<div class="col1"><img src="'. sprintf($fullimg_url, $monster_no) . '"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<p><u>Active Skill:</u> ' . htmlentities($data['as_desc_na']) . '<br/><b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b></p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/><b>' . lead_mult($data) . '</b></p>') . '</div></div>', 
 		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b>' . PHP_EOL . $types[1] . '<br/><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> ' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL . '<b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b>') . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> ' . htmlentities($data['ls_desc_na']) . '<br/>' . PHP_EOL . '<b>' . lead_mult($data) . '</b>') . PHP_EOL . '</div>' . PHP_EOL . '</div>');
 }
 function get_card_summary($id, $region = 'jp'){
@@ -531,7 +518,7 @@ function get_card_summary($id, $region = 'jp'){
 	}
 
 	$monster_no = $data['monster_no_'.$region];
-	$card = card_icon_img($monster_no, $data['name_na'], $region);
+	$card = card_icon_img($data['monster_id'], $data['name_na'], $region);
 	$awakes = awake_list($data['awakenings']);
 	if($data['limit_mult']){
 		$stats = ' <p><b>Lv.110</b> <b>HP</b> ' . lb_stat($data['hp_max'], $data['limit_mult']) . ' <b>ATK</b> ' . lb_stat($data['atk_max'], $data['limit_mult']) . ' <b>RCV</b> ' . lb_stat($data['rcv_max'], $data['limit_mult']) . ' (' . weighted($data, 110) . ' weighted)</p>';
@@ -549,7 +536,7 @@ function get_lb_stats_row($id, $sa, $region = 'jp'){
 		return array('html' => '', 'shortcode' => '');
 	}
 
-	$card = card_icon_img($data['monster_no_'.$region], $data['name_na'], $region);
+	$card = card_icon_img($data['monster_id'], $data['name_na'], $region);
 	$supers = array('','');
 	if($sa){
 		global $aw;
@@ -618,9 +605,9 @@ function get_button_info($id, $button_type_name){
 	if(!$data){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
-	$card = card_icon_img($id, $data['name_na']);	
+	$card = card_icon_img($data['monster_id'], $data['name_na']);	
 	return array(
-		'html' => '<tr><td> <h2 id="card_' . $id . '">' . $card['html'] . '</h2></td>' . '<td>' . htmlentities($button_type_name) . '</td></tr>');
+		'html' => '<tr><td> <h2 id="card_' . $data['monster_id'] . '">' . $card['html'] . '</h2></td>' . '<td>' . htmlentities($button_type_name) . '</td></tr>');
 }
 
 function retrieve_some_buttons($button_type_id, $button_type_name)	{	
