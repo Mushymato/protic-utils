@@ -500,16 +500,19 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 	$head = '';
 	if ($headings == 'yes'){
 		$head = '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' . PHP_EOL . '<div class="cardgrid">';
+		$head_shortcode = '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' . PHP_EOL .  '[cardgrid]';		
 	} else if ($headings == 'tocOnly'){
 		$head = '<div class="cardgrid" id="card_' . $id . '">';
+		$head_shortcode = '[cardgrid card_id=' . $id . ']';
 	} else {
 		$head = '<div class="cardgrid">';
+		$head_shortcode = '[cardgrid]';
 	}
 	$monster_id = $data['monster_id'];
 	$monster_no = $data['monster_no_'.$region];
 	return array(
 		'html' => $head . '<div class="col1"><img src="'. sprintf($fullimg_url, $monster_id) . '"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<br/><p><u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b><br> ' . htmlentities($data['as_desc_na']) . '</p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/> ' . htmlentities($data['ls_desc_na']) . '</p>') . '</div></div>', 
-		'shortcode' => $head . PHP_EOL . '<div class="col1">[pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '</div>' . PHP_EOL . '<div class="col-cardinfo">' . PHP_EOL . '[' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b><br/><span class="card-type">' . PHP_EOL . $types[1] . '</span><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b><br/>' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL) . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/>' . PHP_EOL . htmlentities($data['ls_desc_na']) ) . PHP_EOL . '</div>' . PHP_EOL . '</div>');
+		'shortcode' => $head_shortcode . PHP_EOL . '[col1][pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '[/col1]' . PHP_EOL . '[col2][' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b><br/><span class="card-type">' . PHP_EOL . $types[1] . '</span><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b><br/>' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL) . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/>' . PHP_EOL . htmlentities($data['ls_desc_na']) ) . PHP_EOL . '[/col2]' . PHP_EOL . '[/cardgrid]');
 }
 function get_card_summary($id, $region = 'jp'){
 	$data = select_card($id);
