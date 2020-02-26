@@ -4,7 +4,7 @@ $time_start = microtime(true);
 
 $tablename = 'computedNames';
 $pk = 'COMPUTED_NAME';
-$pairs = json_decode(file_get_contents('https://storage.googleapis.com/mirubot/protic/paddata/miru_data/computed_names.json'), true);
+$pairs = json_decode(file_get_contents('https://f002.backblazeb2.com/file/dadguide-data/extra/computed_names.json'), true);
 $data = array();
 foreach($pairs as $computed_name => $monster_no){
 	$data[] = array('COMPUTED_NAME' => $computed_name, 'MONSTER_NO' => $monster_no);
