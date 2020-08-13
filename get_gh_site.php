@@ -64,7 +64,8 @@ foreach ($buff_tables as $tbl){
 											'COMP' => '',
 											'STAT_DIF' => array(),
 											'STAT_MAX' => array(),
-											'EVO_MATS' => array()
+											'EVO_MATS' => array(),
+											'EVO_TO' => 0
 										);
 									}
 									continue;
@@ -129,15 +130,27 @@ if ($ev == 'yes'){
 	foreach ($evomat_tables as $tbl){
 		foreach ($tbl->childNodes as $tr){
 			if (isset($tr->childNodes)){
+				$is_base = TRUE;
 				foreach ($tr->childNodes as $td){
 					if (isset($td->tagName) && $td->tagName == 'td'){
 						foreach ($td->childNodes as $n){
 							if (isset($n->tagName) && $n->tagName == 'img'){
-								$src = $n->getAttribute('src');
-								if (strpos($src, 'm_icon') !== FALSE){
-									$current_card = intval(str_replace('.jpg', '', basename($src)));
-									if(array_key_exists($current_card, $monster_output)){
-										$monster_output[$current_card]['EVO_MATS'] = array();
+								if($is_base){
+									$src = $n->getAttribute('src');
+									if (strpos($src, 'm_icon') !== FALSE){
+										$current_card = intval(str_replace('.jpg', '', basename($src)));
+										if(array_key_exists($current_card, $monster_output)){
+											$monster_output[$current_card]['EVO_MATS'] = array();
+										}
+									}
+									$is_base = FALSE;
+									continue;
+								} else {
+									$src = $n->getAttribute('src');
+									if (strpos($src, 'm_icon') !== FALSE){
+										if(array_key_exists($current_card, $monster_output)){
+											$monster_output[$current_card]['EVO_TO'] = intval(str_replace('.jpg', '', basename($src)));
+										}
 									}
 								}
 							}
@@ -208,16 +221,36 @@ function fmt_card_buff($id, $mons, $mode){
 	if (strlen($awake_output) > 0){
 		$output .= '<div class="card-change-awakes"><div class="card-change-awakes-name">Awakening Changes</div>' . $awake_output . '</div>';
 	}
-	$evo_mats_output = '';
-	if (sizeof($mons['EVO_MATS']) > 0){
-		$evo_mats_output .= '<td><div class="card-evomats">';
-		foreach($mons['EVO_MATS'] as $mat){
-			$evo_mats_output .= card_icon_img($mat)[$mode];
-		}
-		$evo_mats_output .= '</div></td>';
-	}
-	$output = '<tr><td class="card-change-icon">' . card_icon_img($id)[$mode] . ($mons['NAME_EN'] !== '' ? '<p class="card-change-name">' . $mons['NAME_EN'] . '</p>' : '') . ($mons['NAME_JP'] !== '' ? '<p class="card-change-name">' . $mons['NAME_JP'] . '</p>' : '') . '</td><td>' . $output . '</td>' . $evo_mats_output . '</tr>';
+	$output = '<tr><td class="card-change-icon">' . card_icon_img($id)[$mode] . ($mons['NAME_EN'] !== '' ? '<p class="card-change-name">' . $mons['NAME_EN'] . '</p>' : '') . ($mons['NAME_JP'] !== '' ? '<p class="card-change-name">' . $mons['NAME_JP'] . '</p>' : '') . '</td><td>' . $output . '</td></tr>';
 	return $output;
+}
+
+
+function fmt_evo_mat($id, $mons, $mode){
+	if ($mons['EVO_TO'] == 0){
+		return '';
+	}
+	$evo_mats_output = '<tr><td>' . card_icon_img($id)[$mode] . '<b>Base</b></td><td><div class="card-evomats">';
+	foreach($mons['EVO_MATS'] as $mat){
+		$evo_mats_output .= card_icon_img($mat)[$mode];
+	}
+	$evo_mats_output .= '</div><ul>';
+	foreach($mons['EVO_MATS'] as $mat){
+		$evo_mons = query_monster($mat);
+		$mat_name = $evo_mons['name_jp'];
+		if ($evo_mons['name_na_override'] != ''){
+			$mat_name = $evo_mons['name_na_override'];
+		} else if ($evo_mons['name_na'] != ''){
+			$mat_name = $evo_mons['name_na'];
+		}
+		$evo_mats_output .= '<li>' . $mat_name . '</li>';
+	}
+	$evo_to_comment = '';
+	if (in_array(3911, $mons['EVO_MATS'])){
+		$evo_to_comment = '<b>Assist Evo</b>';
+	}
+	$evo_mats_output .= '</ul></td><td>' . card_icon_img($mons['EVO_TO'])[$mode] . $evo_to_comment . '</td></tr>';
+	return $evo_mats_output;
 }
 
 $output_arr['html'] .= '<table><thead><tr><td>Card</td><td>Change</td></tr></thead>';
@@ -226,6 +259,12 @@ ksort($monster_output);
 foreach($monster_output as $id => $mons){
 	$output_arr['html'] .= fmt_card_buff($id, $mons, 'html');
 	$output_arr['shortcode'] .= fmt_card_buff($id, $mons, 'shortcode');
+}
+$output_arr['html'] .= '</table><table>';
+$output_arr['shortcode'] .= '</table><table>';
+foreach($monster_output as $id => $mons){
+	$output_arr['html'] .= fmt_evo_mat($id, $mons, 'html');
+	$output_arr['shortcode'] .= fmt_evo_mat($id, $mons, 'shortcode');
 }
 $output_arr['html'] .= '</table>';
 $output_arr['shortcode'] .= '</table>';

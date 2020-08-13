@@ -287,6 +287,7 @@ function select_card($id){
 		monsters.type_1_id,
 		monsters.type_2_id,
 		monsters.type_3_id, 
+		monsters.inheritable,
 		leader_skills.desc_na AS ls_desc_na,
 		leader_skills.max_hp AS lead_hp, 
 		leader_skills.max_atk AS lead_atk,
@@ -477,6 +478,10 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1]  . '<br/>' . PHP_EOL . $supers[1]);
 }
+function youtube_link($name_jp){
+	$url = 'www.youtube.com/results?search_query=パズドラ+'.$name_jp;
+	return '<a href="https://'.$url.'" target="_blank">'.$name_jp.'</a>';
+}
 function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings = false){
 	global $fullimg_url;
 	global $fullimg_url_na;
@@ -510,9 +515,10 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 	}
 	$monster_id = $data['monster_id'];
 	$monster_no = $data['monster_no_'.$region];
+	$inherit = $data['inheritable'] == 0 ? 'Not Inheritable' : 'Inheritable';
 	return array(
-		'html' => $head . '<div class="col1"><img src="'. sprintf($fullimg_url, $monster_id) . '"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<br/><p><u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b><br> ' . htmlentities($data['as_desc_na']) . '</p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/> ' . htmlentities($data['ls_desc_na']) . '</p>') . '</div></div>', 
-		'shortcode' => $head_shortcode . PHP_EOL . '[col1][pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '[/col1]' . PHP_EOL . '[col2][' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . $data['name_jp'] : '') . '</b><br/><span class="card-type">' . PHP_EOL . $types[1] . '</span><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b><br/>' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL) . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/>' . PHP_EOL . htmlentities($data['ls_desc_na']) ) . PHP_EOL . '[/col2]' . PHP_EOL . '[/cardgrid]');
+		'html' => $head . '<div class="col1"><img src="'. sprintf($fullimg_url, $monster_id) . '"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . youtube_link($data['name_jp']) : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<br/><p><u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b> <span class="card-inherit">' . $inherit . '</span> <br> ' . htmlentities($data['as_desc_na']) . '</p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/> ' . htmlentities($data['ls_desc_na']) . '</p>') . '</div></div>', 
+		'shortcode' => $head_shortcode . PHP_EOL . '[col1][pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '[/col1]' . PHP_EOL . '[col2][' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' .youtube_link($data['name_jp']) : '') . '</b><br/><span class="card-type">' . PHP_EOL . $types[1] . '</span><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b> <span class="card-inherit">' . $inherit . '</span> <br/>' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL) . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/>' . PHP_EOL . htmlentities($data['ls_desc_na']) ) . PHP_EOL . '[/col2]' . PHP_EOL . '[/cardgrid]');
 }
 function get_card_summary($id, $region = 'jp'){
 	$data = select_card($id);

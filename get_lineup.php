@@ -41,20 +41,19 @@ function machine_selector($selected = ''){
 	return '<select id="rem_selector" name="rem" style="width:80vw;height:2em;">' . $output . '</select>';
 }
 function populate_from_input($input_str, $region){
+	$SEPARATOR = mb_convert_encoding('&#65532;', 'UTF-8', 'HTML-ENTITIES');
+	$RE_RATE = '/(.*)(\d\.\d{2}\%)/';
 	$mons_array = array();
-	foreach(explode("\n", $input_str) as $line){
-		if(trim($line) == '★'){
+	foreach(explode($SEPARATOR, $input_str) as $line){
+		$line = trim($line);
+		if(substr($line, -1) == '★'){
 			continue;
 		}
-		$parts = explode('    ', trim($line));
-		if(sizeof($parts) < 1){
-			continue;
-		}else if(sizeof($parts) < 2){
-			$q_str = $parts[0];
-			$rate = 0;
-		}else{
-			$q_str = $parts[sizeof($parts)-2];
-			$rate = floatval(str_replace('%', '', $parts[sizeof($parts)-1]));
+		if (preg_match($RE_RATE, $line, $matches) == 1){
+			$q_str = $matches[1];
+			$rate = $matches[2];
+		} else {
+			$q_str = $line;
 		}
 		$mon = query_monster($q_str, $region);
 		if($mon){
