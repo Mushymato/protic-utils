@@ -119,8 +119,11 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
     $name = $onelinearr[3];
     $nameindex = 3;
     for($nameindex = 4;; $nameindex++){
-        $name .= ' '.$onelinearr[$nameindex];
-        if (substr($onelinearr[$nameindex], -1) == ';') break;
+        if (substr($onelinearr[$nameindex], -1) == ';'){
+            $name .= ' '.substr($onelinearr[$nameindex], 0, -1);
+            break;
+        } else
+            $name .= ' '.$onelinearr[$nameindex];
     }
 
     $_POST['name'] = $name;
@@ -140,7 +143,9 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
         $_POST['sa'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex+$saindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex+$saindex] == 'na') break;
     }
-}
+
+    $_POST['as'] = $_POST['ls'] = $_POST['cd'] = '';
+} else $_POST['oneline'] = '';
 
 $attlist = "";
 $subattlist = "";
@@ -241,8 +246,10 @@ foreach($awaks as $k => $v){
 if (sizeof($sas)){
     $dsa = 'Super Awakening: ';
     foreach($sas as $k => $v){
-        $dsa .= $darr['awak'][$v-1];
-        $bsa .= "[awak id=$v]";
+        if ($v > 1){
+            $dsa .= $darr['awak'][$v-1];
+            $bsa .= "[awak id=$v]";
+        }
     }
 }
 
@@ -279,6 +286,7 @@ $form = "
     border-bottom: 3px solid #005662;
     background: #67c7d2;
     padding: 0.5rem 0.75rem;
+    color: white;
 }
 .switch {
     position: relative;
@@ -445,9 +453,14 @@ function selectAtt(id, subatt = false){
     }
 }
 function copyText(container){
-    var text = document.getElementById(container);
-    text.select();
-    document.execCommand('copy');
+    if (container == 'output_blog'){
+        var text = document.getElementById(container).innerHTML;
+        navigator.clipboard.writeText(text);
+    } else {
+        var text = document.getElementById(container);
+        text.select();
+        document.execCommand('copy');
+    }
 }
 function clearForm(){
     clearAwak();
@@ -515,7 +528,7 @@ function clearForm(){
         </tr>
         <tr>
             <td></td>
-            <td colspan='3'>
+            <td colspan='2'>
                 <label class='switch'>
                   <input id='sa_toggle' type='checkbox'>
                   <span class='slider round'></span>
@@ -525,7 +538,7 @@ function clearForm(){
         </tr>
         <tr>
             <td></td>
-            <td colspan='3'>$awaklist</td>
+            <td colspan='2'>$awaklist</td>
         </tr>
         <tr>
             <td style='width: 10%'>AS:</td>
@@ -554,7 +567,8 @@ function clearForm(){
     <textarea id='output_discord' style='width: 100%; height: 30vh;'>$discord</textarea>
     <h3 style='float: left;'>Blog Output</h3>
     <a class='eznewsbtn' style='float: right; margin-top:15px;' onclick='copyText(\"output_blog\")'>Copy</a>
-    <textarea id='output_blog' style='width: 100%; height: 30vh;'>$blog</textarea>
+    <textarea id='output_blog' style='display:none;'>$blog</textarea>
+    <div style='width: 100%; height: 30vh; display: inline-block;'>$blog</div>
 </div>
 ";
 
