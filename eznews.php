@@ -10,7 +10,6 @@ else
 $typesize = 13;
 
 if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
-    $onelinearr = explode(' ',$_POST['oneline']);
     $conversion = array(
         'att' => array(
             'na' => '',
@@ -113,6 +112,8 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
         ),
     );
 
+    $onelinearr = explode(' ',$_POST['oneline']);
+    $inputsize = sizeof($onelinearr);
     $_POST['id'] = $onelinearr[0];
     $_POST['att'] = array_key_exists(strtolower($onelinearr[1]), $conversion['att']) ? $conversion['att'][strtolower($onelinearr[1])] : '';
     $_POST['subatt'] = array_key_exists(strtolower($onelinearr[2]), $conversion['att']) ? $conversion['att'][strtolower($onelinearr[2])] : '';
@@ -126,20 +127,23 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
             $name .= ' '.$onelinearr[$nameindex];
     }
 
-    $_POST['name'] = $name;
+    $_POST['mon_name'] = $name;
     for ($typeindex = 1; $typeindex <= 3; $typeindex++){
+        if ($nameindex+$typeindex >= $inputsize) break;
         $_POST['type'.$typeindex] = $conversion['type'][$onelinearr[$nameindex+$typeindex]];
         if ($onelinearr[$nameindex+$typeindex] == 'na') break;
     }
 
     $_POST['awak'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex]];
     for ($awakindex = 1; $awakindex <= 8; $awakindex++){
+        if ($nameindex+$typeindex+$awakindex >= $inputsize) break;
         $_POST['awak'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex] == 'na') break;
     }
 
     $_POST['sa'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
     for ($saindex = 1; $saindex <= 8; $saindex++){
+        if ($nameindex+$typeindex+$awakindex+$saindex >= $inputsize) break;
         $_POST['sa'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex+$saindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex+$saindex] == 'na') break;
     }
@@ -233,28 +237,43 @@ $darr = array(
     'type' => array('Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evo Mat', 'Enhance Mat', 'Devil', 'Special', 'Awoken Mat', 'Machine', 'Redeemable'),
 );
 
+$barr = array(
+    'orb' => array(
+        1 => 'r',
+        2 => 'b',
+        3 => 'g',
+        4 => 'l',
+        5 => 'd',
+    )
+);
+
 $datt = $darr['orb'][$_POST['att']];
 if ($_POST['subatt']) $datt .= '/'.$darr['orb'][$_POST['subatt']];
+$batt = '[orb id='.$barr['orb'][$_POST['att']].']';
+if ($_POST['subatt']) $batt .= '/'.'[orb id='.$barr['orb'][$_POST['subatt']].']';
 $type = $darr['type'][$_POST['type1']-1];
 if ($_POST['type2']) $type .= ' / '.$darr['type'][$_POST['type2']-1];
 if ($_POST['type3']) $type .= ' / '.$darr['type'][$_POST['type3']-1];
 $dawak = $dsa = $bawak = $bsa = '';
 foreach($awaks as $k => $v){
-    $dawak .= $darr['awak'][$v-1];
-    $bawak .= "[awak id=$v]";
+    if ($v > 1){
+        $dawak .= $darr['awak'][$v-1];
+        $bawak .= "[awk id=$v]";
+    }
 }
-if (sizeof($sas)){
+
+if (sizeof($sas) && $sas[0] != ''){
     $dsa = 'Super Awakening: ';
     foreach($sas as $k => $v){
         if ($v > 1){
             $dsa .= $darr['awak'][$v-1];
-            $bsa .= "[awak id=$v]";
+            $bsa .= "[awk id=$v]";
         }
     }
 }
 
 $discord = "
-[{$_POST['id']}] {$datt} ** {$_POST['name']} **
+[{$_POST['id']}] {$datt} ** {$_POST['mon_name']} **
 $type
 $dawak
 $dsa
@@ -266,7 +285,7 @@ __Leader Skill__: {$_POST['ls']}
 $blog = "
 [cardgrid card_id={$_POST['id']}]
 [col1]pic here[/col1]
-[col2][{$_POST['id']}][orb id=d][orb id=b] <b> {$_POST['name']}</b><br/>
+[col2][{$_POST['id']}]$batt <b> {$_POST['mon_name']}</b><br/>
 <span class='card-type'>
 $type </span><br/>
 $bawak<br/>
@@ -278,6 +297,7 @@ $bsa<br/><br/>
 [/cardgrid]
 ";
 
+$pvblog = do_shortcode($blog);
 
 $form = "
 <style>
@@ -502,7 +522,7 @@ function clearForm(){
         </tr>
         <tr>
             <td style='width: 10%'>Name:</td>
-            <td><input id='name' name='name' type='text' style='width:100%; height:25px;' value='{$_POST['name']}'></td>
+            <td><input id='name' name='mon_name' type='text' style='width:100%; height:25px;' value='{$_POST['mon_name']}'></td>
         </tr>
         <tr style='height:35px;'>
             <td style='width: 10%'>Type:</td>
@@ -568,7 +588,7 @@ function clearForm(){
     <h3 style='float: left;'>Blog Output</h3>
     <a class='eznewsbtn' style='float: right; margin-top:15px;' onclick='copyText(\"output_blog\")'>Copy</a>
     <textarea id='output_blog' style='display:none;'>$blog</textarea>
-    <div style='width: 100%; height: 30vh; display: inline-block;'>$blog</div>
+    <div style='width: 100%; height: 30vh; display: inline-block;'>$pvblog</div>
 </div>
 ";
 
