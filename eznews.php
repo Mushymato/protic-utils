@@ -292,7 +292,7 @@ $bawak<br/>
 $bsa<br/><br/>
 <u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/>
 
-<u>Leader Skill: {$_POST['ls']}</u><br/>
+<u>Leader Skill: </u>{$_POST['ls']}<br/>
 [/col2]
 [/cardgrid]
 ";
@@ -473,14 +473,9 @@ function selectAtt(id, subatt = false){
     }
 }
 function copyText(container){
-    if (container == 'output_blog'){
-        var text = document.getElementById(container).innerHTML;
-        navigator.clipboard.writeText(text);
-    } else {
-        var text = document.getElementById(container);
-        text.select();
-        document.execCommand('copy');
-    }
+    var text = document.getElementById(container);
+    text.select();
+    document.execCommand('copy');
 }
 function clearForm(){
     clearAwak();
@@ -587,9 +582,9 @@ function clearForm(){
     <textarea id='output_discord' style='width: 100%; height: 30vh;'>$discord</textarea>
     <h3 style='float: left;'>Blog Output</h3>
     <a class='eznewsbtn' style='float: right; margin-top:15px;' onclick='copyText(\"output_blog\")'>Copy</a>
-    <textarea id='output_blog' style='display:none;'>$blog</textarea>
-    <div style='width: 100%; height: 30vh; display: inline-block;'>$pvblog</div>
+    <textarea id='output_blog' style='width: 100%; height: 30vh;'>$blog</textarea>
 </div>
+<div style='width: 100%; height: 30vh; display: inline-block;'>$pvblog</div>
 ";
 
 echo $form;
