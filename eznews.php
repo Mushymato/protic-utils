@@ -118,13 +118,17 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
     $_POST['att'] = array_key_exists(strtolower($onelinearr[1]), $conversion['att']) ? $conversion['att'][strtolower($onelinearr[1])] : '';
     $_POST['subatt'] = array_key_exists(strtolower($onelinearr[2]), $conversion['att']) ? $conversion['att'][strtolower($onelinearr[2])] : '';
     $name = $onelinearr[3];
-    $nameindex = 3;
-    for($nameindex = 4;; $nameindex++){
-        if (substr($onelinearr[$nameindex], -1) == ';'){
-            $name .= ' '.substr($onelinearr[$nameindex], 0, -1);
-            break;
-        } else
-            $name .= ' '.$onelinearr[$nameindex];
+    if (substr($onelinearr[3], -1) != ';'){
+        for($nameindex = 4;; $nameindex++){
+            if (substr($onelinearr[$nameindex], -1) == ';'){
+                $name .= ' '.substr($onelinearr[$nameindex], 0, -1);
+                break;
+            } else
+                $name .= ' '.$onelinearr[$nameindex];
+        }
+    } else {
+        $nameindex = 3;
+        $name = substr($name, 0, -1);
     }
 
     $_POST['mon_name'] = $name;
@@ -135,14 +139,14 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
     }
 
     $_POST['awak'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex]];
-    for ($awakindex = 1; $awakindex <= 8; $awakindex++){
+    for ($awakindex = 1; $awakindex <= 9; $awakindex++){
         if ($nameindex+$typeindex+$awakindex >= $inputsize) break;
         $_POST['awak'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex] == 'na') break;
     }
 
     $_POST['sa'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
-    for ($saindex = 1; $saindex <= 8; $saindex++){
+    for ($saindex = 1; $saindex <= 9; $saindex++){
         if ($nameindex+$typeindex+$awakindex+$saindex >= $inputsize) break;
         $_POST['sa'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex+$saindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex+$saindex] == 'na') break;
@@ -154,13 +158,13 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
 $attlist = "";
 $subattlist = "";
 $attsel = '4px solid darkred';
-if (!$_POST['att']) $_POST['att'] = 1;
+if (!array_key_exists('att',$_POST)) $_POST['att'] = 1;
 for($i = 1; $i <= 5; $i++){
-    if ($_POST['att'] == $i)
+    if (array_key_exists('att', $_POST) && $_POST['att'] == $i)
         $attlist .= "<a onclick='selectAtt($i)'><img id='att_$i' style='height: 32px; margin-right: 5px; border-radius: 250px; border: $attsel;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
     else
         $attlist .= "<a onclick='selectAtt($i)'><img id='att_$i' style='height: 32px; margin-right: 5px;border-radius: 250px;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
-    if ($_POST['subatt'] == $i)
+    if (array_key_exists('subatt', $_POST) && $_POST['subatt'] == $i)
         $subattlist .= "<a onclick='selectAtt($i, true)'><img id='subatt_$i' style='height: 32px; border-radius: 250px; border: $attsel;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
     else
         $subattlist .= "<a onclick='selectAtt($i, true)'><img id='subatt_$i' style='height: 32px; margin-right: 5px; border-radius: 250px;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
@@ -192,12 +196,12 @@ foreach($awaksort as $i){
 
 $awakcnt = $sacnt = 0;
 $type1 = $type2 = $type3 = $awak = $sa = "";
-if ($_POST['type1']) $type1 = "<img src='/wp-content/uploads/pad-types/{$_POST['type1']}.png'>";
-if ($_POST['type2']) $type2 = "<img src='/wp-content/uploads/pad-types/{$_POST['type2']}.png'>";
-if ($_POST['type3']) $type3 = "<img src='/wp-content/uploads/pad-types/{$_POST['type3']}.png'>";
+if (array_key_exists('type1', $_POST) && $_POST['type1']) $type1 = "<img src='/wp-content/uploads/pad-types/{$_POST['type1']}.png'>";
+if (array_key_exists('type2', $_POST) && $_POST['type2']) $type2 = "<img src='/wp-content/uploads/pad-types/{$_POST['type2']}.png'>";
+if (array_key_exists('type3', $_POST) && $_POST['type3']) $type3 = "<img src='/wp-content/uploads/pad-types/{$_POST['type3']}.png'>";
 
-$awaks = explode(',', $_POST['awak']);
-$sas = explode(',', $_POST['sa']);
+$awaks = array_key_exists('awak', $_POST) ? explode(',', $_POST['awak']) : array();
+$sas = array_key_exists('sa', $_POST) ? explode(',', $_POST['sa']) : array();
 if (sizeof($awaks)){
     foreach($awaks as $k => $v){
         if ($v){
@@ -271,6 +275,9 @@ if (sizeof($sas) && $sas[0] != ''){
         }
     }
 }
+
+$_POST['as'] = str_replace('\\', '', $_POST['as']);
+$_POST['ls'] = str_replace('\\', '', $_POST['ls']);
 
 $discord = "
 [{$_POST['id']}] {$datt} ** {$_POST['mon_name']} **
