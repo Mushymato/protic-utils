@@ -260,7 +260,7 @@ if ($_POST['type2']) $type .= ' / '.$darr['type'][$_POST['type2']-1];
 if ($_POST['type3']) $type .= ' / '.$darr['type'][$_POST['type3']-1];
 $dawak = $dsa = $bawak = $bsa = '';
 foreach($awaks as $k => $v){
-    if ($v > 1){
+    if ($v > 0){
         $dawak .= $darr['awak'][$v-1];
         $bawak .= "[awk id=$v]";
     }
@@ -269,7 +269,7 @@ foreach($awaks as $k => $v){
 if (sizeof($sas) && $sas[0] != ''){
     $dsa = 'Super Awakening: ';
     foreach($sas as $k => $v){
-        if ($v > 1){
+        if ($v > 0){
             $dsa .= $darr['awak'][$v-1];
             $bsa .= "[awk id=$v]";
         }
