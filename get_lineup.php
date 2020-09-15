@@ -129,14 +129,14 @@ function detailed_lineup($mons_array, $region){
 		$output_arr['shortcode'] = $output_arr['shortcode'] . '</strong></div><div class="rem-wrapper-block">'  . PHP_EOL;
 		foreach($mons as $mon){
 			$monster_no = $mon['monster_no_'.$region];
-			$card = card_icon_img($monster_no, $mon['name_na'], $region);
-			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['name_jp'];
-			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_na'] . '</strong><br/>' . $mon['name_jp'];
+			$card = card_icon_img($monster_no, $mon['name_en'], $region);
+			$output_arr['html'] = $output_arr['html'] . '<div class="rem-detail"><div class="rem-card">' . $card['html'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_en'] . '</strong><br/>' . $mon['name_ja'];
+			$output_arr['shortcode'] = $output_arr['shortcode'] . '<div class="rem-detail"><div class="rem-card">' . $card['shortcode'] . '</div><div class="rem-name">[' . $monster_no . '] <strong>' . $mon['name_en'] . '</strong><br/>' . $mon['name_ja'];
 			if(sizeof($mon['EVOS']) > 0){
 				$output_arr['html'] = $output_arr['html'] . '<br/><span>';
 				$output_arr['shortcode'] = $output_arr['shortcode'] . '<br/><span>';
 				foreach($mon['EVOS'] as $evo){
-					$card = card_icon_img($evo['monster_no_'.$region], $evo['name_na'], $region, '40', '40');
+					$card = card_icon_img($evo['monster_no_'.$region], $evo['name_en'], $region, '40', '40');
 					$output_arr['html'] = $output_arr['html'] . $card['html'] . ' ';
 					$output_arr['shortcode'] = $output_arr['shortcode'] . $card['shortcode'] . ' ';
 				}
@@ -167,7 +167,7 @@ function rate_groups_lineup($mons_array, $region){
 		$output_arr['shortcode'] .= PHP_EOL . PHP_EOL;
 		foreach($mons as $mon){
 			$monster_no = $mon['monster_no_'.$region];
-			$card = card_icon_img($monster_no, $mon['name_na'], $region);
+			$card = card_icon_img($monster_no, $mon['name_en'], $region);
 			$output_arr['html'] .= $card['html'];
 			$output_arr['shortcode'] .= $card['shortcode'];
 		}

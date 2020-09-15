@@ -52,12 +52,12 @@ if ($handle) {
 $dungeon_icon_override = json_decode(file_get_contents('./guerrilla/dungeon_icon_overrides.json'), true);
 $cond_types = array(
 	'dungeon_id' => 'ii',
-	'name_na' => 'is',
-	'name_jp' => 'is'
+	'name_en' => 'is',
+	'name_ja' => 'is'
 );
 foreach ($dungeon_icon_override as $override){
 	if (strlen($override['icon_id']) == 0){
-		trigger_error('Dungeon icon override failed: dungeon_id, name_na, name_jp all empty');
+		trigger_error('Dungeon icon override failed: dungeon_id, name_en, name_ja all empty');
 		continue;
 	}
 	foreach ($cond_types as $cond => $param_types){

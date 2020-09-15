@@ -16,8 +16,8 @@ $tf = array_key_exists('tf', $_POST) ? $_POST['tf'] : 'rem';
 function placehold_req($req_id, $region) {
 	return array(
 		'monster_no_'.$region => $req_id,
-		'name_na' => '<NEWCARD>',
-		'name_jp' => '<NEWCARD>'
+		'name_en' => '<NEWCARD>',
+		'name_ja' => '<NEWCARD>'
 	);
 }
 function get_tradepost_rare($data, $region, $include = array()){
@@ -34,16 +34,16 @@ function get_tradepost_rare($data, $region, $include = array()){
 			$mon = placehold_req($d['target_monster_id'], $region);
 		}
 		if($mon){
-			$card = card_icon_img($mon['monster_no_'.$region], $mon['name_na'], $region);
-			$out['html'] .= '<tr class="mon-exchange-card"><td style="width: 80px"  rowspan="2">' . $card['html'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' .  '<br>' . $mon['name_jp'] : '') . '</strong><br><strong><span style="color: #ff6600;">▼ Trade ' . $d['required_count'] . ' cards in.</span></strong><br/></td></tr><tr class="mon-exchange-list"><td>';
-			$out['shortcode'] .= '<tr class="mon-exchange-card"><td style="width: 80px"  rowspan="2">' . $card['shortcode'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' .  '<br>' . $mon['name_jp'] : '') . '</strong><br><strong><span style="color: #ff6600;">▼ Trade ' . $d['required_count'] . ' cards in.</span></strong></td></tr>' . PHP_EOL . '<tr class="mon-exchange-list"><td>' . PHP_EOL ;
+			$card = card_icon_img($mon['monster_no_'.$region], $mon['name_en'], $region);
+			$out['html'] .= '<tr class="mon-exchange-card"><td style="width: 80px"  rowspan="2">' . $card['html'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_en'] . ($mon['name_ja'] != $mon['name_en'] ? ' ' .  '<br>' . $mon['name_ja'] : '') . '</strong><br><strong><span style="color: #ff6600;">▼ Trade ' . $d['required_count'] . ' cards in.</span></strong><br/></td></tr><tr class="mon-exchange-list"><td>';
+			$out['shortcode'] .= '<tr class="mon-exchange-card"><td style="width: 80px"  rowspan="2">' . $card['shortcode'] . '</td><td>[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_en'] . ($mon['name_ja'] != $mon['name_en'] ? ' ' .  '<br>' . $mon['name_ja'] : '') . '</strong><br><strong><span style="color: #ff6600;">▼ Trade ' . $d['required_count'] . ' cards in.</span></strong></td></tr>' . PHP_EOL . '<tr class="mon-exchange-list"><td>' . PHP_EOL ;
 			foreach($d['required_monster_ids'] as $req_id){
 				$mon = query_monster($req_id, $region);
 				if(!$mon){
 					$mon = placehold_req($req_id, $region);
 				}
 				if($mon){
-					$card = card_icon_img($mon['monster_no_'.$region], $mon['name_na'], $region);
+					$card = card_icon_img($mon['monster_no_'.$region], $mon['name_en'], $region);
 					$out['html'] .= $card['html'];
 					$out['shortcode'] .= $card['shortcode'];
 				}
@@ -77,15 +77,15 @@ function get_tradepost_farmable($data, $region, $include = array()){
 		// $req = query_monster($req_id, $region);
 		$req = placehold_req($req_id, $region);
 		if(!$req){continue;}
-		$req_card = card_icon_img($req['monster_no_'.$region], $req['name_na'], $region);
+		$req_card = card_icon_img($req['monster_no_'.$region], $req['name_en'], $region);
 		foreach ($arr_1 as $req_count => $arr_2){
 			foreach ($arr_2 as $mon_id){
 				// $mon = query_monster($mon_id, $region);
 				$mon = placehold_req($mon_id, $region);
 				if(!$mon){continue;}
-				$mon_card = card_icon_img($mon['monster_no_'.$region], $mon['name_na'], $region);
-				$out['html'] .= '<tr><td>' . $mon_card['html'] . '[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' . $mon['name_jp'] : '') . '</strong></td><td>' . $req_card['html'] . ' x ' . $req_count . '[' . $req['monster_no_'.$region] . '] <strong>' . $req['name_na'] . ' ' . $req['name_jp'] . '</strong></td></tr>';
-				$out['shortcode'] .= '<tr><td>' . $mon_card['shortcode'] . '[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_na'] . ($mon['name_jp'] != $mon['name_na'] ? ' ' . $mon['name_jp'] : '') . '</strong></td><td>' . $req_card['shortcode'] . ' x ' . $req_count . '[' . $req['monster_no_'.$region] . '] <strong>' . $req['name_na'] . ' ' . $req['name_jp'] . '</strong></td></tr>' . PHP_EOL;
+				$mon_card = card_icon_img($mon['monster_no_'.$region], $mon['name_en'], $region);
+				$out['html'] .= '<tr><td>' . $mon_card['html'] . '[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_en'] . ($mon['name_ja'] != $mon['name_en'] ? ' ' . $mon['name_ja'] : '') . '</strong></td><td>' . $req_card['html'] . ' x ' . $req_count . '[' . $req['monster_no_'.$region] . '] <strong>' . $req['name_en'] . ' ' . $req['name_ja'] . '</strong></td></tr>';
+				$out['shortcode'] .= '<tr><td>' . $mon_card['shortcode'] . '[' . $mon['monster_no_'.$region] . '] <strong>' . $mon['name_en'] . ($mon['name_ja'] != $mon['name_en'] ? ' ' . $mon['name_ja'] : '') . '</strong></td><td>' . $req_card['shortcode'] . ' x ' . $req_count . '[' . $req['monster_no_'.$region] . '] <strong>' . $req['name_en'] . ' ' . $req['name_ja'] . '</strong></td></tr>' . PHP_EOL;
 			}
 		}
 	}
