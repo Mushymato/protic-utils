@@ -50,7 +50,7 @@ foreach ($buff_tables as $tbl){
 									if(!array_key_exists($current_card, $monster_output)){
 										$old_card_info = select_card($current_card);
 										if($old_card_info !== false){
-											$name = $old_card_info['name_na'];
+											$name = $old_card_info['name_en'];
 										}else{
 											$name = '';
 										}
@@ -109,13 +109,13 @@ foreach ($buff_tables as $tbl){
 						if (preg_match('/\nリーダースキル：/', $new_info) === 1){
 							$monster_output[$current_card]['INFO'] .= $td->nodeValue . PHP_EOL;
 							if($old_card_info !== false){
-								$monster_output[$current_card]['COMP'] .= '<u>Leader Skill</u>: ' . $old_card_info['ls_desc_na'] . PHP_EOL;
+								$monster_output[$current_card]['COMP'] .= '<u>Leader Skill</u>: ' . $old_card_info['ls_desc_en'] . PHP_EOL;
 							}
 						} 
 						if(preg_match('/\nスキル：/', $new_info) === 1){
 							$monster_output[$current_card]['INFO'] .= $td->nodeValue . PHP_EOL;
 							if($old_card_info !== false){
-								$monster_output[$current_card]['COMP'] .= '<u>Active Skill</u>: ' . $old_card_info['as_desc_na'] . '('. $old_card_info['turn_max'] . ' &#10151; ' . $old_card_info['turn_min'] . ')' . PHP_EOL;
+								$monster_output[$current_card]['COMP'] .= '<u>Active Skill</u>: ' . $old_card_info['as_desc_en'] . '('. $old_card_info['turn_max'] . ' &#10151; ' . $old_card_info['turn_min'] . ')' . PHP_EOL;
 							}
 						}
 					}
@@ -237,11 +237,11 @@ function fmt_evo_mat($id, $mons, $mode){
 	$evo_mats_output .= '</div><ul>';
 	foreach($mons['EVO_MATS'] as $mat){
 		$evo_mons = query_monster($mat);
-		$mat_name = $evo_mons['name_jp'];
-		if ($evo_mons['name_na_override'] != ''){
-			$mat_name = $evo_mons['name_na_override'];
-		} else if ($evo_mons['name_na'] != ''){
-			$mat_name = $evo_mons['name_na'];
+		$mat_name = $evo_mons['name_ja'];
+		if ($evo_mons['name_en_override'] != ''){
+			$mat_name = $evo_mons['name_en_override'];
+		} else if ($evo_mons['name_en'] != ''){
+			$mat_name = $evo_mons['name_en'];
 		}
 		$evo_mats_output .= '<li>' . $mat_name . '</li>';
 	}

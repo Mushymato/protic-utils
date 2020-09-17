@@ -66,11 +66,11 @@ function load_rem_by_region($region = 'jp'){
 				$out .= '<div class="' . ($is_pem ? 'pem' : 'rem') . '-wrapper-rarity">' . get_egg($rarity)['html'] . '<strong>' . $rarity . '★' . ($is_pem ? '</strong>' : ' | ' . $rate . '% each, ' . ($rate * sizeof($cards)) . '% total</strong> <input type="checkbox" class="select-group" id="' . $rg_id . '"><label for="' . $rg_id . '">Select All</label>') . '<br/><div class="rate-group" data-rate="' . $rate . '" data-rategroupid="' . $rg_id . '">';
 				if($is_pem){
 					foreach($cards as $mon){
-						$out .= '<div class="pem-icon"><img src="' . sprintf($portrait_url, $mon['monster_id']) . '" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_na'] . '"/></div>';
+						$out .= '<div class="pem-icon"><img src="' . sprintf($portrait_url, $mon['monster_id']) . '" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_en'] . '"/></div>';
 					}
 				}else{
 					foreach($cards as $mon){
-						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['machine_row'] . '-' . $mon['monster_no_'.$region] . '"/><label for="remcard-' . $machine['machine_row'] . '-' . $mon['monster_no_'.$region] . '"><img src="' . $regional_img_url . $mon['monster_no_'.$region] . '.png" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_na'] . '"/></label></div>';
+						$out .= '<div class="rem-icon-check"><input type="checkbox" class="rem-icon-cb" id="remcard-' . $machine['machine_row'] . '-' . $mon['monster_no_'.$region] . '"/><label for="remcard-' . $machine['machine_row'] . '-' . $mon['monster_no_'.$region] . '"><img src="' . $regional_img_url . $mon['monster_no_'.$region] . '.png" title="' . $mon['monster_no_'.$region] . '-' . $mon['name_en'] . '"/></label></div>';
 					}
 				}
 				$out .= '</div></div>';

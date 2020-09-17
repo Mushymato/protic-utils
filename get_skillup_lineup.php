@@ -25,7 +25,7 @@ foreach(explode(PHP_EOL, $input_str) as $line){
 	if(sizeof($monsters) > 1){
 		foreach($monsters as $name){
 			$mon = query_monster($name);
-			$card = card_icon_img($mon['monster_id'], $mon['name_na']);
+			$card = card_icon_img($mon['monster_id'], $mon['name_en']);
 			$output_arr['html'][] = $card['html'];
 			$output_arr['shortcode'][] = $card['shortcode'];
 		}

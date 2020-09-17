@@ -186,7 +186,7 @@ function query_monster($q_str, $region = 'jp'){
 	if ($region != ''){
 		$region_key = 'monster_no_'.$region;
 	}
-	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_jp, name_na, name_na_override, rarity';
+	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_ja, name_en, name_en_override, rarity';
 	if(ctype_digit($q_str)){
 		$sql = 'SELECT '.$monster_table_fields.' FROM monsters WHERE '.$region_key.'=? ORDER BY monster_id DESC';
 		$res = single_param_stmt($sql, $q_str);
@@ -209,10 +209,10 @@ function query_monster($q_str, $region = 'jp'){
 	);
 	$query = array();
 	if(!mb_check_encoding($q_str, 'ASCII')){
-		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_jp'] = ' ORDER BY monster_id DESC';
+		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_ja'] = ' ORDER BY monster_id DESC';
 	}else{
 		$query['SELECT '.$monster_table_fields.' FROM monsters LEFT JOIN computedNames ON monsters.'.$region_key.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
-		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_na'] = ' ORDER BY monster_id DESC';
+		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_en'] = ' ORDER BY monster_id DESC';
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
@@ -274,9 +274,9 @@ function select_card($id){
 		monsters.monster_id,
 		monsters.monster_no_jp,
 		monsters.monster_no_na,
-		monsters.name_jp,
-		monsters.name_na,
-		monsters.name_na_override,
+		monsters.name_ja,
+		monsters.name_en,
+		monsters.name_en_override,
 		monsters.hp_max,
 		monsters.atk_max,
 		monsters.rcv_max,
@@ -288,12 +288,12 @@ function select_card($id){
 		monsters.type_2_id,
 		monsters.type_3_id, 
 		monsters.inheritable,
-		leader_skills.desc_na AS ls_desc_na,
+		leader_skills.desc_en AS ls_desc_en,
 		leader_skills.max_hp AS lead_hp, 
 		leader_skills.max_atk AS lead_atk,
 		leader_skills.max_rcv AS lead_rcv,
 		leader_skills.max_shield AS lead_shield,
-		active_skills.desc_na AS as_desc_na, 
+		active_skills.desc_en AS as_desc_en, 
 		active_skills.turn_max, 
 		active_skills.turn_min 
 	FROM monsters 
@@ -314,8 +314,8 @@ function select_card($id){
 		$res = $res[0];
 	}
 
-	if ($res['name_na_override'] != NULL){
-		$res['name_na'] = $res['name_na_override'];
+	if ($res['name_en_override'] != NULL){
+		$res['name_en'] = $res['name_en_override'];
 	}
 	foreach(array('1', '2') as $i){
 		if ($res['attribute_'.$i.'_id'] !== NULL){
@@ -478,9 +478,9 @@ function awake_list($awakenings, $w = '31', $h = '32'){
 	$supers[0] = $supers[0] . '</div>';
 	return array($awakes[0] . $supers[0], $awakes[1]  . '<br/>' . PHP_EOL . $supers[1]);
 }
-function youtube_link($name_jp){
-	$url = 'www.youtube.com/results?search_query=パズドラ+'.$name_jp;
-	return '<a href="https://'.$url.'" target="_blank">'.$name_jp.'</a>';
+function youtube_link($name_ja){
+	$url = 'www.youtube.com/results?search_query=パズドラ+'.$name_ja;
+	return '<a href="https://'.$url.'" target="_blank">'.$name_ja.'</a>';
 }
 function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings = false){
 	global $fullimg_url;
@@ -501,7 +501,7 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 	}else{
 		$stat1 = stat_table($data, true);
 	}
-	$name_arr = explode(', ', $data['name_na']);
+	$name_arr = explode(', ', $data['name_en']);
 	$head = '';
 	if ($headings == 'yes'){
 		$head = '<h2 id="card_' . $id . '">' . end($name_arr) . '</h2>' . PHP_EOL . '<div class="cardgrid">';
@@ -517,8 +517,8 @@ function get_card_grid($id, $region = 'jp', $right_side_table = false, $headings
 	$monster_no = $data['monster_no_'.$region];
 	$inherit = $data['inheritable'] == 0 ? 'Not Inheritable' : 'Inheritable';
 	return array(
-		'html' => $head . '<div class="col1"><img src="'. sprintf($fullimg_url, $monster_id) . '"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' . youtube_link($data['name_jp']) : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<br/><p><u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b> <span class="card-inherit">' . $inherit . '</span> <br> ' . htmlentities($data['as_desc_na']) . '</p>' . (strlen($data['ls_desc_na']) == 0 ? '' : '<p><u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/> ' . htmlentities($data['ls_desc_na']) . '</p>') . '</div></div>', 
-		'shortcode' => $head_shortcode . PHP_EOL . '[col1][pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '[/col1]' . PHP_EOL . '[col2][' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_na']) . ($data['name_na'] != $data['name_jp'] ? '<br/>' .youtube_link($data['name_jp']) : '') . '</b><br/><span class="card-type">' . PHP_EOL . $types[1] . '</span><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b> <span class="card-inherit">' . $inherit . '</span> <br/>' . htmlentities($data['as_desc_na'] . '<br/>' . PHP_EOL) . (strlen($data['ls_desc_na']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/>' . PHP_EOL . htmlentities($data['ls_desc_na']) ) . PHP_EOL . '[/col2]' . PHP_EOL . '[/cardgrid]');
+		'html' => $head . '<div class="col1"><img src="'. sprintf($fullimg_url, $monster_id) . '"/>' . $stat1 . '</div><div class="col-cardinfo"><p>[' . $monster_no . ']<b>' . $atts[0] . htmlentities($data['name_en']) . ($data['name_en'] != $data['name_ja'] ? '<br/>' . youtube_link($data['name_ja']) : '') . '</b></p><p>' . $types[0] . '</p>' . $awakes[0] . $stat2 . '<br/><p><u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b> <span class="card-inherit">' . $inherit . '</span> <br> ' . htmlentities($data['as_desc_en']) . '</p>' . (strlen($data['ls_desc_en']) == 0 ? '' : '<p><u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/> ' . htmlentities($data['ls_desc_en']) . '</p>') . '</div></div>', 
+		'shortcode' => $head_shortcode . PHP_EOL . '[col1][pdxp id=' . $monster_no . ' r=' . $region . ']' . $stat1 . '[/col1]' . PHP_EOL . '[col2][' . $monster_no . ']<b>' . $atts[1] . htmlentities($data['name_en']) . ($data['name_en'] != $data['name_ja'] ? '<br/>' .youtube_link($data['name_ja']) : '') . '</b><br/><span class="card-type">' . PHP_EOL . $types[1] . '</span><br/>' . PHP_EOL . $awakes[1] . '<br/><br/>' . PHP_EOL . $stat2 . '<u>Active Skill:</u> <b>(' . $data['turn_max'] . ' &#10151; ' . $data['turn_min'] . ')</b> <span class="card-inherit">' . $inherit . '</span> <br/>' . htmlentities($data['as_desc_en'] . '<br/>' . PHP_EOL) . (strlen($data['ls_desc_en']) == 0 ? '' : '<br/><br/>' . PHP_EOL .'<u>Leader Skill:</u> <b>' . lead_mult($data) . '</b><br/>' . PHP_EOL . htmlentities($data['ls_desc_en']) ) . PHP_EOL . '[/col2]' . PHP_EOL . '[/cardgrid]');
 }
 function get_card_summary($id, $region = 'jp'){
 	$data = select_card($id);
@@ -527,7 +527,7 @@ function get_card_summary($id, $region = 'jp'){
 	}
 
 	$monster_no = $data['monster_no_'.$region];
-	$card = card_icon_img($data['monster_id'], $data['name_na'], $region);
+	$card = card_icon_img($data['monster_id'], $data['name_en'], $region);
 	$awakes = awake_list($data['awakenings']);
 	if($data['limit_mult']){
 		$stats = ' <p><b>Lv.110</b> <b>HP</b> ' . lb_stat($data['hp_max'], $data['limit_mult']) . ' <b>ATK</b> ' . lb_stat($data['atk_max'], $data['limit_mult']) . ' <b>RCV</b> ' . lb_stat($data['rcv_max'], $data['limit_mult']) . ' (' . weighted($data, 110) . ' weighted)</p>';
@@ -536,8 +536,8 @@ function get_card_summary($id, $region = 'jp'){
 	}
 	
 	return array(
-		'html' => '<h2 id="card_' . $monster_no . '">' . $card['html'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[0], 
-		'shortcode' => '<h2 id="card_' . $monster_no . '">' . $card['shortcode'] . ' ' . htmlentities($data['name_na']) .'</h2>' . $stats . $awakes[1]);
+		'html' => '<h2 id="card_' . $monster_no . '">' . $card['html'] . ' ' . htmlentities($data['name_en']) .'</h2>' . $stats . $awakes[0], 
+		'shortcode' => '<h2 id="card_' . $monster_no . '">' . $card['shortcode'] . ' ' . htmlentities($data['name_en']) .'</h2>' . $stats . $awakes[1]);
 }
 function get_lb_stats_row($id, $sa, $region = 'jp'){
 	$data = select_card($id);
@@ -545,7 +545,7 @@ function get_lb_stats_row($id, $sa, $region = 'jp'){
 		return array('html' => '', 'shortcode' => '');
 	}
 
-	$card = card_icon_img($data['monster_id'], $data['name_na'], $region);
+	$card = card_icon_img($data['monster_id'], $data['name_en'], $region);
 	$supers = array('','');
 	if($sa){
 		global $aw;
@@ -614,7 +614,7 @@ function get_button_info($id, $button_type_name){
 	if(!$data){
 		return array('html' => 'NO CARD FOUND', 'shortcode' => 'NO CARD FOUND');
 	}
-	$card = card_icon_img($data['monster_id'], $data['name_na']);	
+	$card = card_icon_img($data['monster_id'], $data['name_en']);	
 	return array(
 		'html' => '<tr><td> <h2 id="card_' . $data['monster_id'] . '">' . $card['html'] . '</h2></td>' . '<td>' . htmlentities($button_type_name) . '</td></tr>');
 }

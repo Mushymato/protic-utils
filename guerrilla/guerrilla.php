@@ -79,7 +79,7 @@ function get_table_time_rows($start_time, $t_entries, $start_end, $group_list){
 }
 
 function select_guerrilla_data($server, $start_time, $end_time){
-	$query = 'SELECT d_servers.name as server, start_timestamp, end_timestamp, group_name, dungeons.dungeon_id as dungeon_id, dungeons.icon_id as icon_id, name_na, name_jp FROM schedule INNER JOIN dungeons on schedule.dungeon_id=dungeons.dungeon_id INNER JOIN d_servers on schedule.server_id=d_servers.server_id WHERE group_name IS NOT NULL AND d_servers.name=? AND start_timestamp>=? AND end_timestamp<=?;';
+	$query = 'SELECT d_servers.name as server, start_timestamp, end_timestamp, group_name, dungeons.dungeon_id as dungeon_id, dungeons.icon_id as icon_id, name_en, name_ja FROM schedule INNER JOIN dungeons on schedule.dungeon_id=dungeons.dungeon_id INNER JOIN d_servers on schedule.server_id=d_servers.server_id WHERE group_name IS NOT NULL AND d_servers.name=? AND start_timestamp>=? AND end_timestamp<=?;';
 	global $miru;
 	$stmt = $miru->conn->prepare($query);
 	if (!$stmt){
@@ -106,12 +106,17 @@ function get_guerrilla_tables(){
 			'end' => (new DateTime('tomorrow', new DateTimeZone('-0800')))->getTimestamp()
 		)
 	);
+	$name_lang = array(
+		'JP' => 'name_ja',
+		'NA' => 'name_na'
+	);
 	$now = time();
 	
 	$out = '';
 	foreach(['JP', 'NA'] as $server){
 		$gd = select_guerrilla_data($server, $day[$server]['start'], $day[$server]['end']);
-		$dungeon_name = 'name_'.strtolower($server);
+		// $dungeon_name = 'name_'.strtolower($server);
+		$dungeon_name = $lang[$server];
 
 		foreach ($gd as $dungeon){
 			$by_dungeon_group[$server][$dungeon['dungeon_id']][$dungeon['group_name']][] = $dungeon;

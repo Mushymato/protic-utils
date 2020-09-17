@@ -58,7 +58,7 @@ foreach(explode("\n", $input_str) as $line){
 	}
 	$mon = query_monster($reward);
 	if($mon){
-		$card = card_icon_img($mon['monster_id'], $mon['name_na']);
+		$card = card_icon_img($mon['monster_id'], $mon['name_en']);
 		$output_arr['html'] .= '<div class="ranking-reward"><b>' . $card['html'] . $extra_str . '</b></div>';
 		$output_arr['shortcode'] .= '<div class="ranking-reward"><b>' . $card['shortcode'] . $extra_str . '</b></div>';
 	}else{
