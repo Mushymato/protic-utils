@@ -10,7 +10,6 @@ else
 $typesize = 13;
 
 if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
-    $onelinearr = explode(' ',$_POST['oneline']);
     $conversion = array(
         'att' => array(
             'na' => '',
@@ -113,45 +112,59 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
         ),
     );
 
+    $onelinearr = explode(' ',$_POST['oneline']);
+    $inputsize = sizeof($onelinearr);
     $_POST['id'] = $onelinearr[0];
     $_POST['att'] = array_key_exists(strtolower($onelinearr[1]), $conversion['att']) ? $conversion['att'][strtolower($onelinearr[1])] : '';
     $_POST['subatt'] = array_key_exists(strtolower($onelinearr[2]), $conversion['att']) ? $conversion['att'][strtolower($onelinearr[2])] : '';
     $name = $onelinearr[3];
-    $nameindex = 3;
-    for($nameindex = 4;; $nameindex++){
-        $name .= ' '.$onelinearr[$nameindex];
-        if (substr($onelinearr[$nameindex], -1) == ';') break;
+    if (substr($onelinearr[3], -1) != ';'){
+        for($nameindex = 4;; $nameindex++){
+            if (substr($onelinearr[$nameindex], -1) == ';'){
+                $name .= ' '.substr($onelinearr[$nameindex], 0, -1);
+                break;
+            } else
+                $name .= ' '.$onelinearr[$nameindex];
+        }
+    } else {
+        $nameindex = 3;
+        $name = substr($name, 0, -1);
     }
 
-    $_POST['name'] = $name;
+    $_POST['mon_name'] = $name;
     for ($typeindex = 1; $typeindex <= 3; $typeindex++){
+        if ($nameindex+$typeindex >= $inputsize) break;
         $_POST['type'.$typeindex] = $conversion['type'][$onelinearr[$nameindex+$typeindex]];
         if ($onelinearr[$nameindex+$typeindex] == 'na') break;
     }
 
     $_POST['awak'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex]];
-    for ($awakindex = 1; $awakindex <= 8; $awakindex++){
+    for ($awakindex = 1; $awakindex <= 9; $awakindex++){
+        if ($nameindex+$typeindex+$awakindex >= $inputsize) break;
         $_POST['awak'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex] == 'na') break;
     }
 
     $_POST['sa'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
-    for ($saindex = 1; $saindex <= 8; $saindex++){
+    for ($saindex = 1; $saindex <= 9; $saindex++){
+        if ($nameindex+$typeindex+$awakindex+$saindex >= $inputsize) break;
         $_POST['sa'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex+$saindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex+$saindex] == 'na') break;
     }
-}
+
+    $_POST['as'] = $_POST['ls'] = $_POST['cd'] = '';
+} else $_POST['oneline'] = '';
 
 $attlist = "";
 $subattlist = "";
 $attsel = '4px solid darkred';
-if (!$_POST['att']) $_POST['att'] = 1;
+if (!array_key_exists('att',$_POST)) $_POST['att'] = 1;
 for($i = 1; $i <= 5; $i++){
-    if ($_POST['att'] == $i)
+    if (array_key_exists('att', $_POST) && $_POST['att'] == $i)
         $attlist .= "<a onclick='selectAtt($i)'><img id='att_$i' style='height: 32px; margin-right: 5px; border-radius: 250px; border: $attsel;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
     else
         $attlist .= "<a onclick='selectAtt($i)'><img id='att_$i' style='height: 32px; margin-right: 5px;border-radius: 250px;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
-    if ($_POST['subatt'] == $i)
+    if (array_key_exists('subatt', $_POST) && $_POST['subatt'] == $i)
         $subattlist .= "<a onclick='selectAtt($i, true)'><img id='subatt_$i' style='height: 32px; border-radius: 250px; border: $attsel;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
     else
         $subattlist .= "<a onclick='selectAtt($i, true)'><img id='subatt_$i' style='height: 32px; margin-right: 5px; border-radius: 250px;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
@@ -183,12 +196,12 @@ foreach($awaksort as $i){
 
 $awakcnt = $sacnt = 0;
 $type1 = $type2 = $type3 = $awak = $sa = "";
-if ($_POST['type1']) $type1 = "<img src='/wp-content/uploads/pad-types/{$_POST['type1']}.png'>";
-if ($_POST['type2']) $type2 = "<img src='/wp-content/uploads/pad-types/{$_POST['type2']}.png'>";
-if ($_POST['type3']) $type3 = "<img src='/wp-content/uploads/pad-types/{$_POST['type3']}.png'>";
+if (array_key_exists('type1', $_POST) && $_POST['type1']) $type1 = "<img src='/wp-content/uploads/pad-types/{$_POST['type1']}.png'>";
+if (array_key_exists('type2', $_POST) && $_POST['type2']) $type2 = "<img src='/wp-content/uploads/pad-types/{$_POST['type2']}.png'>";
+if (array_key_exists('type3', $_POST) && $_POST['type3']) $type3 = "<img src='/wp-content/uploads/pad-types/{$_POST['type3']}.png'>";
 
-$awaks = explode(',', $_POST['awak']);
-$sas = explode(',', $_POST['sa']);
+$awaks = array_key_exists('awak', $_POST) ? explode(',', $_POST['awak']) : array();
+$sas = array_key_exists('sa', $_POST) ? explode(',', $_POST['sa']) : array();
 if (sizeof($awaks)){
     foreach($awaks as $k => $v){
         if ($v){
@@ -228,26 +241,46 @@ $darr = array(
     'type' => array('Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evo Mat', 'Enhance Mat', 'Devil', 'Special', 'Awoken Mat', 'Machine', 'Redeemable'),
 );
 
+$barr = array(
+    'orb' => array(
+        1 => 'r',
+        2 => 'b',
+        3 => 'g',
+        4 => 'l',
+        5 => 'd',
+    )
+);
+
 $datt = $darr['orb'][$_POST['att']];
 if ($_POST['subatt']) $datt .= '/'.$darr['orb'][$_POST['subatt']];
+$batt = '[orb id='.$barr['orb'][$_POST['att']].']';
+if ($_POST['subatt']) $batt .= '/'.'[orb id='.$barr['orb'][$_POST['subatt']].']';
 $type = $darr['type'][$_POST['type1']-1];
 if ($_POST['type2']) $type .= ' / '.$darr['type'][$_POST['type2']-1];
 if ($_POST['type3']) $type .= ' / '.$darr['type'][$_POST['type3']-1];
 $dawak = $dsa = $bawak = $bsa = '';
 foreach($awaks as $k => $v){
-    $dawak .= $darr['awak'][$v-1];
-    $bawak .= "[awak id=$v]";
-}
-if (sizeof($sas)){
-    $dsa = 'Super Awakening: ';
-    foreach($sas as $k => $v){
-        $dsa .= $darr['awak'][$v-1];
-        $bsa .= "[awak id=$v]";
+    if ($v > 0){
+        $dawak .= $darr['awak'][$v-1];
+        $bawak .= "[awk id=$v]";
     }
 }
 
+if (sizeof($sas) && $sas[0] != ''){
+    $dsa = 'Super Awakening: ';
+    foreach($sas as $k => $v){
+        if ($v > 0){
+            $dsa .= $darr['awak'][$v-1];
+            $bsa .= "[awk id=$v]";
+        }
+    }
+}
+
+$_POST['as'] = str_replace('\\', '', $_POST['as']);
+$_POST['ls'] = str_replace('\\', '', $_POST['ls']);
+
 $discord = "
-[{$_POST['id']}] {$datt} ** {$_POST['name']} **
+[{$_POST['id']}] {$datt} ** {$_POST['mon_name']} **
 $type
 $dawak
 $dsa
@@ -259,18 +292,19 @@ __Leader Skill__: {$_POST['ls']}
 $blog = "
 [cardgrid card_id={$_POST['id']}]
 [col1]pic here[/col1]
-[col2][{$_POST['id']}][orb id=d][orb id=b] <b> {$_POST['name']}</b><br/>
+[col2][{$_POST['id']}]$batt <b> {$_POST['mon_name']}</b><br/>
 <span class='card-type'>
 $type </span><br/>
 $bawak<br/>
 $bsa<br/><br/>
 <u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/>
 
-<u>Leader Skill: {$_POST['ls']}</u><br/>
+<u>Leader Skill: </u>{$_POST['ls']}<br/>
 [/col2]
 [/cardgrid]
 ";
 
+$pvblog = do_shortcode($blog);
 
 $form = "
 <style>
@@ -279,6 +313,7 @@ $form = "
     border-bottom: 3px solid #005662;
     background: #67c7d2;
     padding: 0.5rem 0.75rem;
+    color: white;
 }
 .switch {
     position: relative;
@@ -489,7 +524,7 @@ function clearForm(){
         </tr>
         <tr>
             <td style='width: 10%'>Name:</td>
-            <td><input id='name' name='name' type='text' style='width:100%; height:25px;' value='{$_POST['name']}'></td>
+            <td><input id='name' name='mon_name' type='text' style='width:100%; height:25px;' value='{$_POST['mon_name']}'></td>
         </tr>
         <tr style='height:35px;'>
             <td style='width: 10%'>Type:</td>
@@ -515,7 +550,7 @@ function clearForm(){
         </tr>
         <tr>
             <td></td>
-            <td colspan='3'>
+            <td colspan='2'>
                 <label class='switch'>
                   <input id='sa_toggle' type='checkbox'>
                   <span class='slider round'></span>
@@ -525,7 +560,7 @@ function clearForm(){
         </tr>
         <tr>
             <td></td>
-            <td colspan='3'>$awaklist</td>
+            <td colspan='2'>$awaklist</td>
         </tr>
         <tr>
             <td style='width: 10%'>AS:</td>
@@ -556,6 +591,7 @@ function clearForm(){
     <a class='eznewsbtn' style='float: right; margin-top:15px;' onclick='copyText(\"output_blog\")'>Copy</a>
     <textarea id='output_blog' style='width: 100%; height: 30vh;'>$blog</textarea>
 </div>
+<div style='width: 100%; height: 30vh; display: inline-block;'>$pvblog</div>
 ";
 
 echo $form;
