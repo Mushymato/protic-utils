@@ -13,7 +13,7 @@ function get_json($url){
 function get_icon($dungeon_id){
 	global $dungeon_info;
 	$dungeon = $dungeon_info[$dungeon_id];
-	$icon_url = '/wp-content/uploads/pad-portrait/'.$dungeon['icon_id'].'.png';
+	$icon_url = '/wp-content/uploads/pad-portrait/'.sprintf('%05d', $dungeon['icon_id']).'.png';	
 	$name = $dungeon['name'];
 	$pdx_search = 'http://www.puzzledragonx.com/en/search.asp?q='.$name;
 	return tag('a', "<img src=\"$icon_url\" class=\"dungeon-icon\">", "href=\"$pdx_search\" title=\"$name\"");
@@ -22,7 +22,7 @@ function get_orb($orb){
 	$orb_id = ['red' => '1', 'blue' => '2', 'green' => '3'];
 	if(array_key_exists($orb, $orb_id)){
 		$id = $orb_id[$orb];
-		return "<img src=\"https://pad.protic.site/wp-content/uploads/pad-orbs/$id.png\" width=\"15\" height=\"15\">";
+		return "<img src=\"/wp-content/uploads/pad-orbs/$id.png\" width=\"15\" height=\"15\">";
 	}else{
 		return $orb;
 	}
@@ -116,7 +116,7 @@ function get_guerrilla_tables(){
 	foreach(['JP', 'NA'] as $server){
 		$gd = select_guerrilla_data($server, $day[$server]['start'], $day[$server]['end']);
 		// $dungeon_name = 'name_'.strtolower($server);
-		$dungeon_name = $lang[$server];
+		$dungeon_name = $name_lang[$server];
 
 		foreach ($gd as $dungeon){
 			$by_dungeon_group[$server][$dungeon['dungeon_id']][$dungeon['group_name']][] = $dungeon;
@@ -177,6 +177,6 @@ function get_guerrilla_schedule(){
 			<button onclick="pickMode(\'next\');">By Countdown</button>
 		</span>
 	</div>';
-	return '<div>' . $btn . get_guerrilla_tables() . '</div>';
+	return '<div id="ltd-table">' . $btn . get_guerrilla_tables() . '</div>';
 }
 ?>
