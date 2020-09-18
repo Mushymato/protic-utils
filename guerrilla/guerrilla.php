@@ -116,7 +116,7 @@ function get_guerrilla_tables(){
 	foreach(['JP', 'NA'] as $server){
 		$gd = select_guerrilla_data($server, $day[$server]['start'], $day[$server]['end']);
 		// $dungeon_name = 'name_'.strtolower($server);
-		$dungeon_name = $lang[$server];
+		$dungeon_name = $name_lang[$server];
 
 		foreach ($gd as $dungeon){
 			$by_dungeon_group[$server][$dungeon['dungeon_id']][$dungeon['group_name']][] = $dungeon;
