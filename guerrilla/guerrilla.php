@@ -108,7 +108,7 @@ function get_guerrilla_tables(){
 	);
 	$name_lang = array(
 		'JP' => 'name_ja',
-		'NA' => 'name_na'
+		'NA' => 'name_en'
 	);
 	$now = time();
 	
