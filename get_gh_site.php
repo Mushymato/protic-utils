@@ -33,10 +33,20 @@ $buff_tables = $xpath->query("//table[contains(@class, 'monster_list')]");
 $monster_output = array();
 $current_card = 0;
 foreach ($buff_tables as $tbl){
-	foreach ($tbl->childNodes as $tr){
+	$tbody = $tbl;
+	foreach ($tbl->childNodes as $child){
+		if (isset($child->tagName) && $child->tagName == 'tbody') {
+			$tbody = $child;
+			break;
+		}
+	}
+	foreach ($tbody->childNodes as $tr){
 		if (isset($tr->childNodes)){
 			$awk_key = 'SA';
 			foreach ($tr->childNodes as $td){
+				// print_r($td);
+				// print_r(isset($td->tagName) && $td->tagName == 'td');
+				// echo PHP_EOL;
 				if (isset($td->tagName) && $td->tagName == 'td'){
 					foreach ($td->childNodes as $n){
 						if (isset($n->tagName)){
@@ -161,7 +171,9 @@ if ($ev == 'yes'){
 											if (isset($img->tagName) && $img->tagName == 'img'){
 												$src = $img->getAttribute('src');
 												if (strpos($src, 'm_icon') !== FALSE){
-													$monster_output[$current_card]['EVO_MATS'][] = intval(str_replace('.jpg', '', basename($src)));
+													if(array_key_exists($current_card, $monster_output)){
+														$monster_output[$current_card]['EVO_MATS'][] = intval(str_replace('.jpg', '', basename($src)));
+													}
 												}
 											}
 										}
