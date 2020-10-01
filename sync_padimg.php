@@ -11,8 +11,10 @@ $stmt->close();
 // $miru_full_url = 'https://f002.backblazeb2.com/file/miru-data/padimages/jp/full/';
 // $miru_portrait_url_na = 'https://f002.backblazeb2.com/file/miru-data/padimages/na/portrait/';
 // $miru_portrait_url = 'https://f002.backblazeb2.com/file/miru-data/padimages/na/full/';
-$miru_portrait_url = 'https://f002.backblazeb2.com/file/dadguide-data/media/icons/%05d.png';
-$miru_full_url = 'https://f002.backblazeb2.com/file/dadguide-data/media/portraits/%05d.png';
+//$miru_portrait_url = 'https://f002.backblazeb2.com/file/dadguide-data/media/icons/%05d.png';
+//$miru_full_url = 'https://f002.backblazeb2.com/file/dadguide-data/media/portraits/%05d.png';
+$miru_portrait_url = 'https://d1kpnpud0qoyxf.cloudfront.net/media/icons/%05d.png';
+$miru_full_url = 'https://d1kpnpud0qoyxf.cloudfront.net/media/portraits/%05d.png';
 function download_image($source, $target, $id, $type){
 	if(grab_img_if_exists($source, $id, $_SERVER['DOCUMENT_ROOT'] . $target)){
 		echo $type . ' - ' . $id . PHP_EOL;
