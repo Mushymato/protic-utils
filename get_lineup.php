@@ -21,6 +21,7 @@ window.onload = function(){
 $input_str = array_key_exists('input', $_POST) ? $_POST['input'] : '';
 $om = array_key_exists('om', $_POST) ? $_POST['om'] : 'shortcode';
 $re = array_key_exists('r', $_POST) ? $_POST['r'] : 'jp';
+$sp = array_key_exists('sp', $_POST) ? $_POST['sp'] : 'newline';
 $st = array_key_exists('st', $_POST) ? $_POST['st'] : 'rates';
 $ir = array_key_exists('ir', $_POST) ? $_POST['ir'] : 'mirubot';
 $rem = array_key_exists('rem', $_POST) ? $_POST['rem'] : 0;
@@ -40,8 +41,11 @@ function machine_selector($selected = ''){
 	}
 	return '<select id="rem_selector" name="rem" style="width:80vw;height:2em;">' . $output . '</select>';
 }
-function populate_from_input($input_str, $region){
-	$SEPARATOR = mb_convert_encoding('&#65532;', 'UTF-8', 'HTML-ENTITIES');
+function populate_from_input($input_str, $region, $sp){
+	$SEPARATOR = "\n";
+	if ($sp == '65532'){
+		$SEPARATOR = mb_convert_encoding('&#65532;', 'UTF-8', 'HTML-ENTITIES');
+	}
 	$RE_RATE = '/(.*)(\d\.\d{2}\%)/';
 	$mons_array = array();
 	foreach(explode($SEPARATOR, $input_str) as $line){
@@ -54,6 +58,7 @@ function populate_from_input($input_str, $region){
 			$rate = $matches[2];
 		} else {
 			$q_str = $line;
+			$rate = 0;
 		}
 		$mon = query_monster($q_str, $region);
 		if($mon){
@@ -182,6 +187,7 @@ function rate_groups_lineup($mons_array, $region){
 Output Mode: <input type="radio" name="om" value="html" <?php if($om == 'html'){echo 'checked';}?>> HTML <input type="radio" name="om" value="shortcode" <?php if($om == 'shortcode'){echo 'checked';}?>> Shortcode <input type="submit"><br/>
 Output Style: <input type="radio" name="st" value="rates" <?php if($st == 'rates'){echo 'checked';}?>> Rate Groups <input type="radio" name="st" value="cards" <?php if($st == 'cards'){echo 'checked';}?>> Card Details<br/>
 <p>Region: <input type="radio" name="r" value="jp" <?php if($re == 'jp'){echo 'checked';}?>> JP <input type="radio" name="r" value="na" <?php if($re == 'na'){echo 'checked';}?>> NA</p>
+<p>Separator: <input type="radio" name="sp" value="newline" <?php if($sp == 'newline'){echo 'checked';}?>> Newline <input type="radio" name="sp" value="65532" <?php if($sp == '65532'){echo 'checked';}?>> &#65532;</p>
 <p>Enter <input type="radio" name="ir" value="mirubot" id="ir_mirubot" <?php if($ir == 'mirubot'){echo 'checked';}?>> REM Name <input type="radio" name="ir" value="ingame" id="ir_ingame" <?php if($ir == 'ingame'){echo 'checked';}?>> In-game Lineup</p>
 <?php echo machine_selector($rem);?>
 <textarea id="txt_input" name="input" style="width:80vw;height:20vh;">
@@ -191,7 +197,7 @@ Output Style: <input type="radio" name="st" value="rates" <?php if($st == 'rates
 <?php
 $time_start = microtime(true);
 
-$mons_array = $ir == 'mirubot' ? populate_from_mirubot($rem, $re) : populate_from_input($input_str, $re);
+$mons_array = $ir == 'mirubot' ? populate_from_mirubot($rem, $re) : populate_from_input($input_str, $re, $sp);
 $output_arr = $st == 'rates' ? rate_groups_lineup($mons_array, $re) : detailed_lineup($mons_array, $re);
 
 echo '<p>Total execution time in seconds: ' . (microtime(true) - $time_start) . '</p>';
