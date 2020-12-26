@@ -108,9 +108,16 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
             'prs+'	=> 70,
             'jbs'	=> 71,
             'pbs'	=> 72,
+            'rco'   => 73,
+            'bco'   => 74,
+            'gco'   => 75,
+            'lco'   => 76,
+            'dco'   => 77,
             'na'    => '',
         ),
     );
+
+    $_POST['oneline'] = str_replace('\\', '', $_POST['oneline']);
 
     $onelinearr = explode(' ',$_POST['oneline']);
     $inputsize = sizeof($onelinearr);
@@ -183,7 +190,8 @@ $awaksort = array(
     22, 23, 24, 25, 26, 32, 31, 33, 34,
      4,  5,  6,  7,  8, 35, 36, 37, 38,
      1,  2,  3, 46, 47, 39, 40, 41, 42,
-     65, 66, 67, 9, 71, 72, 30, 64, 63,
+    65, 66, 67,  9, 71, 72, 30, 64, 63,
+    73, 74, 75, 76, 77,
 );
 
 $awaklist = "";
@@ -236,7 +244,8 @@ $darr = array(
         ':misc_guardbreak:', ':misc_extraattack:', ':teamboost_hp:', ':teamboost_rcv:', ':misc_voidshield:', ':misc_assist:', ':misc_super_extraattack:',
         ':misc_skillcharge:', ':res_bind_super:', ':misc_te_super:', ':res_cloud:', ':res_seal:', ':misc_sb_super:', ':attack_boost_high:',
         ':attack_boost_low:', ':l_shield:', ':l_attack:', ':misc_super_comboboost:',':orb_combo:', ':misc_voice:', ':misc_dungeonbonus:',':reduce_hp:',':reduce_atk:',
-        ':reduce_rcv:', ':res_blind_super:', ':res_jammer_super:', ':res_poison_super:', ':misc_jammerboost:', ':misc_poisonboost:'
+        ':reduce_rcv:', ':res_blind_super:', ':res_jammer_super:', ':res_poison_super:', ':misc_jammerboost:', ':misc_poisonboost:',
+        ':rcombo:', ':bcombo:', ':gcombo:', ':lcombo:', ':dcombo:',
     ),
     'type' => array('Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evo Mat', 'Enhance Mat', 'Devil', 'Special', 'Awoken Mat', 'Machine', 'Redeemable'),
 );
@@ -289,6 +298,8 @@ __Active Skill__: {$_POST['as']} **({$_POST['cd']} max CD)**
 __Leader Skill__: {$_POST['ls']}
 ";
 
+$name = str_replace('\\', '', $_POST['mon_name']);
+
 $blog = "
 [cardgrid card_id={$_POST['id']}]
 [col1]pic here[/col1]
@@ -299,7 +310,7 @@ $bawak<br/>
 $bsa<br/><br/>
 <u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/>
 
-<u>Leader Skill: </u>{$_POST['ls']}<br/>
+<u>Leader Skill</u>: {$_POST['ls']}<br/>
 [/col2]
 [/cardgrid]
 ";
@@ -578,7 +589,7 @@ function clearForm(){
 <div style='width: 50%; display: inline-block;'>
     <h2>One Liner</h2>
     <form method='post'>
-        <input type='text' name='oneline' style='width: 100%;' value='{$_POST['oneline']}'>
+        <input type='text' name='oneline' style='width: 100%;' value=\"{$_POST['oneline']}\">
         <input type='submit' style='float: right;'>
     </form>
 </div>
