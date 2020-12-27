@@ -166,11 +166,12 @@ $attlist = "";
 $subattlist = "";
 $attsel = '4px solid darkred';
 if (!array_key_exists('att',$_POST)) $_POST['att'] = 1;
-for($i = 1; $i <= 5; $i++){
+for($i = 0; $i <= 5; $i++){
     if (array_key_exists('att', $_POST) && $_POST['att'] == $i)
         $attlist .= "<a onclick='selectAtt($i)'><img id='att_$i' style='height: 32px; margin-right: 5px; border-radius: 250px; border: $attsel;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
     else
         $attlist .= "<a onclick='selectAtt($i)'><img id='att_$i' style='height: 32px; margin-right: 5px;border-radius: 250px;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
+    if ($i == 0) continue;
     if (array_key_exists('subatt', $_POST) && $_POST['subatt'] == $i)
         $subattlist .= "<a onclick='selectAtt($i, true)'><img id='subatt_$i' style='height: 32px; border-radius: 250px; border: $attsel;' src='/wp-content/uploads/pad-orbs/$i.png'></a>";
     else
@@ -229,6 +230,7 @@ if (sizeof($sas)){
 
 $darr = array(
     'orb' => array(
+        0 => '',
         1 => ':orb_fire:',
         2 => ':orb_water:',
         3 => ':orb_wood:',
@@ -252,6 +254,7 @@ $darr = array(
 
 $barr = array(
     'orb' => array(
+        0 => '0',
         1 => 'r',
         2 => 'b',
         3 => 'g',
@@ -470,7 +473,7 @@ function selectAtt(id, subatt = false){
             orb.style.border = '';
             val.value = '';
         } else {
-            for (var i = 1; i <= 5; i++){
+            for (var i = 0; i <= 5; i++){
                 document.getElementById('subatt_'+i).style.border = '';
             }
 
@@ -481,7 +484,7 @@ function selectAtt(id, subatt = false){
         var orb = document.getElementById('att_'+id);
         var val = document.getElementById('att');
 
-        for (var i = 1; i <= 5; i++){
+        for (var i = 0; i <= 5; i++){
             document.getElementById('att_'+i).style.border = '';
         }
 
