@@ -473,7 +473,7 @@ function selectAtt(id, subatt = false){
             orb.style.border = '';
             val.value = '';
         } else {
-            for (var i = 0; i <= 5; i++){
+            for (var i = 1; i <= 5; i++){
                 document.getElementById('subatt_'+i).style.border = '';
             }
 
@@ -591,6 +591,7 @@ function clearForm(){
 </form>
 <div style='width: 50%; display: inline-block;'>
     <h2>One Liner</h2>
+    [id] [att] [name] [type] [awak] [sa]
     <form method='post'>
         <input type='text' name='oneline' style='width: 100%;' value=\"{$_POST['oneline']}\">
         <input type='submit' style='float: right;'>
