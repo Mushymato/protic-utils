@@ -304,6 +304,7 @@ __Leader Skill__: {$_POST['ls']}
 $name = str_replace('\\', '', $_POST['mon_name']);
 
 $blog = "
+<p>
 [cardgrid card_id={$_POST['id']}]
 [col1]pic here[/col1]
 [col2][{$_POST['id']}]$batt <b> {$_POST['mon_name']}</b><br/>
@@ -311,11 +312,12 @@ $blog = "
 $type </span><br/>
 $bawak<br/>
 $bsa<br/><br/>
-<u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/>
+<u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/><br/>
 
 <u>Leader Skill</u>: {$_POST['ls']}<br/>
 [/col2]
 [/cardgrid]
+</p>
 ";
 
 $pvblog = do_shortcode($blog);
