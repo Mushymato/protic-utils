@@ -304,6 +304,7 @@ __Leader Skill__: {$_POST['ls']}
 $name = str_replace('\\', '', $_POST['mon_name']);
 
 $blog = "
+<p>
 [cardgrid card_id={$_POST['id']}]
 [col1]pic here[/col1]
 [col2][{$_POST['id']}]$batt <b> {$_POST['mon_name']}</b><br/>
@@ -311,11 +312,12 @@ $blog = "
 $type </span><br/>
 $bawak<br/>
 $bsa<br/><br/>
-<u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/>
+<u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/><br/>
 
 <u>Leader Skill</u>: {$_POST['ls']}<br/>
 [/col2]
 [/cardgrid]
+</p>
 ";
 
 $pvblog = do_shortcode($blog);
@@ -473,7 +475,7 @@ function selectAtt(id, subatt = false){
             orb.style.border = '';
             val.value = '';
         } else {
-            for (var i = 0; i <= 5; i++){
+            for (var i = 1; i <= 5; i++){
                 document.getElementById('subatt_'+i).style.border = '';
             }
 
@@ -591,6 +593,7 @@ function clearForm(){
 </form>
 <div style='width: 50%; display: inline-block;'>
     <h2>One Liner</h2>
+    [id] [att] [name] [type] [awak] [sa]
     <form method='post'>
         <input type='text' name='oneline' style='width: 100%;' value=\"{$_POST['oneline']}\">
         <input type='submit' style='float: right;'>
