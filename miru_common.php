@@ -293,14 +293,14 @@ function select_card($id){
 		leader_skills.max_atk AS lead_atk,
 		leader_skills.max_rcv AS lead_rcv,
 		leader_skills.max_shield AS lead_shield,
-		active_skills.desc_en AS as_desc_en, 
-		active_skills.turn_max, 
-		active_skills.turn_min 
-	FROM monsters 
-	LEFT JOIN leader_skills ON monsters.leader_skill_id=leader_skills.leader_skill_id 
 		leader_skills.max_combos AS max_combos,
 		leader_skills.bonus_damage AS bonus_damage,
 		leader_skills.mult_bonus_damage AS mult_bonus_damage,
+		active_skills.desc_en AS as_desc_en,
+		active_skills.turn_max,
+		active_skills.turn_min
+	FROM monsters
+	LEFT JOIN leader_skills ON monsters.leader_skill_id=leader_skills.leader_skill_id
 	LEFT JOIN active_skills ON monsters.active_skill_id=active_skills.active_skill_id
 	WHERE monster_id=?;';
 	$stmt = $miru->conn->prepare($sql);
