@@ -298,6 +298,9 @@ function select_card($id){
 		active_skills.turn_min 
 	FROM monsters 
 	LEFT JOIN leader_skills ON monsters.leader_skill_id=leader_skills.leader_skill_id 
+		leader_skills.max_combos AS max_combos,
+		leader_skills.bonus_damage AS bonus_damage,
+		leader_skills.mult_bonus_damage AS mult_bonus_damage,
 	LEFT JOIN active_skills ON monsters.active_skill_id=active_skills.active_skill_id
 	WHERE monster_id=?;';
 	$stmt = $miru->conn->prepare($sql);
