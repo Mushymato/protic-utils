@@ -451,7 +451,7 @@ function typing_killer_tooltip($t1, $t2, $t3){
 	}
 }
 function lead_mult($data){
-	return '['.pow($data['lead_hp'], 2).'/'.pow($data['lead_atk'], 2).'/'.pow($data['lead_rcv'], 2).($data['lead_shield'] == 0 ? '' : ', ' . round(100 * (1 - pow((1-$data['lead_shield']), 2)), 2) . '%').']';
+	return '['.pow($data['lead_hp'], 2).'/'.pow($data['lead_atk'], 2).'/'.pow($data['lead_rcv'], 2).($data['lead_shield'] == 0 ? '' : ', ' . round(100 * (1 - pow((1-$data['lead_shield']), 2)), 2) . '%').']'. ($data['max_combos'] || $data['bonus_damage'] || $data['mult_bonus_damage']) ? ' ['. ( implode( array_filter(array($data['max_combos'] ? '+'. 2 * $data['max_combos'] .'c' : false, $data['bonus_damage'] ? 2 * $data['bonus_damage'] . 'fua' : false, $data['mult_bonus_damage'] ? ' fua': false) ) , '/') ) .']' : '';
 }
 function awake_icon($id, $w = '31', $h = '32', $awake_url = '/wp-content/uploads/pad-awks/', $info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s='){
 	return array('html' => '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>', 'shortcode' => '[awk id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']');
