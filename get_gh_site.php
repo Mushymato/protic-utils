@@ -230,7 +230,7 @@ function fmt_card_buff($id, $mons, $mode){
 	}
 	$awake_output = '';
 	if (sizeof($mons['OLD_AWK']) > 0){
-		$awake_output .= '<div class="card-change-old-awakes"><u>Old:</u> ';
+		$awake_output .= '<div class="card-change-old-awakes"><span class="card-change-awakes-txt">Old:</span> ';
 		foreach($mons['OLD_AWK'] as $ak){
 			$icon = awake_icon($ak);
 			$awake_output .= $icon[$mode];
@@ -239,7 +239,7 @@ function fmt_card_buff($id, $mons, $mode){
 		$rowspan += 1;
 	}
 	if (sizeof($mons['NEW_AWK']) > 0){
-		$awake_output .= '<div class="card-change-new-awakes"><u>New:</u> ';
+		$awake_output .= '<div class="card-change-new-awakes"><span class="card-change-awakes-txt">New:</span> ';
 		foreach($mons['NEW_AWK'] as $ak){
 			$icon = awake_icon($ak);
 			$awake_output .= $icon[$mode];
@@ -248,7 +248,7 @@ function fmt_card_buff($id, $mons, $mode){
 		$rowspan += 1;
 	}
 	if (sizeof($mons['OLD_SA']) > 0){
-		$awake_output .= '<div class="card-change-sa"><u>Old SA:</u> ';
+		$awake_output .= '<div class="card-change-sa"><span class="card-change-awakes-txt">Old SA:</span> ';
 		foreach($mons['OLD_SA'] as $ak){
 			$icon = awake_icon($ak);
 			$awake_output .= $icon[$mode];
@@ -256,7 +256,7 @@ function fmt_card_buff($id, $mons, $mode){
 		$awake_output .= '</div>';
 	}
 	if (sizeof($mons['NEW_SA']) > 0){
-		$awake_output .= '<div class="card-change-sa"><u>New SA:</u> ';
+		$awake_output .= '<div class="card-change-sa"><span class="card-change-awakes-txt">New SA:</span> ';
 		foreach($mons['NEW_SA'] as $ak){
 			$icon = awake_icon($ak);
 			$awake_output .= $icon[$mode];
