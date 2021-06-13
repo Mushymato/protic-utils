@@ -147,14 +147,14 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
     }
 
     $_POST['awak'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex]];
-    for ($awakindex = 1; $awakindex <= 9; $awakindex++){
+    for ($awakindex = 1; $awakindex < 9; $awakindex++){
         if ($nameindex+$typeindex+$awakindex >= $inputsize) break;
         $_POST['awak'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex] == 'na') break;
     }
 
     $_POST['sa'] = $conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex]];
-    for ($saindex = 1; $saindex <= 9; $saindex++){
+    for ($saindex = 1; $saindex < 9; $saindex++){
         if ($nameindex+$typeindex+$awakindex+$saindex >= $inputsize) break;
         $_POST['sa'] .= ','.$conversion['awak'][$onelinearr[$nameindex+$typeindex+$awakindex+$saindex]];
         if ($onelinearr[$nameindex+$typeindex+$awakindex+$saindex] == 'na') break;
@@ -307,12 +307,20 @@ if (sizeof($sas) && $sas[0] != ''){
 $_POST['as'] = str_replace('\\', '', $_POST['as']);
 $_POST['ls'] = str_replace('\\', '', $_POST['ls']);
 
+$cdtext = "**({$_POST['cd']} max CD)**";
+
+if (!$_POST['as']){
+    $_POST['as'] = 'None';
+    $cdtext = '';
+}
+if (!$_POST['ls']) $_POST['ls'] = 'None';
+
 $discord = "
 [{$_POST['id']}] {$datt} ** {$_POST['mon_name']} **
 $type
 $dawak
 $dsa
-__Active Skill__: {$_POST['as']} **({$_POST['cd']} max CD)**
+__Active Skill__: {$_POST['as']} {$cd}
 
 __Leader Skill__: {$_POST['ls']}
 ";
@@ -328,7 +336,7 @@ $blog = "
 $type </span><br/>
 $bawak<br/>
 $bsa<br/><br/>
-<u>Active Skill</u>: {$_POST['as']} <b>({$_POST['cd']} max CD)</b><br/><br/>
+<u>Active Skill</u>: {$_POST['as']} <b>{$cd}</b><br/><br/>
 
 <u>Leader Skill</u>: {$_POST['ls']}<br/>
 [/col2]
