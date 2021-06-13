@@ -186,7 +186,7 @@ function query_monster($q_str, $region = 'jp'){
 	if ($region != ''){
 		$region_key = 'monster_no_'.$region;
 	}
-	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_ja, name_en, name_en_override, rarity';
+	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_ja, name_en, rarity';
 	if(ctype_digit($q_str)){
 		$sql = 'SELECT '.$monster_table_fields.' FROM monsters WHERE '.$region_key.'=? ORDER BY monster_id DESC';
 		$res = single_param_stmt($sql, $q_str);
@@ -276,7 +276,6 @@ function select_card($id){
 		monsters.monster_no_na,
 		monsters.name_ja,
 		monsters.name_en,
-		monsters.name_en_override,
 		monsters.hp_max,
 		monsters.atk_max,
 		monsters.rcv_max,
@@ -317,9 +316,9 @@ function select_card($id){
 		$res = $res[0];
 	}
 
-	if ($res['name_en_override'] != NULL){
+	/*if ($res['name_en_override'] != NULL){
 		$res['name_en'] = $res['name_en_override'];
-	}
+	}*/
 	foreach(array('1', '2') as $i){
 		if ($res['attribute_'.$i.'_id'] !== NULL){
 			$res['attribute_'.$i.'_id'] = strval(intval($res['attribute_'.$i.'_id'])+1);
