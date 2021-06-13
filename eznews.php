@@ -113,6 +113,7 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
             'gco'   => 75,
             'lco'   => 76,
             'dco'   => 77,
+            'cab'   => 78,
             'na'    => '',
         ),
     );
@@ -192,13 +193,28 @@ $awaksort = array(
      4,  5,  6,  7,  8, 35, 36, 37, 38,
      1,  2,  3, 46, 47, 39, 40, 41, 42,
     65, 66, 67,  9, 71, 72, 30, 64, 63,
-    73, 74, 75, 76, 77,
+    73, 74, 75, 76, 77, 78,
 );
+$graylist = array();
+$allattawak = array();
+$attawaklist = array(
+    1 => array(14,22,73),
+    2 => array(15,23,74),
+    3 => array(16,24,75),
+    4 => array(17,25,76),
+    5 => array(18,26,77),
+);
+foreach($attawaklist as $k => $v) $allattawak = array_merge($allattawak, $v);
+if (array_key_exists($_POST['att'], $attawaklist)) $graylist = array_merge($graylist, $attawaklist[$_POST['att']]);
+if (array_key_exists($_POST['subatt'], $attawaklist)) $graylist = array_merge($graylist, $attawaklist[$_POST['subatt']]);
+$graylist = array_diff($allattawak, $graylist);
 
 $awaklist = "";
 $j = 1;
 foreach($awaksort as $i){
-    $awaklist .= "<a onclick='selectAwak(\"$i\");'><img src='/wp-content/uploads/pad-awks/$i.png'></a>";
+    $gray = in_array($i, $graylist) ? "style='filter: grayscale(1)'" : "style='filter: grayscale(0)'";
+
+    $awaklist .= "<a onclick='selectAwak(\"$i\");'><img id='awak_img_$i' $gray src='/wp-content/uploads/pad-awks/$i.png'></a>";
     if ($j % 9 == 0) $awaklist.='<br>';
     $j++;
 }
@@ -247,7 +263,7 @@ $darr = array(
         ':misc_skillcharge:', ':res_bind_super:', ':misc_te_super:', ':res_cloud:', ':res_seal:', ':misc_sb_super:', ':attack_boost_high:',
         ':attack_boost_low:', ':l_shield:', ':l_attack:', ':misc_super_comboboost:',':orb_combo:', ':misc_voice:', ':misc_dungeonbonus:',':reduce_hp:',':reduce_atk:',
         ':reduce_rcv:', ':res_blind_super:', ':res_jammer_super:', ':res_poison_super:', ':misc_jammerboost:', ':misc_poisonboost:',
-        ':rcombo:', ':bcombo:', ':gcombo:', ':lcombo:', ':dcombo:',
+        ':rcombo:', ':bcombo:', ':gcombo:', ':lcombo:', ':dcombo:', ':cross_boost:',
     ),
     'type' => array('Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evo Mat', 'Enhance Mat', 'Devil', 'Special', 'Awoken Mat', 'Machine', 'Redeemable'),
 );
@@ -467,33 +483,50 @@ function clearAwak(sa = false){
 }
 
 function selectAtt(id, subatt = false){
-    if (subatt){
-        var orb = document.getElementById('subatt_'+id);
-        var val = document.getElementById('subatt');
+    var attawaklist = [
+        [14,22,73],
+        [15,23,74],
+        [16,24,75],
+        [17,25,76],
+        [18,26,77],
+    ];
+    var graylist = [];
+    var allattawak = [];
+    attawaklist.forEach(function(v, i){
+        allattawak = allattawak.concat(v);
+    });
 
-        if (val.value == id){
-            orb.style.border = '';
-            val.value = '';
+    var main = document.getElementById('att_'+id);
+    var mainval = document.getElementById('att');
+    var sub = document.getElementById('subatt_'+id);
+    var subval = document.getElementById('subatt');
+
+    if (subatt){
+        if (subval.value == id){
+            sub.style.border = '';
+            subval.value = '';
         } else {
             for (var i = 1; i <= 5; i++){
                 document.getElementById('subatt_'+i).style.border = '';
             }
 
-            orb.style.border = '$attsel';
-            val.value = id;
+            sub.style.border = '$attsel';
+            subval.value = id;
         }
     } else {
-        var orb = document.getElementById('att_'+id);
-        var val = document.getElementById('att');
-
         for (var i = 0; i <= 5; i++){
             document.getElementById('att_'+i).style.border = '';
         }
 
-        orb.style.border = '$attsel';
-
-        val.value = id;
+        main.style.border = '$attsel';
+        mainval.value = id;
     }
+
+    if (['1','2','3','4','5'].includes(mainval.value)) graylist = graylist.concat(attawaklist[mainval.value-1]);
+    if (['1','2','3','4','5'].includes(subval.value)) graylist = graylist.concat(attawaklist[subval.value-1]);
+    allattawak.forEach(function(v, i){
+        grayscale(v, graylist.includes(v));
+    });
 }
 function copyText(container){
     var text = document.getElementById(container);
@@ -519,6 +552,11 @@ function clearForm(){
     document.getElementById('as').innerHTML = '';
     document.getElementById('ls').innerHTML = '';
     document.getElementById('cd').innerHTML = '';
+}
+function grayscale(awk, color=false){
+    var img = document.getElementById('awak_img_'+awk);
+
+    img.style.filter = color ? 'grayscale(0)' : 'grayscale(1)';
 }
 </script>
 <form method='post' style='width: 50%; float: left; display: inline-block'>
