@@ -42,7 +42,7 @@ foreach ($buff_tables as $tbl){
 	}
 	foreach ($tbody->childNodes as $tr){
 		if (isset($tr->childNodes)){
-			$awk_key = 'SA';
+			$awk_key = 'NEW_SA';
 			foreach ($tr->childNodes as $td){
 				// print_r($td);
 				// print_r(isset($td->tagName) && $td->tagName == 'td');
@@ -55,7 +55,7 @@ foreach ($buff_tables as $tbl){
 								if (strpos($src, 'm_icon') !== FALSE){
 									$current_card = intval(str_replace('.jpg', '', basename($src)));
 									if($n->getAttribute('rowspan') == '2'){
-										$awk_key = 'SA';
+										$awk_key = 'NEW_SA';
 									}
 									if(!array_key_exists($current_card, $monster_output)){
 										$old_card_info = select_card($current_card);
@@ -69,7 +69,8 @@ foreach ($buff_tables as $tbl){
 											'NAME_EN' => $name,
 											'OLD_AWK' => array(),
 											'NEW_AWK' => array(),
-											'SA' => array(),
+											'OLD_SA' => array(),
+											'NEW_SA' => array(),
 											'INFO' => '',
 											'COMP' => '',
 											'STAT_DIF' => array(),
@@ -90,11 +91,35 @@ foreach ($buff_tables as $tbl){
 								if ($n->getAttribute('class') == 'name'){
 									$monster_output[$current_card]['NAME_JP'] = $n->nodeValue;
 									continue;
-								}else if($n->nodeValue == '覚醒' || $n->nodeValue == '調整後'){
+								}else if( $n->nodeValue == '調整後'){
+									// heuristic, assume that there are 9 awakes
+									if (count($monster_output[$current_card]['NEW_AWK']) == 9){
+										$awk_key = 'NEW_SA';
+										continue;
+									} else {
+										$awk_key = 'NEW_AWK';
+										continue;	
+									}
+								}else if( $n->nodeValue == '調整前'){
+									// heuristic, assume that there are 9 awakes
+									if (count($monster_output[$current_card]['NEW_AWK']) == 9){
+										$awk_key = 'OLD_SA';
+										continue;
+									} else {
+										$awk_key = 'OLD_AWK';
+										continue;	
+									}
+								}else if($n->nodeValue == '覚醒' || $n->nodeValue == '覚醒調整後'){
 									$awk_key = 'NEW_AWK';
 									continue;
-								}else if($n->nodeValue == '調整前'){
+								}else if($n->nodeValue == '覚醒調整前'){
 									$awk_key = 'OLD_AWK';
+									continue;
+								}else if ($n->nodeValue == '超覚醒' || $n->nodeValue == '超覚醒調整後'){
+									$awk_key = 'NEW_SA';
+									continue;
+								}else if ($n->nodeValue == '超覚醒調整前'){
+									$awk_key = 'OLD_SA';
 									continue;
 								}
 							}
@@ -205,7 +230,7 @@ function fmt_card_buff($id, $mons, $mode){
 	}
 	$awake_output = '';
 	if (sizeof($mons['OLD_AWK']) > 0){
-		$awake_output .= '<div class="card-change-old-awakes"><u>Old:</u> ';
+		$awake_output .= '<div class="card-change-old-awakes"><span class="card-change-awakes-txt">Old:</span> ';
 		foreach($mons['OLD_AWK'] as $ak){
 			$icon = awake_icon($ak);
 			$awake_output .= $icon[$mode];
@@ -214,7 +239,7 @@ function fmt_card_buff($id, $mons, $mode){
 		$rowspan += 1;
 	}
 	if (sizeof($mons['NEW_AWK']) > 0){
-		$awake_output .= '<div class="card-change-new-awakes"><u>New:</u> ';
+		$awake_output .= '<div class="card-change-new-awakes"><span class="card-change-awakes-txt">New:</span> ';
 		foreach($mons['NEW_AWK'] as $ak){
 			$icon = awake_icon($ak);
 			$awake_output .= $icon[$mode];
@@ -222,9 +247,17 @@ function fmt_card_buff($id, $mons, $mode){
 		$awake_output .= '</div>';
 		$rowspan += 1;
 	}
-	if (sizeof($mons['SA']) > 0){
-		$awake_output .= '<div class="card-change-sa"><u>SA:</u> ';
-		foreach($mons['SA'] as $ak){
+	if (sizeof($mons['OLD_SA']) > 0){
+		$awake_output .= '<div class="card-change-sa"><span class="card-change-awakes-txt">Old SA:</span> ';
+		foreach($mons['OLD_SA'] as $ak){
+			$icon = awake_icon($ak);
+			$awake_output .= $icon[$mode];
+		}
+		$awake_output .= '</div>';
+	}
+	if (sizeof($mons['NEW_SA']) > 0){
+		$awake_output .= '<div class="card-change-sa"><span class="card-change-awakes-txt">New SA:</span> ';
+		foreach($mons['NEW_SA'] as $ak){
 			$icon = awake_icon($ak);
 			$awake_output .= $icon[$mode];
 		}

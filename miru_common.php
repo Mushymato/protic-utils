@@ -186,7 +186,7 @@ function query_monster($q_str, $region = 'jp'){
 	if ($region != ''){
 		$region_key = 'monster_no_'.$region;
 	}
-	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_ja, name_en, name_en_override, rarity';
+	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_ja, name_en, rarity';
 	if(ctype_digit($q_str)){
 		$sql = 'SELECT '.$monster_table_fields.' FROM monsters WHERE '.$region_key.'=? ORDER BY monster_id DESC';
 		$res = single_param_stmt($sql, $q_str);
@@ -276,7 +276,6 @@ function select_card($id){
 		monsters.monster_no_na,
 		monsters.name_ja,
 		monsters.name_en,
-		monsters.name_en_override,
 		monsters.hp_max,
 		monsters.atk_max,
 		monsters.rcv_max,
@@ -293,11 +292,14 @@ function select_card($id){
 		leader_skills.max_atk AS lead_atk,
 		leader_skills.max_rcv AS lead_rcv,
 		leader_skills.max_shield AS lead_shield,
-		active_skills.desc_en AS as_desc_en, 
-		active_skills.turn_max, 
-		active_skills.turn_min 
-	FROM monsters 
-	LEFT JOIN leader_skills ON monsters.leader_skill_id=leader_skills.leader_skill_id 
+		leader_skills.max_combos AS max_combos,
+		leader_skills.bonus_damage AS bonus_damage,
+		leader_skills.mult_bonus_damage AS mult_bonus_damage,
+		active_skills.desc_en AS as_desc_en,
+		active_skills.turn_max,
+		active_skills.turn_min
+	FROM monsters
+	LEFT JOIN leader_skills ON monsters.leader_skill_id=leader_skills.leader_skill_id
 	LEFT JOIN active_skills ON monsters.active_skill_id=active_skills.active_skill_id
 	WHERE monster_id=?;';
 	$stmt = $miru->conn->prepare($sql);
@@ -314,9 +316,9 @@ function select_card($id){
 		$res = $res[0];
 	}
 
-	if ($res['name_en_override'] != NULL){
+	/*if ($res['name_en_override'] != NULL){
 		$res['name_en'] = $res['name_en_override'];
-	}
+	}*/
 	foreach(array('1', '2') as $i){
 		if ($res['attribute_'.$i.'_id'] !== NULL){
 			$res['attribute_'.$i.'_id'] = strval(intval($res['attribute_'.$i.'_id'])+1);
@@ -451,7 +453,7 @@ function typing_killer_tooltip($t1, $t2, $t3){
 	}
 }
 function lead_mult($data){
-	return '['.pow($data['lead_hp'], 2).'/'.pow($data['lead_atk'], 2).'/'.pow($data['lead_rcv'], 2).($data['lead_shield'] == 0 ? '' : ', ' . round(100 * (1 - pow((1-$data['lead_shield']), 2)), 2) . '%').']';
+	return '['.pow($data['lead_hp'], 2).'/'.pow($data['lead_atk'], 2).'/'.pow($data['lead_rcv'], 2).($data['lead_shield'] == 0 ? '' : ', ' . round(100 * (1 - pow((1-$data['lead_shield']), 2)), 2) . '%').']'. (($data['max_combos'] || $data['bonus_damage'] || $data['mult_bonus_damage'] > 0) ? (' ['. ( implode( array_filter(array($data['max_combos'] ? '+'. 2 * $data['max_combos'] .'c' : false, $data['bonus_damage'] ? ($data['bonus_damage'] > 999999 ? round(2 * $data['bonus_damage'] / 1000000) . 'M' : ($data['bonus_damage'] > 999 ? round(2 * $data['bonus_damage'] / 1000) . 'k' : 2 * $data['bonus_damage'])) . ' fua' : false, $data['mult_bonus_damage'] > 0 ? 'fua': false) ) , '/') ) .']') : '');
 }
 function awake_icon($id, $w = '31', $h = '32', $awake_url = '/wp-content/uploads/pad-awks/', $info_url = 'http://www.puzzledragonx.com/en/awokenskill.asp?s='){
 	return array('html' => '<a href="' . $info_url . $id . '"><img src="' . $awake_url . $id . '.png" width="' . $w. '" height="' . $h. '"/></a>', 'shortcode' => '[awk id=' . $id . ($w != '31' ? ' w=' . $w . ' h=' . $h : '') . ']');
