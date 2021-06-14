@@ -186,9 +186,17 @@ function query_monster($q_str, $region = 'jp'){
 	if ($region != ''){
 		$region_key = 'monster_no_'.$region;
 	}
-	$monster_table_fields = 'monster_id, monster_no_jp, monster_no_na, name_ja, name_en, rarity';
+	$base_query = 'SELECT
+			monsters.monster_id,
+			monsters.monster_no_jp,
+			monsters.monster_no_na,
+			monsters.rarity,
+			monsters.name_ja,
+			monsters.name_en AS name_en_base,
+			monster_name_overrides.name_en AS name_en_override
+		FROM monsters LEFT JOIN monster_name_overrides ON monsters.monster_id=monster_name_overrides.monster_id ';
 	if(ctype_digit($q_str)){
-		$sql = 'SELECT '.$monster_table_fields.' FROM monsters WHERE '.$region_key.'=? ORDER BY monster_id DESC';
+		$sql = $base_query.'WHERE '.$region_key.'=? ORDER BY monster_id DESC';
 		$res = single_param_stmt($sql, $q_str);
 		if(sizeof($res) > 0){
 			if(sizeof($res) > 1){
@@ -209,14 +217,15 @@ function query_monster($q_str, $region = 'jp'){
 	);
 	$query = array();
 	if(!mb_check_encoding($q_str, 'ASCII')){
-		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_ja'] = ' ORDER BY monster_id DESC';
+		$query['WHERE monsters.name_ja'] = ' ORDER BY monsters.monster_id DESC';
 	}else{
-		$query['SELECT '.$monster_table_fields.' FROM monsters LEFT JOIN computedNames ON monsters.'.$region_key.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
-		$query['SELECT '.$monster_table_fields.' FROM monsters WHERE name_en'] = ' ORDER BY monster_id DESC';
+		// $query['LEFT JOIN computedNames ON monsters.'.$region_key.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
+		$query['WHERE name_en_base'] = ' ORDER BY monsters.monster_id DESC';
+		$query['WHERE name_en_override'] = ' ORDER BY monsters.monster_id DESC';
 	}
 	foreach($matching as $m){
 		foreach($query as $q => $o){
-			$res = single_param_stmt($q . $m[0] . $o, $m[1]);
+			$res = single_param_stmt($base_query.$q . $m[0] . $o, $m[1]);
 			if(sizeof($res) > 0){
 				if(sizeof($res) > 1){
 					foreach($res as $r){
@@ -275,7 +284,9 @@ function select_card($id){
 		monsters.monster_no_jp,
 		monsters.monster_no_na,
 		monsters.name_ja,
-		monsters.name_en,
+		monsters.name_en AS name_en_base,
+		monster_name_overrides.name_en AS name_en_override,
+		monster_name_overrides.is_translation,
 		monsters.hp_max,
 		monsters.atk_max,
 		monsters.rcv_max,
@@ -299,9 +310,10 @@ function select_card($id){
 		active_skills.turn_max,
 		active_skills.turn_min
 	FROM monsters
+	LEFT JOIN monster_name_overrides ON monsters.monster_id=monster_name_overrides.monster_id
 	LEFT JOIN leader_skills ON monsters.leader_skill_id=leader_skills.leader_skill_id
 	LEFT JOIN active_skills ON monsters.active_skill_id=active_skills.active_skill_id
-	WHERE monster_id=?;';
+	WHERE monsters.monster_id=?;';
 	$stmt = $miru->conn->prepare($sql);
 	if (!$stmt){
 		echo $sql . PHP_EOL;
@@ -315,10 +327,11 @@ function select_card($id){
 	}else{
 		$res = $res[0];
 	}
-
-	/*if ($res['name_en_override'] != NULL){
+	if ($res['name_en_override'] != NULL && ($res['is_translation'] == 0 || $res['name_en_base'] == $res['name_ja'])){
 		$res['name_en'] = $res['name_en_override'];
-	}*/
+	} else {
+		$res['name_en'] = $res['name_en_base'];
+	}
 	foreach(array('1', '2') as $i){
 		if ($res['attribute_'.$i.'_id'] !== NULL){
 			$res['attribute_'.$i.'_id'] = strval(intval($res['attribute_'.$i.'_id'])+1);
