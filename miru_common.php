@@ -192,11 +192,11 @@ function query_monster($q_str, $region = 'jp'){
 			monsters.monster_no_na,
 			monsters.rarity,
 			monsters.name_ja,
-			monsters.name_en AS name_en_base,
+			monsters.name_en,
 			monster_name_overrides.name_en AS name_en_override
 		FROM monsters LEFT JOIN monster_name_overrides ON monsters.monster_id=monster_name_overrides.monster_id ';
 	if(ctype_digit($q_str)){
-		$sql = $base_query.'WHERE '.$region_key.'=? ORDER BY monster_id DESC';
+		$sql = $base_query.'WHERE monsters.'.$region_key.'=? ORDER BY monsters.monster_id DESC';
 		$res = single_param_stmt($sql, $q_str);
 		if(sizeof($res) > 0){
 			if(sizeof($res) > 1){
@@ -220,7 +220,7 @@ function query_monster($q_str, $region = 'jp'){
 		$query['WHERE monsters.name_ja'] = ' ORDER BY monsters.monster_id DESC';
 	}else{
 		// $query['LEFT JOIN computedNames ON monsters.'.$region_key.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
-		$query['WHERE name_en_base'] = ' ORDER BY monsters.monster_id DESC';
+		$query['WHERE name_en'] = ' ORDER BY monsters.monster_id DESC';
 		$query['WHERE name_en_override'] = ' ORDER BY monsters.monster_id DESC';
 	}
 	foreach($matching as $m){
