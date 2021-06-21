@@ -320,7 +320,7 @@ $discord = "
 $type
 $dawak
 $dsa
-__Active Skill__: {$_POST['as']} {$cd}
+__Active Skill__: {$_POST['as']} {$cdtext}
 
 __Leader Skill__: {$_POST['ls']}
 ";
@@ -336,7 +336,7 @@ $blog = "
 $type </span><br/>
 $bawak<br/>
 $bsa<br/><br/>
-<u>Active Skill</u>: {$_POST['as']} <b>{$cd}</b><br/><br/>
+<u>Active Skill</u>: {$_POST['as']} <b>{$cdtext}</b><br/><br/>
 
 <u>Leader Skill</u>: {$_POST['ls']}<br/>
 [/col2]
