@@ -307,11 +307,11 @@ if (sizeof($sas) && $sas[0] != ''){
 $_POST['as'] = str_replace('\\', '', $_POST['as']);
 $_POST['ls'] = str_replace('\\', '', $_POST['ls']);
 
-$cdtext = "**({$_POST['cd']} max CD)**";
+$cdtext = "({$_POST['cd']} max CD)";
 
 if (!$_POST['as']){
     $_POST['as'] = 'None';
-    $cdtext = '';
+    $cdtext = ' ';
 }
 if (!$_POST['ls']) $_POST['ls'] = 'None';
 
@@ -320,7 +320,7 @@ $discord = "
 $type
 $dawak
 $dsa
-__Active Skill__: {$_POST['as']} {$cdtext}
+__Active Skill__: {$_POST['as']} **{$cdtext}**
 
 __Leader Skill__: {$_POST['ls']}
 ";
