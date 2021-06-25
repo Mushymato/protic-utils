@@ -220,7 +220,7 @@ function query_monster($q_str, $region = 'jp'){
 		$query['WHERE monsters.name_ja'] = ' ORDER BY monsters.monster_id DESC';
 	}else{
 		// $query['LEFT JOIN computedNames ON monsters.'.$region_key.'=computedNames.MONSTER_NO WHERE COMPUTED_NAME'] = ' ORDER BY LENGTH(COMPUTED_NAME) ASC';
-		$query['WHERE name_en'] = ' ORDER BY monsters.monster_id DESC';
+		$query['WHERE monsters.name_en'] = ' ORDER BY monsters.monster_id DESC';
 		$query['WHERE name_en_override'] = ' ORDER BY monsters.monster_id DESC';
 	}
 	foreach($matching as $m){
