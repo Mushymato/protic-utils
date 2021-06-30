@@ -19,7 +19,7 @@ $time_start = microtime(true);
 
 include 'sql_param.php';
 $file = fopen('dadguide.mysql.zip', 'wb');
-fwrite($file, file_get_contents('https://d1kpnpud0qoyxf.cloudfront.net/db/dadguide.mysql.zip'));
+fwrite($file, file_get_contents('https://d1kpnpud0qoyxf.cloudfront.net/db/dadguide.mysql.zip?cachebreak='.time()));
 fclose($file);
 $zip = new ZipArchive;
 if ($zip->open('dadguide.mysql.zip') === TRUE) {
