@@ -6,7 +6,7 @@ $res = $miru->conn->prepare($query);
 if (is_array($res))
     $awaksize = sizeof($res);
 else
-    $awaksize = 72;
+    $awaksize = 81;
 $typesize = 13;
 
 if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
@@ -114,6 +114,15 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
             'lco'   => 76,
             'dco'   => 77,
             'cab'   => 78,
+            '3c'    => 79,
+            '3cob'  => 79,
+            '3co'   => 79,
+            '4c'    => 80,
+            '4co'   => 80,
+            '4cob'  => 80,
+            '5c'    => 81,
+            '5co'   => 81,
+            '5cob'  => 81,
             'na'    => '',
         ),
     );
@@ -193,7 +202,7 @@ $awaksort = array(
      4,  5,  6,  7,  8, 35, 36, 37, 38,
      1,  2,  3, 46, 47, 39, 40, 41, 42,
     65, 66, 67,  9, 71, 72, 30, 64, 63,
-    73, 74, 75, 76, 77, 78,
+    73, 74, 75, 76, 77, 78, 79, 80, 81
 );
 $graylist = array();
 $allattawak = array();
@@ -263,7 +272,7 @@ $darr = array(
         ':misc_skillcharge:', ':res_bind_super:', ':misc_te_super:', ':res_cloud:', ':res_seal:', ':misc_sb_super:', ':attack_boost_high:',
         ':attack_boost_low:', ':l_shield:', ':l_attack:', ':misc_super_comboboost:',':orb_combo:', ':misc_voice:', ':misc_dungeonbonus:',':reduce_hp:',':reduce_atk:',
         ':reduce_rcv:', ':res_blind_super:', ':res_jammer_super:', ':res_poison_super:', ':misc_jammerboost:', ':misc_poisonboost:',
-        ':rcombo:', ':bcombo:', ':gcombo:', ':lcombo:', ':dcombo:', ':cross_boost:',
+        ':rcombo:', ':bcombo:', ':gcombo:', ':lcombo:', ':dcombo:', ':cross_boost:', ':3cob:', ':4cob:', ':5cob:',
     ),
     'type' => array('Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evo Mat', 'Enhance Mat', 'Devil', 'Special', 'Awoken Mat', 'Machine', 'Redeemable'),
 );
