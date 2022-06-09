@@ -7,6 +7,7 @@ if (is_array($res))
     $awaksize = sizeof($res);
 else
     $awaksize = 81;
+    $awaksize = 95;
 $typesize = 13;
 
 if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
@@ -123,6 +124,28 @@ if (array_key_exists('oneline', $_POST) && $_POST['oneline']){
             '5c'    => 81,
             '5co'   => 81,
             '5cob'  => 81,
+            'bmatch'=> 82,
+            'bm'    => 82,
+            'dradd' => 83,
+            'draadd'=> 83,
+            'goadd' => 84,
+            'godadd'=> 84,
+            'deadd' => 85,
+            'devadd'=> 85,
+            'maadd' => 86,
+            'macadd'=> 86,
+            'baadd' => 87,
+            'baladd'=> 87,
+            'atkadd'=> 88,
+            'atadd' => 88,
+            'phadd' => 89,
+            'phyadd'=> 89,
+            'heaadd'=> 90,
+            'rsub'  => 91,
+            'bsub'  => 92,
+            'gsub'  => 93,
+            'lsub'  => 94,
+            'dsub'  => 95,
             'na'    => '',
         ),
     );
@@ -203,6 +226,9 @@ $awaksort = array(
      1,  2,  3, 46, 47, 39, 40, 41, 42,
     65, 66, 67,  9, 71, 72, 30, 64, 63,
     73, 74, 75, 76, 77, 78, 79, 80, 81
+    73, 74, 75, 76, 77, 78, 79, 80, 81,
+    82, 83, 84, 85, 86, 87, 88, 89, 90,
+    91, 92, 93, 94, 95,
 );
 $graylist = array();
 $allattawak = array();
@@ -272,7 +298,9 @@ $darr = array(
         ':misc_skillcharge:', ':res_bind_super:', ':misc_te_super:', ':res_cloud:', ':res_seal:', ':misc_sb_super:', ':attack_boost_high:',
         ':attack_boost_low:', ':l_shield:', ':l_attack:', ':misc_super_comboboost:',':orb_combo:', ':misc_voice:', ':misc_dungeonbonus:',':reduce_hp:',':reduce_atk:',
         ':reduce_rcv:', ':res_blind_super:', ':res_jammer_super:', ':res_poison_super:', ':misc_jammerboost:', ':misc_poisonboost:',
-        ':rcombo:', ':bcombo:', ':gcombo:', ':lcombo:', ':dcombo:', ':cross_boost:', ':3cob:', ':4cob:', ':5cob:',
+        ':rcombo:', ':bcombo:', ':gcombo:', ':lcombo:', ':dcombo:', ':cross_boost:', ':3cob:', ':4cob:', ':5cob:', ':bmatch:',
+        ':draadd:', ':godadd:', ':devadd:', ':macadd:', ':baladd:', ":atkadd:", ":phyadd:", ":heaadd:",
+        ":rsub:", ":bsub:", ":gsub:", ':lsub:', ":dsub:",
     ),
     'type' => array('Dragon', 'Balanced', 'Physical', 'Healer', 'Attacker', 'God', 'Evo Mat', 'Enhance Mat', 'Devil', 'Special', 'Awoken Mat', 'Machine', 'Redeemable'),
 );
